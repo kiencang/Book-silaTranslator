@@ -8,6 +8,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.3]- 2026-05-08
 ### Fixed
 - Sử dụng SI/Prompt riêng cho dịch sách.
+- Đổi giao diện nhập dự án thành nhập Tác phẩm + Tác giả.
 
 ## [v1.0.2]- 2026-05-07
 ### Fixed
