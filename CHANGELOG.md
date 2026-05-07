@@ -6,3 +6,5 @@ Tất cả những thay đổi đáng chú ý của dự án kiencang/Book-silaT
 và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [v1.0.1]- 2026-05-07
+### Fixed
+- Tải lại phiên bản đầu tiên bị thiếu file!
