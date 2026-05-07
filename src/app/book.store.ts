@@ -3,6 +3,14 @@ import { isPlatformBrowser } from '@angular/common';
 import { DbService, Project } from './db.service';
 import { marked } from 'marked';
 
+export interface TranslationVersion {
+  versionNumber: number;
+  text: string;
+  model: string;
+  temperature: number;
+  timestamp: number;
+}
+
 export interface Chapter {
   id: string;
   title: string;
@@ -10,6 +18,9 @@ export interface Chapter {
   wordCount: number;
   translatedText?: string;
   status: 'pending' | 'translating' | 'done' | 'error';
+  versions?: TranslationVersion[];
+  activeVersionNumber?: number;
+  latestVersionNumber?: number;
 }
 
 export interface TranslationConfig {
@@ -144,6 +155,20 @@ export class BookStore {
 
   updateChapter(id: string, partial: Partial<Chapter>) {
     this.chapters.update(chs => chs.map(c => c.id === id ? { ...c, ...partial } : c));
+  }
+
+  selectVersion(chapterId: string, versionNumber: number) {
+    const chaps = this.chapters();
+    const chapter = chaps.find(c => c.id === chapterId);
+    if (chapter && chapter.versions) {
+      const version = chapter.versions.find(v => v.versionNumber === versionNumber);
+      if (version) {
+        this.updateChapter(chapterId, {
+          activeVersionNumber: versionNumber,
+          translatedText: version.text
+        });
+      }
+    }
   }
   
   resetToPhase1() {

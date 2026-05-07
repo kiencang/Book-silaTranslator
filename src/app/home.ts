@@ -21,6 +21,7 @@ import { FormsModule } from '@angular/forms';
       <div class="space-y-6">
         <div>
           <input type="text" [(ngModel)]="projectName" placeholder="Nhập tên dự án, ví dụ: Moby Dick - Herman Melville" 
+                 (keydown.enter)="projectName().trim() && createProject()"
                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg transition-shadow">
         </div>
         

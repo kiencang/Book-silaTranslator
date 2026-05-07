@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { BookStore, Chapter } from './book.store';
 import { GeminiClient } from './gemini';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,7 +8,7 @@ import { marked } from 'marked';
 @Component({
   selector: 'app-translator',
   standalone: true,
-  imports: [MatIconModule],
+  imports: [MatIconModule, DatePipe],
   template: `
     <div class="max-w-6xl mx-auto py-8 px-4">
       <div class="flex items-center justify-between mb-8">
@@ -185,25 +186,61 @@ import { marked } from 'marked';
             </div>
 
             @if (expanded[chapter.id]) {
-              <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                <div class="p-6">
-                  <h5 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Bản gốc (Markdown)</h5>
-                  <div class="prose prose-sm max-w-none text-gray-700" [innerHTML]="parseMarkdown(chapter.originalText)"></div>
-                </div>
-                <div class="p-6 bg-gray-50">
-                  <h5 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Bản dịch</h5>
-                  @if (chapter.translatedText) {
-                    <div class="prose prose-sm max-w-none text-gray-900" [innerHTML]="parseMarkdown(chapter.translatedText)"></div>
-                  } @else if (chapter.status === 'translating') {
-                    <div class="flex flex-col items-center justify-center py-12 text-blue-600">
-                      <mat-icon class="animate-spin mb-2">sync</mat-icon>
-                      <span class="text-sm">Gemini đang tiến hành dịch</span>
-                    </div>
-                  } @else {
-                    <div class="flex items-center justify-center py-12 text-gray-400">
-                      <span class="text-sm">Chưa được dịch.</span>
-                    </div>
-                  }
+              <div class="flex flex-col">
+                @if (chapter.versions && chapter.versions.length > 0) {
+                  <div class="px-6 py-3 bg-white border-b border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                     <div class="flex items-center gap-2">
+                        <span class="text-xs font-medium text-gray-500 mr-2">Phiên bản:</span>
+                        @for (v of chapter.versions; track v.versionNumber) {
+                          <button 
+                            (click)="store.selectVersion(chapter.id, v.versionNumber)"
+                            [class.bg-blue-100]="chapter.activeVersionNumber === v.versionNumber"
+                            [class.text-blue-700]="chapter.activeVersionNumber === v.versionNumber"
+                            [class.font-semibold]="chapter.activeVersionNumber === v.versionNumber"
+                            [class.bg-gray-100]="chapter.activeVersionNumber !== v.versionNumber"
+                            [class.text-gray-600]="chapter.activeVersionNumber !== v.versionNumber"
+                            class="px-2 py-1.5 min-w-[36px] rounded-md text-xs font-medium transition-colors hover:bg-gray-200"
+                          >
+                            v{{ v.versionNumber }}
+                          </button>
+                        }
+                      </div>
+                      @if (getActiveVersion(chapter); as activeV) {
+                        <div class="text-[11px] text-gray-500 flex flex-wrap items-center gap-x-4 gap-y-2 bg-gray-50 px-3 py-1.5 rounded-md border border-gray-100">
+                          <span class="flex items-center gap-1.5">
+                            <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-indigo-500">smart_toy</mat-icon> {{ activeV.model }}
+                          </span>
+                          <span class="flex items-center gap-1.5">
+                            <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-orange-500">thermostat</mat-icon> Temp: {{ activeV.temperature }}
+                          </span>
+                          <span class="flex items-center gap-1.5">
+                            <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-green-500">schedule</mat-icon> {{ activeV.timestamp | date:'dd/MM/yyyy HH:mm' }}
+                          </span>
+                        </div>
+                      }
+                  </div>
+                }
+
+                <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                  <div class="p-6">
+                    <h5 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Bản gốc (Markdown)</h5>
+                    <div class="prose prose-sm max-w-none text-gray-700" [innerHTML]="parseMarkdown(chapter.originalText)"></div>
+                  </div>
+                  <div class="p-6 bg-gray-50">
+                    <h5 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Bản dịch</h5>
+                    @if (chapter.translatedText) {
+                      <div class="prose prose-sm max-w-none text-gray-900" [innerHTML]="parseMarkdown(chapter.translatedText)"></div>
+                    } @else if (chapter.status === 'translating') {
+                      <div class="flex flex-col items-center justify-center py-12 text-blue-600">
+                        <mat-icon class="animate-spin mb-2">sync</mat-icon>
+                        <span class="text-sm">Gemini đang tiến hành dịch</span>
+                      </div>
+                    } @else {
+                      <div class="flex items-center justify-center py-12 text-gray-400">
+                        <span class="text-sm">Chưa được dịch.</span>
+                      </div>
+                    }
+                  </div>
                 </div>
               </div>
             }
@@ -238,6 +275,11 @@ export class Translator {
     return marked.parse(text) as string;
   }
 
+  getActiveVersion(chapter: Chapter) {
+    if (!chapter.versions || !chapter.activeVersionNumber) return null;
+    return chapter.versions.find(v => v.versionNumber === chapter.activeVersionNumber) || null;
+  }
+
   async translateSingle(chapter: Chapter) {
     this.store.updateChapter(chapter.id, { status: 'translating' });
     this.expanded[chapter.id] = true;
@@ -245,9 +287,24 @@ export class Translator {
     try {
       const config = this.store.config();
       const result = await this.gemini.translateChapter(chapter.originalText, config.model, config.temperature);
+      
+      const newVersionNumber = (chapter.latestVersionNumber || 0) + 1;
+      const newVersion = {
+        versionNumber: newVersionNumber,
+        text: result,
+        model: config.model,
+        temperature: config.temperature,
+        timestamp: Date.now()
+      };
+      
+      const versions = [...(chapter.versions || []), newVersion].slice(-3);
+      
       this.store.updateChapter(chapter.id, { 
         status: 'done',
-        translatedText: result 
+        translatedText: result,
+        versions: versions,
+        latestVersionNumber: newVersionNumber,
+        activeVersionNumber: newVersionNumber
       });
     } catch (e) {
       console.error(e);
