@@ -8,6 +8,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.2]- 2026-05-07
 ### Fixed
 - Thêm thông tin phiên bản dịch cho từng khối dịch (tối đa 3 phiên bản, có thông tin model, temp, ngày giờ).
+- Enter để tạo dự án mới, chứ không bắt buộc click vào button.
 
 ## [v1.0.1]- 2026-05-07
 ### Fixed
