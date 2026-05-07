@@ -12,23 +12,31 @@ import { FormsModule } from '@angular/forms';
   template: `
     <div class="flex-1 flex items-center justify-center min-h-[50vh]">
       <div class="w-full max-w-2xl p-8 bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div class="text-center mb-10">
-        <div class="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-3xl mx-auto mb-6 shadow-md">B</div>
+        <div class="text-center mb-5">
         <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Tạo dự án dịch mới</h2>
-        <p class="text-gray-500 mt-3 text-lg">Bắt đầu bằng cách đặt tên cho dự án sách của bạn.</p>
+        <p class="text-gray-500 mt-3 text-lg">Bắt đầu bằng cách nhập thông tin cho dự án sách của bạn.</p>
       </div>
       
-      <div class="space-y-6">
+      <div class="space-y-4">
         <div>
-          <input type="text" [(ngModel)]="projectName" placeholder="Nhập tên dự án, ví dụ: Moby Dick - Herman Melville" 
-                 (keydown.enter)="projectName().trim() && createProject()"
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tên tác phẩm <span class="text-red-500">*</span></label>
+          <input type="text" [(ngModel)]="bookTitle" placeholder="Ví dụ: Moby Dick" 
+                 (keydown.enter)="canCreate() && createProject()"
+                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg transition-shadow">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tác giả <span class="text-red-500">*</span></label>
+          <input type="text" [(ngModel)]="author" placeholder="Ví dụ: Herman Melville (hoặc Vô danh)" 
+                 (keydown.enter)="canCreate() && createProject()"
                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg transition-shadow">
         </div>
         
-        <button [disabled]="!projectName().trim()" (click)="createProject()" 
-                class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-xl transition-colors shadow-sm text-lg">
-          Tạo dự án & Bắt đầu
-        </button>
+        <div class="pt-2">
+          <button [disabled]="!canCreate()" (click)="createProject()" 
+                  class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-xl transition-colors shadow-sm text-lg">
+            Tạo dự án & Bắt đầu
+          </button>
+        </div>
       </div>
       </div>
     </div>
@@ -36,11 +44,19 @@ import { FormsModule } from '@angular/forms';
 })
 export class Home {
   store = inject(BookStore);
-  projectName = signal('');
+  bookTitle = signal('');
+  author = signal('');
+
+  canCreate() {
+    return this.bookTitle().trim().length > 0 && this.author().trim().length > 0;
+  }
 
   createProject() {
-    if (this.projectName().trim()) {
-      this.store.createNewProject(this.projectName().trim());
+    if (this.canCreate()) {
+      const title = this.bookTitle().trim();
+      const author = this.author().trim();
+      const projectName = author ? `${title} - ${author}` : title;
+      this.store.createNewProject(projectName, title, author);
     }
   }
 }

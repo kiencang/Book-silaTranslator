@@ -23,19 +23,27 @@ import { marked } from 'marked';
         <div>
           <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Chọn mô hình</h3>
           <div class="flex flex-col space-y-2">
-            <label class="flex items-center space-x-3 cursor-pointer">
-              <input type="radio" name="model" value="gemini-3-flash-preview" 
-                [checked]="store.config().model === 'gemini-3-flash-preview'"
-                (change)="store.updateConfig({model: 'gemini-3-flash-preview'})"
-                class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-              <span class="text-gray-700 font-medium tracking-tight">gemini-flash-latest</span>
+            <label class="flex items-center space-x-3 transition-opacity"
+                   [class.cursor-pointer]="!store.isTranslatingAny()"
+                   [class.cursor-not-allowed]="store.isTranslatingAny()"
+                   [class.opacity-50]="store.isTranslatingAny()">
+              <input type="radio" name="model" value="gemini-flash-latest" 
+                [disabled]="store.isTranslatingAny()"
+                [checked]="store.config().model === 'gemini-flash-latest'"
+                (change)="store.updateConfig({model: 'gemini-flash-latest'})"
+                class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:cursor-not-allowed">
+              <span class="text-gray-700 font-medium tracking-tight">[Nhanh & Tiết kiệm] - gemini-flash-latest</span>
             </label>
-            <label class="flex items-center space-x-3 cursor-pointer">
-              <input type="radio" name="model" value="gemini-3.1-pro-preview" 
-                [checked]="store.config().model === 'gemini-3.1-pro-preview'"
-                (change)="store.updateConfig({model: 'gemini-3.1-pro-preview'})"
-                class="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500">
-              <span class="text-gray-700 font-medium tracking-tight">gemini-pro-latest</span>
+            <label class="flex items-center space-x-3 transition-opacity"
+                   [class.cursor-pointer]="!store.isTranslatingAny()"
+                   [class.cursor-not-allowed]="store.isTranslatingAny()"
+                   [class.opacity-50]="store.isTranslatingAny()">
+              <input type="radio" name="model" value="gemini-pro-latest" 
+                [disabled]="store.isTranslatingAny()"
+                [checked]="store.config().model === 'gemini-pro-latest'"
+                (change)="store.updateConfig({model: 'gemini-pro-latest'})"
+                class="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500 disabled:cursor-not-allowed">
+              <span class="text-gray-700 font-medium tracking-tight">[Tư duy sâu] - gemini-pro-latest</span>
             </label>
           </div>
         </div>
@@ -45,38 +53,44 @@ import { marked } from 'marked';
         <div>
           <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Độ sáng tạo / Nhiệt độ</h3>
           <div class="flex space-x-6">
-            <label class="flex flex-col items-center cursor-pointer group">
-              <div class="w-8 h-8 rounded-full bg-black ring-offset-2 transition-all flex items-center justify-center cursor-pointer"
+            <button class="flex flex-col items-center group transition-opacity outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    [class.cursor-pointer]="!store.isTranslatingAny()"
+                    [disabled]="store.isTranslatingAny()"
+                    (click)="store.updateConfig({temperature: 0.3})">
+              <div class="w-8 h-8 rounded-full bg-black ring-offset-2 transition-all flex items-center justify-center"
                    [class.ring-2]="store.config().temperature === 0.3"
-                   [class.ring-black]="store.config().temperature === 0.3"
-                   (click)="store.updateConfig({temperature: 0.3})">
+                   [class.ring-black]="store.config().temperature === 0.3">
                 @if (store.config().temperature === 0.3) { <mat-icon class="text-white !w-4 !h-4 !text-base !flex !items-center !justify-center">check</mat-icon> }
               </div>
               <span class="mt-2 text-xs font-semibold text-gray-700">0.3</span>
               <span class="text-[10px] text-gray-400">Chặt chẽ</span>
-            </label>
+            </button>
 
-            <label class="flex flex-col items-center cursor-pointer group">
-              <div class="w-8 h-8 rounded-full bg-blue-500 ring-offset-2 transition-all flex items-center justify-center cursor-pointer"
+            <button class="flex flex-col items-center group transition-opacity outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    [class.cursor-pointer]="!store.isTranslatingAny()"
+                    [disabled]="store.isTranslatingAny()"
+                    (click)="store.updateConfig({temperature: 0.5})">
+              <div class="w-8 h-8 rounded-full bg-blue-500 ring-offset-2 transition-all flex items-center justify-center"
                    [class.ring-2]="store.config().temperature === 0.5"
-                   [class.ring-blue-500]="store.config().temperature === 0.5"
-                   (click)="store.updateConfig({temperature: 0.5})">
+                   [class.ring-blue-500]="store.config().temperature === 0.5">
                  @if (store.config().temperature === 0.5) { <mat-icon class="text-white !w-4 !h-4 !text-base !flex !items-center !justify-center">check</mat-icon> }
               </div>
               <span class="mt-2 text-xs font-semibold text-gray-700">0.5</span>
               <span class="text-[10px] text-gray-400">Cân bằng</span>
-            </label>
+            </button>
 
-            <label class="flex flex-col items-center cursor-pointer group">
-              <div class="w-8 h-8 rounded-full bg-red-500 ring-offset-2 transition-all flex items-center justify-center cursor-pointer"
+            <button class="flex flex-col items-center group transition-opacity outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    [class.cursor-pointer]="!store.isTranslatingAny()"
+                    [disabled]="store.isTranslatingAny()"
+                    (click)="store.updateConfig({temperature: 0.7})">
+              <div class="w-8 h-8 rounded-full bg-red-500 ring-offset-2 transition-all flex items-center justify-center"
                    [class.ring-2]="store.config().temperature === 0.7"
-                   [class.ring-red-500]="store.config().temperature === 0.7"
-                   (click)="store.updateConfig({temperature: 0.7})">
+                   [class.ring-red-500]="store.config().temperature === 0.7">
                  @if (store.config().temperature === 0.7) { <mat-icon class="text-white !w-4 !h-4 !text-base !flex !items-center !justify-center">check</mat-icon> }
               </div>
               <span class="mt-2 text-xs font-semibold text-gray-700">0.7</span>
               <span class="text-[10px] text-gray-400">Uyển chuyển</span>
-            </label>
+            </button>
           </div>
         </div>
       </div>
@@ -286,7 +300,13 @@ export class Translator {
     
     try {
       const config = this.store.config();
-      const result = await this.gemini.translateChapter(chapter.originalText, config.model, config.temperature);
+      const result = await this.gemini.translateChapter(
+        chapter.originalText, 
+        config.model, 
+        config.temperature,
+        this.store.bookTitle(),
+        this.store.author()
+      );
       
       const newVersionNumber = (chapter.latestVersionNumber || 0) + 1;
       const newVersion = {

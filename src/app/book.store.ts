@@ -24,7 +24,7 @@ export interface Chapter {
 }
 
 export interface TranslationConfig {
-  model: 'gemini-3-flash-preview' | 'gemini-3.1-pro-preview';
+  model: 'gemini-flash-latest' | 'gemini-pro-latest';
   temperature: number;
 }
 
@@ -35,6 +35,8 @@ export class BookStore {
   
   readonly currentProjectId = signal<string | null>(null);
   readonly currentProjectName = signal<string>('');
+  readonly bookTitle = signal<string>('');
+  readonly author = signal<string>('');
   private currentProjectCreatedAt = signal<number>(Date.now());
 
   readonly phase = signal<0 | 1 | 2 | 3>(0);
@@ -46,7 +48,7 @@ export class BookStore {
   readonly isTranslatingAny = computed(() => this.chapters().some(c => c.status === 'translating'));
   readonly toastMessage = signal<{message: string, type: 'error' | 'success'} | null>(null);
   readonly config = signal<TranslationConfig>({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-pro-latest',
     temperature: 0.5
   });
 
@@ -71,7 +73,9 @@ export class BookStore {
         chapters: this.chapters(),
         config: this.config(),
         updatedAt: Date.now(),
-        createdAt: untracked(() => this.currentProjectCreatedAt())
+        createdAt: untracked(() => this.currentProjectCreatedAt()),
+        bookTitle: this.bookTitle(),
+        author: this.author()
       };
       
       if (isPlatformBrowser(this.platformId)) {
@@ -89,10 +93,12 @@ export class BookStore {
     }
   }
 
-  async createNewProject(name: string) {
+  async createNewProject(name: string, title: string = '', author: string = '') {
     const newId = Date.now().toString() + Math.random().toString(36).substring(2, 9);
     this.currentProjectId.set(newId);
     this.currentProjectName.set(name);
+    this.bookTitle.set(title);
+    this.author.set(author);
     this.currentProjectCreatedAt.set(Date.now());
     
     this.fileName.set(null);
@@ -106,6 +112,8 @@ export class BookStore {
     if (proj) {
       this.currentProjectId.set(proj.id);
       this.currentProjectName.set(proj.name);
+      this.bookTitle.set(proj.bookTitle || '');
+      this.author.set(proj.author || '');
       this.currentProjectCreatedAt.set(proj.createdAt || Date.now());
       
       this.fileName.set(proj.fileName);
@@ -127,6 +135,8 @@ export class BookStore {
   closeProject() {
     this.currentProjectId.set(null);
     this.currentProjectName.set('');
+    this.bookTitle.set('');
+    this.author.set('');
     this.phase.set(0);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('md-translator-last-id');

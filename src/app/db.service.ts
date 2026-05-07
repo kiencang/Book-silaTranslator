@@ -11,6 +11,8 @@ export interface Project {
   rawMarkdown: string | null;
   chapters: any[];
   config: any;
+  bookTitle?: string;
+  author?: string;
 }
 
 @Injectable({ providedIn: 'root' })
