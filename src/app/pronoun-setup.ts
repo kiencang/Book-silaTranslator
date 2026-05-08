@@ -117,6 +117,7 @@ export class PronounSetup {
 
     try {
       this.isGeneratingPronouns.set(true);
+      this.store.isGeneratingMetadata.set(true);
       
       const ratio = this.pronounExtractRatio();
       const lengthToTake = Math.floor(fullText.length * ratio);
@@ -129,6 +130,7 @@ export class PronounSetup {
       this.store.showToast('Có lỗi xảy ra khi tạo bảng đại từ', 'error');
     } finally {
       this.isGeneratingPronouns.set(false);
+      this.store.isGeneratingMetadata.set(false);
     }
   }
 

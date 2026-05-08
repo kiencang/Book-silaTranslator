@@ -47,6 +47,7 @@ export class BookStore {
   readonly fileName = signal<string | null>(null);
   readonly rawMarkdown = signal<string | null>(null);
   readonly isConverting = signal<boolean>(false);
+  readonly isGeneratingMetadata = signal<boolean>(false);
   readonly chapters = signal<Chapter[]>([]);
   readonly hasAnyTranslation = computed(() => this.chapters().some(c => !!c.translatedText));
   readonly isTranslatingAny = computed(() => this.chapters().some(c => c.status === 'translating'));

@@ -34,7 +34,7 @@ import { FormsModule } from '@angular/forms';
                 [checked]="store.config().model === 'gemini-flash-latest'"
                 (change)="store.updateConfig({model: 'gemini-flash-latest'})"
                 class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:cursor-not-allowed">
-              <span class="text-gray-700 font-medium tracking-tight">[Nhanh & Tiết kiệm] - flash</span>
+              <span class="text-sm text-gray-700 font-medium tracking-tight">[Nhanh & Tiết kiệm] - flash</span>
             </label>
             <label class="flex items-center space-x-3 transition-opacity"
                    [class.cursor-pointer]="!store.isTranslatingAny()"
@@ -45,7 +45,7 @@ import { FormsModule } from '@angular/forms';
                 [checked]="store.config().model === 'gemini-pro-latest'"
                 (change)="store.updateConfig({model: 'gemini-pro-latest'})"
                 class="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500 disabled:cursor-not-allowed">
-              <span class="text-gray-700 font-medium tracking-tight">[Tư duy sâu] - pro</span>
+              <span class="text-sm text-gray-700 font-medium tracking-tight">[Tư duy sâu] - pro</span>
             </label>
           </div>
         </div>
@@ -54,7 +54,7 @@ import { FormsModule } from '@angular/forms';
 
         <!-- Temperature Selection -->
         <div class="flex-1">
-          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Độ sáng tạo / Nhiệt độ</h3>
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Độ sáng tạo</h3>
           <div class="flex space-x-6">
             <button class="flex flex-col items-center group transition-opacity outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                     [class.cursor-pointer]="!store.isTranslatingAny()"
@@ -63,7 +63,7 @@ import { FormsModule } from '@angular/forms';
               <div class="w-8 h-8 rounded-full bg-black ring-offset-2 transition-all flex items-center justify-center"
                    [class.ring-2]="store.config().temperature === 0.3"
                    [class.ring-black]="store.config().temperature === 0.3">
-                @if (store.config().temperature === 0.3) { <mat-icon class="text-white !w-4 !h-4 !text-base !flex !items-center !justify-center">check</mat-icon> }
+                @if (store.config().temperature === 0.3) { <mat-icon class="!text-white !w-5 !h-5 !text-xl !flex !items-center !justify-center font-bold">check</mat-icon> }
               </div>
               <span class="mt-2 text-xs font-semibold text-gray-700">0.3</span>
               <span class="text-[10px] text-gray-400">Chặt chẽ</span>
@@ -76,7 +76,7 @@ import { FormsModule } from '@angular/forms';
               <div class="w-8 h-8 rounded-full bg-blue-500 ring-offset-2 transition-all flex items-center justify-center"
                    [class.ring-2]="store.config().temperature === 0.5"
                    [class.ring-blue-500]="store.config().temperature === 0.5">
-                 @if (store.config().temperature === 0.5) { <mat-icon class="text-white !w-4 !h-4 !text-base !flex !items-center !justify-center">check</mat-icon> }
+                 @if (store.config().temperature === 0.5) { <mat-icon class="!text-white !w-5 !h-5 !text-xl !flex !items-center !justify-center font-bold">check</mat-icon> }
               </div>
               <span class="mt-2 text-xs font-semibold text-gray-700">0.5</span>
               <span class="text-[10px] text-gray-400">Cân bằng</span>
@@ -89,7 +89,7 @@ import { FormsModule } from '@angular/forms';
               <div class="w-8 h-8 rounded-full bg-red-500 ring-offset-2 transition-all flex items-center justify-center"
                    [class.ring-2]="store.config().temperature === 0.7"
                    [class.ring-red-500]="store.config().temperature === 0.7">
-                 @if (store.config().temperature === 0.7) { <mat-icon class="text-white !w-4 !h-4 !text-base !flex !items-center !justify-center">check</mat-icon> }
+                 @if (store.config().temperature === 0.7) { <mat-icon class="!text-white !w-5 !h-5 !text-xl !flex !items-center !justify-center font-bold">check</mat-icon> }
               </div>
               <span class="mt-2 text-xs font-semibold text-gray-700">0.7</span>
               <span class="text-[10px] text-gray-400">Uyển chuyển</span>

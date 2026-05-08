@@ -12,8 +12,8 @@ import { DatePipe, DecimalPipe } from '@angular/common';
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden cursor-default" (click)="$event.stopPropagation()">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50/80">
           <h2 class="text-xl font-bold text-gray-900">Quản lý dự án</h2>
-          <button (click)="close.emit()" class="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-200 transition-colors">
-            <span class="material-icons">close</span>
+          <button (click)="close.emit()" class="text-gray-400 hover:text-gray-700 w-8 h-8 rounded-full hover:bg-gray-200 transition-colors flex items-center justify-center">
+            <span class="material-icons !text-[20px] !w-5 !h-5 !flex !items-center !justify-center leading-none">close</span>
           </button>
         </div>
         
@@ -53,22 +53,27 @@ import { DatePipe, DecimalPipe } from '@angular/common';
                         </span>
                       }
                     </h3>
-                    <div class="flex flex-wrap items-center text-sm text-gray-500 gap-x-4 gap-y-2 mt-2">
-                      <span class="flex items-center"><span class="material-icons text-[16px] mr-1">update</span> {{p.updatedAt | date:'short'}}</span>
-                      <span class="flex items-center">
-                        <span class="w-2 h-2 rounded-full mr-1.5" 
-                              [class.bg-gray-400]="p.phase === 1"
-                              [class.bg-yellow-400]="p.phase === 2"
-                              [class.bg-green-500]="p.phase === 3"></span>
-                        Giai đoạn {{p.phase}}: 
-                        {{p.phase === 1 ? 'Upload' : (p.phase === 2 ? 'Split' : 'Translate')}}
-                      </span>
-                      @if (getProgress(p); as prog) {
+                    <div class="flex flex-col gap-2 w-full mt-2">
+                      <div class="flex flex-wrap items-center text-sm text-gray-500 gap-x-4 gap-y-2">
+                        <span class="flex items-center"><span class="material-icons text-[16px] mr-1">update</span> {{p.updatedAt | date:'short'}}</span>
                         <span class="flex items-center">
-                           <span class="px-2 py-0.5 rounded text-xs font-medium" [class]="prog.colorClass">
-                             Tiến độ dịch: {{prog.percentage}}% ({{prog.translated | number}} / {{prog.total | number}} từ)
-                           </span>
+                          <span class="w-2 h-2 rounded-full mr-1.5" 
+                                [class.bg-gray-400]="p.phase === 1"
+                                [class.bg-yellow-400]="p.phase === 2"
+                                [class.bg-purple-500]="p.phase === 3"
+                                [class.bg-blue-500]="p.phase === 4"
+                                [class.bg-green-500]="p.phase === 5"></span>
+                          Giai đoạn {{p.phase}}: 
+                          {{p.phase === 1 ? 'Tải lên' : (p.phase === 2 ? 'Chia chương' : (p.phase === 3 ? 'Đại từ' : (p.phase === 4 ? 'Từ khó' : 'Dịch thuật')))}}
                         </span>
+                      </div>
+                      @if (getProgress(p); as prog) {
+                        <div class="w-full sm:w-2/3 max-w-sm mt-1 mb-1 flex items-center gap-3">
+                          <div class="flex-1 overflow-hidden h-1.5 bg-gray-200 rounded-full">
+                            <div class="h-full rounded-full transition-all duration-300" [class]="prog.barColorClass" [style.width.%]="prog.percentage"></div>
+                          </div>
+                          <span class="text-xs font-bold min-w-[2.5rem] text-right" [class]="prog.textColorClass">{{prog.percentage}}%</span>
+                        </div>
                       }
                     </div>
                   </div>
@@ -171,7 +176,7 @@ export class ProjectModal implements OnInit {
   }
 
   getProgress(p: Project) {
-    if (!p.chapters || p.chapters.length === 0 || p.phase !== 3) return null;
+    if (!p.chapters || p.chapters.length === 0 || p.phase < 3) return null;
     let total = 0;
     let translated = 0;
     for (const c of p.chapters) {
@@ -183,13 +188,15 @@ export class ProjectModal implements OnInit {
     if (total === 0) return null;
     const percentage = Math.round((translated / total) * 100);
     
-    let colorClass = 'text-red-600 bg-red-100'; // red
+    let barColorClass = 'bg-blue-500';
+    let textColorClass = 'text-blue-600';
     if (percentage === 100) {
-      colorClass = 'text-green-600 bg-green-100';
-    } else if (percentage >= 50) {
-      colorClass = 'text-yellow-700 bg-yellow-100';
+      barColorClass = 'bg-green-500';
+      textColorClass = 'text-green-600';
+    } else if (percentage === 0) {
+      textColorClass = 'text-gray-500';
     }
 
-    return { percentage, colorClass, translated, total };
+    return { percentage, barColorClass, textColorClass, translated, total };
   }
 }

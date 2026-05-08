@@ -113,6 +113,7 @@ export class GlossarySetup {
 
     try {
       this.isGenerating.set(true);
+      this.store.isGeneratingMetadata.set(true);
       
       const ratio = this.glossaryExtractRatio();
       const lengthToTake = Math.floor(fullText.length * ratio);
@@ -125,6 +126,7 @@ export class GlossarySetup {
       this.store.showToast('Có lỗi xảy ra khi tạo bảng thuật ngữ', 'error');
     } finally {
       this.isGenerating.set(false);
+      this.store.isGeneratingMetadata.set(false);
     }
   }
 

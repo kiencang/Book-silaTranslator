@@ -17,10 +17,10 @@ import {MatIconModule} from '@angular/material/icon';
     <div class="h-screen bg-gray-50 flex flex-col font-sans overflow-hidden">
       <header class="bg-white border-b border-gray-200 shrink-0 w-full py-4 px-6 flex items-center justify-between shadow-sm">
         <div class="flex items-center space-x-2" 
-             [class.cursor-pointer]="!store.isTranslatingAny()" 
-             [class.cursor-default]="store.isTranslatingAny()"
+             [class.cursor-pointer]="!store.isTranslatingAny() && !store.isGeneratingMetadata()" 
+             [class.cursor-default]="store.isTranslatingAny() || store.isGeneratingMetadata()"
              title="Quay lại danh sách dự án" 
-             (click)="!store.isTranslatingAny() && store.closeProject()">
+             (click)="!store.isTranslatingAny() && !store.isGeneratingMetadata() && store.closeProject()">
           <div class="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center text-white font-bold text-xl">B</div>
           <h1 class="text-xl font-semibold text-gray-900 tracking-tight flex items-center">
             <span class="hidden sm:inline">Book silaTranslator</span>
@@ -68,10 +68,10 @@ import {MatIconModule} from '@angular/material/icon';
             </div>
           }
           
-          <button (click)="!store.isTranslatingAny() && showProjectModal.set(true)" 
-                  [class.opacity-50]="store.isTranslatingAny()" 
-                  [class.cursor-not-allowed]="store.isTranslatingAny()"
-                  [disabled]="store.isTranslatingAny()"
+          <button (click)="!store.isTranslatingAny() && !store.isGeneratingMetadata() && showProjectModal.set(true)" 
+                  [class.opacity-50]="store.isTranslatingAny() || store.isGeneratingMetadata()" 
+                  [class.cursor-not-allowed]="store.isTranslatingAny() || store.isGeneratingMetadata()"
+                  [disabled]="store.isTranslatingAny() || store.isGeneratingMetadata()"
                   class="flex items-center text-gray-600 hover:text-blue-600 font-medium text-sm transition-colors bg-gray-100 hover:bg-blue-50 px-3 py-2 rounded-lg whitespace-nowrap">
             <span class="material-icons sm:mr-1.5 text-[18px]">folder_copy</span>
             <span class="hidden sm:inline">Quản lý dự án</span>
@@ -97,7 +97,7 @@ import {MatIconModule} from '@angular/material/icon';
 
       <footer class="shrink-0 bg-white border-t border-gray-200 py-2.5 px-6 text-xs text-gray-500 flex justify-center items-center">
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-gray-600">v1.0.7</span>
+          <span class="font-medium text-gray-600">v1.0.8</span>
           <span class="text-gray-300">•</span>
           <a href="https://github.com/kiencang/Book-silaTranslator" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 transition-colors">GitHub</a>
           <span class="text-gray-300">•</span>
