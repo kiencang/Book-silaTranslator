@@ -136,10 +136,24 @@ import { FormsModule } from '@angular/forms';
       <!-- Action area -->
       <div class="mb-4 flex justify-between items-start w-full">
         <div class="flex gap-4 items-center">
-          @if (translationState() === 'all') {
+          @if (translateOperation() !== 'none') {
+            <button 
+              disabled
+              class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm flex items-center space-x-2 opacity-75 cursor-not-allowed"
+            >
+              <mat-icon class="animate-spin">sync</mat-icon>
+              @if (translateOperation() === 'retranslate') {
+                <span>Đang dịch lại toàn bộ sách...</span>
+              } @else if (translateOperation() === 'all') {
+                <span>Đang khởi tạo bản dịch...</span>
+              } @else {
+                <span>Đang dịch các phần chưa dịch...</span>
+              }
+            </button>
+          } @else if (translationState() === 'all') {
             @if (showConfirmRetranslate()) {
               <div class="flex items-center space-x-3 bg-red-50 text-red-700 px-4 py-2 rounded-lg border border-red-100 shadow-sm transition-all duration-200">
-                <span class="text-sm font-medium">Bạn có chắc muốn dịch lại từ đầu? Mọi bản dịch cũ sẽ bị ghi đè.</span>
+                <span class="text-sm font-medium">Bạn có chắc muốn dịch lại từ đầu? Lựa chọn này sẽ tốn thời gian & Token.</span>
                 <div class="flex items-center space-x-2 border-l border-red-200 pl-3">
                   <button (click)="executeTranslateAll(true)" class="text-sm font-bold hover:text-red-900 transition-colors">Đồng ý</button>
                   <button (click)="showConfirmRetranslate.set(false)" class="text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">Hủy</button>
@@ -309,6 +323,7 @@ export class Translator {
   expanded: Record<string, boolean> = {};
 
   showConfirmRetranslate = signal(false);
+  translateOperation = signal<'none' | 'all' | 'retranslate' | 'untranslated'>('none');
 
   translationState = computed(() => {
     const chapters = this.store.chapters();
@@ -382,15 +397,26 @@ export class Translator {
     this.showConfirmRetranslate.set(false);
     
     let toTranslate = this.store.chapters();
-    if (!forceAll) {
+    if (forceAll) {
+      this.translateOperation.set('retranslate');
+    } else {
+      const isCompletelyNew = toTranslate.every(c => c.status === 'pending');
+      this.translateOperation.set(isCompletelyNew ? 'all' : 'untranslated');
       toTranslate = toTranslate.filter(c => c.status === 'pending' || c.status === 'error');
     }
 
-    if (toTranslate.length === 0) return;
+    if (toTranslate.length === 0) {
+      this.translateOperation.set('none');
+      return;
+    }
 
-    for (const chapter of toTranslate) {
-      // Do it sequentially to avoid rate limiting
-      await this.translateSingle(chapter);
+    try {
+      for (const chapter of toTranslate) {
+        // Do it sequentially to avoid rate limiting
+        await this.translateSingle(chapter);
+      }
+    } finally {
+      this.translateOperation.set('none');
     }
   }
 }

@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [MatIconModule, FormsModule],
   template: `
-    <div class="max-w-5xl mx-auto py-8 lg:px-8">
+    <div class="max-w-7xl mx-auto py-8 lg:px-8 px-4">
       <div class="flex items-center justify-between mb-8">
         <div>
           <h2 class="text-2xl font-bold text-gray-900">Thiết lập Đại từ Nhân xưng (Tùy chọn)</h2>
@@ -26,7 +26,7 @@ import { FormsModule } from '@angular/forms';
                 <select [value]="pronounExtractRatio()" (change)="pronounExtractRatio.set(+$any($event.target).value)" [disabled]="isGeneratingPronouns()" class="w-full pl-3 pr-8 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
                   <option value="0.25">25% nội dung sách</option>
                   <option value="0.5">50% nội dung sách</option>
-                  <option value="1.0">100% nội dung sách</option>
+                  <option value="1">100% nội dung sách</option>
                 </select>
               </div>
               <div class="flex-1">
