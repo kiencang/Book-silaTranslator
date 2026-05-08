@@ -5,6 +5,10 @@ Tất cả những thay đổi đáng chú ý của dự án kiencang/Book-silaT
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.0.9]- 2026-05-09
+### Fixed
+- Tái cấu trúc lại mã nguồn để phục vụ nhu cầu mở rộng sau này.
+
 ## [v1.0.8]- 2026-05-09
 ### Fixed
 - Vô hiệu hóa các nút bấm trong quá trình tạo Đại từ / Thuật ngữ; Tránh thao tác nhầm.
