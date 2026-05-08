@@ -5,6 +5,11 @@ Tất cả những thay đổi đáng chú ý của dự án kiencang/Book-silaT
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.0.4]- 2026-05-08
+### Fixed
+- Tùy chỉnh việc chia khối dịch / phase2 (điều chỉnh từ khóa chia và số lượng từ mỗi khối).
+- Điều chỉnh giao diện phase2 để nó có khả năng xem trước, giúp phát hiện vấn đề chia khối được tốt hơn.
+
 ## [v1.0.3]- 2026-05-08
 ### Fixed
 - Sử dụng SI/Prompt riêng cho dịch sách.
