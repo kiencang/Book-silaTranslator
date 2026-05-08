@@ -8,6 +8,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.5]- 2026-05-08
 ### Fixed
 - Cập nhật SI/Prompt.
+- Bổ sung bảng đại từ nhân xưng.
 
 ## [v1.0.4]- 2026-05-08
 ### Fixed
