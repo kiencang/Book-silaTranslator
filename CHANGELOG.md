@@ -9,6 +9,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Sửa lỗi % ở phần trích xuất dữ liệu đem đi phân tích đại từ nhân xưng (lỗi 1 và 1.0).
 - Tăng độ rộng ở phase2 / Đại từ nhân xưng.
+- Điều chỉnh lại thông báo khi người dùng muốn 'Dịch lại toàn bộ cuốn sách'.
 
 ## [v1.0.5]- 2026-05-08
 ### Fixed
