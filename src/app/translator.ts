@@ -1,14 +1,15 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { BookStore, Chapter } from './book.store';
 import { GeminiClient } from './gemini';
 import { MatIconModule } from '@angular/material/icon';
 import { marked } from 'marked';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-translator',
   standalone: true,
-  imports: [MatIconModule, DatePipe],
+  imports: [MatIconModule, DatePipe, FormsModule],
   template: `
     <div class="max-w-6xl mx-auto py-8 px-4">
       <div class="flex items-center justify-between mb-8">
@@ -19,8 +20,9 @@ import { marked } from 'marked';
       </div>
 
       <!-- Config Panel -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8 flex flex-col md:flex-row gap-8">
-        <div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8 flex flex-col md:flex-row gap-8 relative">
+        <!-- Model Selection -->
+        <div class="flex-1">
           <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Chọn mô hình</h3>
           <div class="flex flex-col space-y-2">
             <label class="flex items-center space-x-3 transition-opacity"
@@ -32,7 +34,7 @@ import { marked } from 'marked';
                 [checked]="store.config().model === 'gemini-flash-latest'"
                 (change)="store.updateConfig({model: 'gemini-flash-latest'})"
                 class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:cursor-not-allowed">
-              <span class="text-gray-700 font-medium tracking-tight">[Nhanh & Tiết kiệm] - gemini-flash-latest</span>
+              <span class="text-gray-700 font-medium tracking-tight">[Nhanh & Tiết kiệm] - flash</span>
             </label>
             <label class="flex items-center space-x-3 transition-opacity"
                    [class.cursor-pointer]="!store.isTranslatingAny()"
@@ -43,14 +45,15 @@ import { marked } from 'marked';
                 [checked]="store.config().model === 'gemini-pro-latest'"
                 (change)="store.updateConfig({model: 'gemini-pro-latest'})"
                 class="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500 disabled:cursor-not-allowed">
-              <span class="text-gray-700 font-medium tracking-tight">[Tư duy sâu] - gemini-pro-latest</span>
+              <span class="text-gray-700 font-medium tracking-tight">[Tư duy sâu] - pro</span>
             </label>
           </div>
         </div>
 
         <div class="w-px bg-gray-200 hidden md:block"></div>
 
-        <div>
+        <!-- Temperature Selection -->
+        <div class="flex-1">
           <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Độ sáng tạo / Nhiệt độ</h3>
           <div class="flex space-x-6">
             <button class="flex flex-col items-center group transition-opacity outline-none disabled:opacity-50 disabled:cursor-not-allowed"
@@ -93,6 +96,41 @@ import { marked } from 'marked';
             </button>
           </div>
         </div>
+
+        <div class="w-px bg-gray-200 hidden md:block"></div>
+
+        <!-- Pronouns Table Toggle -->
+        <div class="flex-1">
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+            Đại từ nhân xưng
+          </h3>
+          <div class="flex flex-col space-y-3">
+             <label class="flex items-center space-x-3 transition-opacity" [class.cursor-pointer]="!!store.pronounTable()" [class.cursor-not-allowed]="!store.pronounTable()" [class.opacity-50]="!store.pronounTable()">
+              <input type="checkbox" 
+                [checked]="store.usePronouns()"
+                (change)="toggleUsePronouns($event)"
+                [disabled]="!store.pronounTable()"
+                class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 disabled:cursor-not-allowed"
+                [class.cursor-pointer]="!!store.pronounTable()">
+              <span class="text-gray-700 font-medium tracking-tight">Kích hoạt Bảng đại từ</span>
+            </label>
+            <div class="text-sm text-gray-500 italic mt-1">
+              @if (store.pronounTable()) {
+                 Đang sử dụng bảng đại từ đã cập nhật.
+              } @else {
+                 Chưa có bảng đại từ nhân xưng thiết lập.
+              }
+            </div>
+            <button 
+              (click)="store.phase.set(3)"
+              class="inline-flex max-w-fit items-center px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-lg text-sm font-medium transition-colors mt-2"
+            >
+              <mat-icon class="mr-2 !w-4 !h-4 !text-base">assignment_ind</mat-icon>
+              Chỉnh sửa
+            </button>
+          </div>
+        </div>
+
       </div>
 
       <!-- Action area -->
@@ -294,6 +332,11 @@ export class Translator {
     return chapter.versions.find(v => v.versionNumber === chapter.activeVersionNumber) || null;
   }
 
+  toggleUsePronouns(event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.store.usePronouns.set(isChecked);
+  }
+
   async translateSingle(chapter: Chapter) {
     this.store.updateChapter(chapter.id, { status: 'translating' });
     this.expanded[chapter.id] = true;
@@ -305,7 +348,9 @@ export class Translator {
         config.model, 
         config.temperature,
         this.store.bookTitle(),
-        this.store.author()
+        this.store.author(),
+        this.store.pronounTable(),
+        this.store.usePronouns()
       );
       
       const newVersionNumber = (chapter.latestVersionNumber || 0) + 1;
@@ -349,3 +394,4 @@ export class Translator {
     }
   }
 }
+

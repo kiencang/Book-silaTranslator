@@ -13,6 +13,8 @@ export interface Project {
   config: any;
   bookTitle?: string;
   author?: string;
+  pronounTable?: string;
+  usePronouns?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

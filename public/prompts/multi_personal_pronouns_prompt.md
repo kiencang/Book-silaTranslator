@@ -5,6 +5,11 @@
 <context_info>
 **Tên sách:** [tên sách]
 **Tác giả:** [tên tác giả]
+
+**Bảng đại từ nhân xưng:**
+[bảng đại từ nhân xưng]
+
+*LƯU Ý: Ở trên là Bảng đại từ nhân xưng tham chiếu. Bạn BẮT BUỘC phải sử dụng cấu trúc xưng hô này cho cách người kể chuyện gọi nhân vật (ngôi thứ 3) và trong các cuộc hội thoại thông thường. TUY NHIÊN, bạn được phép điều chỉnh linh hoạt cách xưng hô (ngôi thứ 1 & 2) nếu bối cảnh cảm xúc của câu chuyện (như khi nhân vật cãi vã, tức giận, hoặc khi mối quan hệ của họ thay đổi) thực sự đòi hỏi sự chuyển đổi.*
 </context_info>
 
 <mandatory_requirement>
