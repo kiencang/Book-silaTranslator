@@ -3,6 +3,7 @@ import {BookStore} from './book.store';
 import {Uploader} from './uploader';
 import {Splitter} from './splitter';
 import {PronounSetup} from './pronoun-setup';
+import {GlossarySetup} from './glossary-setup';
 import {Translator} from './translator';
 import {Home} from './home';
 import {ProjectModal} from './project-modal';
@@ -11,7 +12,7 @@ import {MatIconModule} from '@angular/material/icon';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
-  imports: [Uploader, Splitter, PronounSetup, Translator, Home, ProjectModal, MatIconModule],
+  imports: [Uploader, Splitter, PronounSetup, GlossarySetup, Translator, Home, ProjectModal, MatIconModule],
   template: `
     <div class="h-screen bg-gray-50 flex flex-col font-sans overflow-hidden">
       <header class="bg-white border-b border-gray-200 shrink-0 w-full py-4 px-6 flex items-center justify-between shadow-sm">
@@ -46,15 +47,21 @@ import {MatIconModule} from '@angular/material/icon';
                   Chia chương
                 </div>
                 <div class="w-8 h-px bg-gray-200"></div>
-                <div class="flex items-center" [class.text-blue-600]="store.phase() === 3 || store.phase() === 4">
+                <div class="flex items-center" [class.text-blue-600]="store.phase() >= 3">
                   <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2"
                         [class.border-blue-600]="store.phase() >= 3" [class.bg-blue-600]="store.phase() > 3" [class.text-white]="store.phase() > 3">3</span>
                   Đại từ
                 </div>
                 <div class="w-8 h-px bg-gray-200"></div>
-                <div class="flex items-center" [class.text-blue-600]="store.phase() === 4">
+                <div class="flex items-center" [class.text-blue-600]="store.phase() >= 4">
                   <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2"
-                        [class.border-blue-600]="store.phase() === 4">4</span>
+                        [class.border-blue-600]="store.phase() >= 4" [class.bg-blue-600]="store.phase() > 4" [class.text-white]="store.phase() > 4">4</span>
+                  Từ khó
+                </div>
+                <div class="w-8 h-px bg-gray-200"></div>
+                <div class="flex items-center" [class.text-blue-600]="store.phase() === 5">
+                  <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2"
+                        [class.border-blue-600]="store.phase() === 5">5</span>
                   Dịch thuật
                 </div>
               </div>
@@ -81,7 +88,8 @@ import {MatIconModule} from '@angular/material/icon';
                @case (1) { <app-uploader /> }
                @case (2) { <app-splitter /> }
                @case (3) { <app-pronoun-setup /> }
-               @case (4) { <app-translator /> }
+               @case (4) { <app-glossary-setup /> }
+               @case (5) { <app-translator /> }
              }
           }
         </div>
@@ -89,7 +97,7 @@ import {MatIconModule} from '@angular/material/icon';
 
       <footer class="shrink-0 bg-white border-t border-gray-200 py-2.5 px-6 text-xs text-gray-500 flex justify-center items-center">
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-gray-600">v1.0.6</span>
+          <span class="font-medium text-gray-600">v1.0.7</span>
           <span class="text-gray-300">•</span>
           <a href="https://github.com/kiencang/Book-silaTranslator" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 transition-colors">GitHub</a>
           <span class="text-gray-300">•</span>

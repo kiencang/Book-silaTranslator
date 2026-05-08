@@ -105,28 +105,64 @@ import { FormsModule } from '@angular/forms';
             Đại từ nhân xưng
           </h3>
           <div class="flex flex-col space-y-3">
-             <label class="flex items-center space-x-3 transition-opacity" [class.cursor-pointer]="!!store.pronounTable()" [class.cursor-not-allowed]="!store.pronounTable()" [class.opacity-50]="!store.pronounTable()">
+             <label class="flex items-center space-x-3 transition-opacity" [class.cursor-pointer]="!!store.pronounTable()" [class.cursor-not-allowed]="store.isTranslatingAny() || !store.pronounTable()" [class.opacity-50]="store.isTranslatingAny() || !store.pronounTable()">
               <input type="checkbox" 
                 [checked]="store.usePronouns()"
                 (change)="toggleUsePronouns($event)"
-                [disabled]="!store.pronounTable()"
+                [disabled]="store.isTranslatingAny() || !store.pronounTable()"
                 class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 disabled:cursor-not-allowed"
                 [class.cursor-pointer]="!!store.pronounTable()">
               <span class="text-gray-700 font-medium tracking-tight">Kích hoạt Bảng đại từ</span>
             </label>
-            <div class="text-sm text-gray-500 italic mt-1">
+            <div class="text-xs text-gray-500 italic mt-0">
               @if (store.pronounTable()) {
-                 Đang sử dụng bảng đại từ đã cập nhật.
+                 Đã có bảng đại từ.
               } @else {
-                 Chưa có bảng đại từ nhân xưng thiết lập.
+                 Chưa thiết lập.
               }
             </div>
             <button 
               (click)="store.phase.set(3)"
-              class="inline-flex max-w-fit items-center px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-lg text-sm font-medium transition-colors mt-2"
+              [disabled]="store.isTranslatingAny()"
+              class="inline-flex max-w-fit items-center px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-lg text-sm font-medium transition-colors mt-2 disabled:opacity-50"
             >
               <mat-icon class="mr-2 !w-4 !h-4 !text-base">assignment_ind</mat-icon>
-              Chỉnh sửa
+              Chỉnh sửa & Tạo
+            </button>
+          </div>
+        </div>
+
+        <div class="w-px bg-gray-200 hidden md:block"></div>
+
+        <!-- Glossary Table Toggle -->
+        <div class="flex-1">
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+            Thuật ngữ / Từ khó
+          </h3>
+          <div class="flex flex-col space-y-3">
+             <label class="flex items-center space-x-3 transition-opacity" [class.cursor-pointer]="!!store.glossaryTable()" [class.cursor-not-allowed]="store.isTranslatingAny() || !store.glossaryTable()" [class.opacity-50]="store.isTranslatingAny() || !store.glossaryTable()">
+              <input type="checkbox" 
+                [checked]="store.useGlossary()"
+                (change)="toggleUseGlossary($event)"
+                [disabled]="store.isTranslatingAny() || !store.glossaryTable()"
+                class="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500 disabled:cursor-not-allowed"
+                [class.cursor-pointer]="!!store.glossaryTable()">
+              <span class="text-gray-700 font-medium tracking-tight">Kích hoạt Bảng từ khó</span>
+            </label>
+            <div class="text-xs text-gray-500 italic mt-0">
+              @if (store.glossaryTable()) {
+                 Đã có bảng thuật ngữ.
+              } @else {
+                 Chưa thiết lập.
+              }
+            </div>
+            <button 
+              (click)="store.phase.set(4)"
+              [disabled]="store.isTranslatingAny()"
+              class="inline-flex max-w-fit items-center px-4 py-2 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-lg text-sm font-medium transition-colors mt-2 disabled:opacity-50"
+            >
+              <mat-icon class="mr-2 !w-4 !h-4 !text-base">library_books</mat-icon>
+              Chỉnh sửa & Tạo
             </button>
           </div>
         </div>
@@ -352,6 +388,11 @@ export class Translator {
     this.store.usePronouns.set(isChecked);
   }
 
+  toggleUseGlossary(event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.store.useGlossary.set(isChecked);
+  }
+
   async translateSingle(chapter: Chapter) {
     this.store.updateChapter(chapter.id, { status: 'translating' });
     this.expanded[chapter.id] = true;
@@ -365,7 +406,9 @@ export class Translator {
         this.store.bookTitle(),
         this.store.author(),
         this.store.pronounTable(),
-        this.store.usePronouns()
+        this.store.usePronouns(),
+        this.store.glossaryTable(),
+        this.store.useGlossary()
       );
       
       const newVersionNumber = (chapter.latestVersionNumber || 0) + 1;

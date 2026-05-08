@@ -39,9 +39,11 @@ export class BookStore {
   readonly author = signal<string>('');
   readonly pronounTable = signal<string>('');
   readonly usePronouns = signal<boolean>(false);
+  readonly glossaryTable = signal<string>('');
+  readonly useGlossary = signal<boolean>(false);
   private currentProjectCreatedAt = signal<number>(Date.now());
 
-  readonly phase = signal<0 | 1 | 2 | 3 | 4>(0);
+  readonly phase = signal<0 | 1 | 2 | 3 | 4 | 5>(0);
   readonly fileName = signal<string | null>(null);
   readonly rawMarkdown = signal<string | null>(null);
   readonly isConverting = signal<boolean>(false);
@@ -79,7 +81,9 @@ export class BookStore {
         bookTitle: this.bookTitle(),
         author: this.author(),
         pronounTable: this.pronounTable(),
-        usePronouns: this.usePronouns()
+        usePronouns: this.usePronouns(),
+        glossaryTable: this.glossaryTable(),
+        useGlossary: this.useGlossary()
       };
       
       if (isPlatformBrowser(this.platformId)) {
@@ -105,6 +109,8 @@ export class BookStore {
     this.author.set(author);
     this.pronounTable.set('');
     this.usePronouns.set(false);
+    this.glossaryTable.set('');
+    this.useGlossary.set(false);
     this.currentProjectCreatedAt.set(Date.now());
     
     this.fileName.set(null);
@@ -122,6 +128,8 @@ export class BookStore {
       this.author.set(proj.author || '');
       this.pronounTable.set(proj.pronounTable || '');
       this.usePronouns.set(!!proj.usePronouns);
+      this.glossaryTable.set(proj.glossaryTable || '');
+      this.useGlossary.set(!!proj.useGlossary);
       this.currentProjectCreatedAt.set(proj.createdAt || Date.now());
       
       this.fileName.set(proj.fileName);
@@ -147,6 +155,8 @@ export class BookStore {
     this.author.set('');
     this.pronounTable.set('');
     this.usePronouns.set(false);
+    this.glossaryTable.set('');
+    this.useGlossary.set(false);
     this.phase.set(0);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('md-translator-last-id');
@@ -172,6 +182,11 @@ export class BookStore {
   savePronounsConf(table: string, use: boolean) {
     this.pronounTable.set(table);
     this.usePronouns.set(use);
+  }
+
+  saveGlossaryConf(table: string, use: boolean) {
+    this.glossaryTable.set(table);
+    this.useGlossary.set(use);
   }
 
   updateConfig(partial: Partial<TranslationConfig>) {

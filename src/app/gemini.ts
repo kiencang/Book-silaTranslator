@@ -25,6 +25,11 @@ export class GeminiClient {
   
   private pronounsSystemInstructionCache: string | null = null;
   private pronounsPromptCache: string | null = null;
+  
+  private glossarySystemInstructionCache: string | null = null;
+  private glossaryPromptCache: string | null = null;
+  private multiGlossaryPromptCache: string | null = null;
+  private multiPronounsGlossaryPromptCache: string | null = null;
 
   async loadPrompts() {
     const defaultOpts = { cache: 'no-store' as RequestCache };
@@ -38,12 +43,16 @@ export class GeminiClient {
       return null;
     };
 
-    const [si, p, pm, psi, pp] = await Promise.all([
+    const [si, p, pm, psi, pp, gsi, gp, mgp, mpgp] = await Promise.all([
       loadFile('/prompts/multi_system_instructions.md'),
       loadFile('/prompts/multi_prompt.md'),
       loadFile('/prompts/multi_personal_pronouns_prompt.md'),
       loadFile('/prompts/pronouns_system_instructions.md'),
-      loadFile('/prompts/pronouns_prompt.md')
+      loadFile('/prompts/pronouns_prompt.md'),
+      loadFile('/prompts/glossary_system_instructions.md'),
+      loadFile('/prompts/glossary_prompt.md'),
+      loadFile('/prompts/multi_glossary_prompt.md'),
+      loadFile('/prompts/multi_pronouns_glossary_prompt.md')
     ]);
 
     this.systemInstructionCache = si;
@@ -51,14 +60,31 @@ export class GeminiClient {
     this.pronounsMultiPromptCache = pm;
     this.pronounsSystemInstructionCache = psi;
     this.pronounsPromptCache = pp;
+    this.glossarySystemInstructionCache = gsi;
+    this.glossaryPromptCache = gp;
+    this.multiGlossaryPromptCache = mgp;
+    this.multiPronounsGlossaryPromptCache = mpgp;
   }
 
-  async translateChapter(text: string, model: string, temperature: number, bookTitle: string = '', author: string = '', pronounTable: string = '', usePronouns: boolean = false): Promise<string> {
+  async translateChapter(text: string, model: string, temperature: number, bookTitle: string = '', author: string = '', pronounTable: string = '', usePronouns: boolean = false, glossaryTable: string = '', useGlossary: boolean = false): Promise<string> {
     await this.loadPrompts();
 
     let finalPrompt = '';
     
-    if (usePronouns && this.pronounsMultiPromptCache && pronounTable) {
+    if (usePronouns && useGlossary && this.multiPronounsGlossaryPromptCache && pronounTable && glossaryTable) {
+       finalPrompt = this.multiPronounsGlossaryPromptCache;
+       finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
+       finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
+       finalPrompt = finalPrompt.replace('[bảng đại từ nhân xưng]', pronounTable);
+       finalPrompt = finalPrompt.replace('[bảng thuật ngữ]', glossaryTable);
+       finalPrompt = finalPrompt.replace('[nội dung cần dịch]', '\n' + text);
+    } else if (useGlossary && this.multiGlossaryPromptCache && glossaryTable) {
+       finalPrompt = this.multiGlossaryPromptCache;
+       finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
+       finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
+       finalPrompt = finalPrompt.replace('[bảng thuật ngữ]', glossaryTable);
+       finalPrompt = finalPrompt.replace('[nội dung cần dịch]', '\n' + text);
+    } else if (usePronouns && this.pronounsMultiPromptCache && pronounTable) {
        finalPrompt = this.pronounsMultiPromptCache;
        finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
        finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
@@ -121,6 +147,32 @@ export class GeminiClient {
 
     const response = await this.ai.models.generateContent({
       model: model,
+      contents: [{ text: finalPrompt }],
+      config: configArgs
+    });
+
+    return response.text || '';
+  }
+
+  async generateGlossary(text: string, bookTitle: string = '', author: string = ''): Promise<string> {
+    await this.loadPrompts();
+
+    let finalPrompt = this.glossaryPromptCache || `Hãy phân tích nội dung và trích xuất Bảng thuật ngữ chuyên ngành/Từ khó dịch tiếng Anh - Việt.\n\n<metadata>\n- Tên sách: [tên sách]\n- Tác giả: [tên tác giả]\n</metadata>\n\n<source_text>\n[nội dung]\n</source_text>`;
+    
+    finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
+    finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
+    finalPrompt = finalPrompt.replace('[nội dung]', text);
+
+    const configArgs: any = {
+      temperature: 0.3,
+      thinkingConfig: { thinkingLevel: 'HIGH' }
+    };
+    if (this.glossarySystemInstructionCache) {
+       configArgs.systemInstruction = this.glossarySystemInstructionCache;
+    }
+
+    const response = await this.ai.models.generateContent({
+      model: 'gemini-pro-latest',
       contents: [{ text: finalPrompt }],
       config: configArgs
     });

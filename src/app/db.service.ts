@@ -15,6 +15,8 @@ export interface Project {
   author?: string;
   pronounTable?: string;
   usePronouns?: boolean;
+  glossaryTable?: string;
+  useGlossary?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
