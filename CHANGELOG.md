@@ -9,6 +9,8 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Cập nhật SI/Prompt.
 - Bổ sung bảng đại từ nhân xưng.
+- Thêm Thinking level HIGH vào mọi model và mọi phase.
+- Thiết lập mặc temperature của phân tích đại từ nhân xưng là 0.3
 
 ## [v1.0.4]- 2026-05-08
 ### Fixed
