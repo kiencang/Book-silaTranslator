@@ -7,6 +7,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [Unreleased]
 - Thêm tính năng lưu version cho phần Đại từ nhân xưng & Thuật ngữ / Từ khó.
+- Bổ sung giao diện chỉnh sửa trực quan hơn cho phần Đại từ nhân xưng & Thuật ngữ / Từ khó.
 
 ## [v1.0.12]- 2026-05-10
 ### Fixed
