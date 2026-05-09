@@ -46,6 +46,9 @@ import { FormsModule } from '@angular/forms';
               @if (isGeneratingPronouns()) {
                 <mat-icon class="animate-spin mr-2 !w-5 !h-5 !text-[20px]">sync</mat-icon>
                 Đang phân tích và tạo bảng...
+              } @else if (draftPronounTable().trim().length > 0) {
+                <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
+                Tạo lại bảng dữ liệu
               } @else {
                 <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">auto_awesome</mat-icon>
                 Bắt đầu tạo bảng tự động
@@ -96,8 +99,8 @@ export class PronounSetup {
 
   isGeneratingPronouns = signal<boolean>(false);
   draftPronounTable = signal<string>(this.store.pronounTable() || '');
-  pronounExtractRatio = signal<number>(0.5);
-  pronounModel = signal<string>('gemini-pro-latest');
+  pronounExtractRatio = signal<number>(this.store.config().pronounGenRatio ?? 0.5);
+  pronounModel = signal<string>(this.store.config().pronounGenModel ?? 'gemini-pro-latest');
 
   async generatePronouns() {
     // Generate full text from markdown representation (so it's exactly what is going to be used, minus noise if it was cleaned/split!)
@@ -119,6 +122,11 @@ export class PronounSetup {
       this.isGeneratingPronouns.set(true);
       this.store.isGeneratingMetadata.set(true);
       
+      this.store.updateConfig({
+        pronounGenRatio: this.pronounExtractRatio(),
+        pronounGenModel: this.pronounModel()
+      });
+
       const ratio = this.pronounExtractRatio();
       const lengthToTake = Math.floor(fullText.length * ratio);
       const textToAnalyze = fullText.substring(0, lengthToTake);

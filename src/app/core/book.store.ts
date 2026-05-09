@@ -26,6 +26,10 @@ export interface Chapter {
 export interface TranslationConfig {
   model: 'gemini-flash-latest' | 'gemini-pro-latest';
   temperature: number;
+  pronounGenRatio?: number;
+  pronounGenModel?: string;
+  glossaryGenRatio?: number;
+  glossaryGenModel?: string;
 }
 
 @Injectable({ providedIn: 'root' })

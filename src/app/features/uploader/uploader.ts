@@ -3,6 +3,7 @@ import { BookStore } from '../../core/book.store';
 import { GeminiClient } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
 import TurndownService from 'turndown';
+import { PDFDocument } from 'pdf-lib';
 
 @Component({
   selector: 'app-uploader',
@@ -134,9 +135,32 @@ export class Uploader {
         const markdown = this.turndownService.turndown(text);
         this.store.setMarkdown(markdown, file.name);
       } else if (file.name.toLowerCase().endsWith('.pdf')) {
-        const base64 = await this.fileToBase64(file);
-        const b64Data = base64.split(',')[1];
-        const markdown = await this.gemini.convertPdfToMarkdown(b64Data);
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await PDFDocument.load(arrayBuffer);
+        const pageCount = pdfDoc.getPageCount();
+
+        let markdown = '';
+        
+        if (pageCount <= 50) {
+          const base64 = await this.fileToBase64(file);
+          const b64Data = base64.split(',')[1];
+          markdown = await this.gemini.convertPdfToMarkdown(b64Data);
+        } else {
+          const CHUNK_SIZE = 50;
+          for (let i = 0; i < pageCount; i += CHUNK_SIZE) {
+            const endPage = Math.min(i + CHUNK_SIZE, pageCount) - 1;
+            this.store.showToast(`Đang xử lý trang ${i + 1} đến ${endPage + 1} / ${pageCount}...`);
+            const newPdf = await PDFDocument.create();
+            const pageIndices = Array.from({ length: endPage - i + 1 }, (_, k) => k + i);
+            const copiedPages = await newPdf.copyPages(pdfDoc, pageIndices);
+            copiedPages.forEach((page) => newPdf.addPage(page));
+            const chunkBase64 = await newPdf.saveAsBase64();
+            
+            const chunkMarkdown = await this.gemini.convertPdfToMarkdown(chunkBase64);
+            markdown += chunkMarkdown + '\n\n';
+          }
+        }
+        
         this.store.setMarkdown(markdown, file.name);
       } else {
         this.store.showToast('Định dạng file không được hỗ trợ. Vui lòng tải lên file TXT, HTML hoặc PDF.');

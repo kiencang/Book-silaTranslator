@@ -12,9 +12,15 @@ import { DatePipe, DecimalPipe } from '@angular/common';
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden cursor-default" (click)="$event.stopPropagation()">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50/80">
           <h2 class="text-xl font-bold text-gray-900">Quản lý dự án</h2>
-          <button (click)="close.emit()" class="text-gray-400 hover:text-gray-700 w-8 h-8 rounded-full hover:bg-gray-200 transition-colors flex items-center justify-center">
-            <span class="material-icons !text-[20px] !w-5 !h-5 !flex !items-center !justify-center leading-none">close</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button (click)="fileInput.click()" class="text-sm px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors flex items-center gap-1">
+              <span class="material-icons text-[18px]">file_upload</span> Nhập dự án
+            </button>
+            <input #fileInput type="file" accept=".json" class="hidden" (change)="importProject($event)" />
+            <button (click)="close.emit()" class="text-gray-400 hover:text-gray-700 w-8 h-8 rounded-full hover:bg-gray-200 transition-colors flex items-center justify-center">
+              <span class="material-icons !text-[20px] !w-5 !h-5 !flex !items-center !justify-center leading-none">close</span>
+            </button>
+          </div>
         </div>
         
         <div class="p-6 overflow-y-auto flex-1 bg-white">
@@ -93,9 +99,12 @@ import { DatePipe, DecimalPipe } from '@angular/common';
                     } @else {
                       @if (getProgress(p)?.percentage === 100) {
                         <button (click)="exportProject(p, $event)" class="px-4 py-2 w-full bg-green-50 hover:bg-green-100 text-green-700 rounded-lg text-sm font-medium transition-colors border border-green-200 shadow-sm text-center flex items-center justify-center gap-1.5">
-                          <span class="material-icons text-[18px]">download</span> Download bản dịch
+                          <span class="material-icons text-[18px]">download</span> Download sách
                         </button>
                       }
+                      <button (click)="exportProjectData(p, $event)" class="px-4 py-2 w-full bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-sm font-medium transition-colors border border-purple-200 shadow-sm text-center flex items-center justify-center gap-1.5" title="Xuất toàn bộ dữ liệu dự án (JSON)">
+                        <span class="material-icons text-[18px]">save_alt</span> Sao lưu dự án
+                      </button>
                       <button (click)="loadProject(p.id)" class="px-4 py-2 w-full bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors border border-blue-200 shadow-sm text-center flex items-center justify-center gap-1.5">
                         <span class="material-icons text-[18px]">folder_open</span> Mở dự án
                       </button>
@@ -158,6 +167,56 @@ export class ProjectModal implements OnInit {
   exportProject(p: Project, event: Event) {
     event.stopPropagation();
     this.store.exportProjectToHtml(p);
+  }
+
+  exportProjectData(p: Project, event: Event) {
+    event.stopPropagation();
+    const dataStr = JSON.stringify(p, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `SilaProject_${p.name.replace(/\s+/g, '_')}_${p.id}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  async importProject(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    
+    try {
+      const text = await file.text();
+      const proj = JSON.parse(text) as Project;
+      
+      // Basic validation
+      if (!proj || !proj.id || !proj.name) {
+        this.store.showToast('File không hợp lệ hoặc dữ liệu bị lỗi.');
+        return;
+      }
+      
+      // Check if project already exists, if so generate a new unique timestamp ID
+      // To ensure no overlapping, since they can import the same project multiple times
+      const existingIds = this.projects().map(p => p.id);
+      if (existingIds.includes(proj.id)) {
+        proj.id = Date.now().toString() + Math.random().toString(36).substring(2, 9);
+        proj.name = `${proj.name} (Imported)`;
+      }
+      
+      proj.updatedAt = Date.now();
+      
+      await this.db.saveProject(proj);
+      this.store.showToast('Đã nhập dự án thành công!');
+      await this.loadProjects();
+    } catch (e) {
+      console.error(e);
+      this.store.showToast('Có lỗi xảy ra khi đọc file dự án.');
+    } finally {
+      input.value = ''; // Reset the input
+    }
   }
 
   async deleteProject(id: string, event: Event) {
