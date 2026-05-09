@@ -5,6 +5,10 @@ Tất cả những thay đổi đáng chú ý của dự án kiencang/Book-silaT
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.0.12]- 2026-05-10
+### Fixed
+- Điều chỉnh phase2/Chia sách để nó chỉ block khu vực thích hợp trong trường hợp đã có bản dịch.
+
 ## [v1.0.11]- 2026-05-09
 ### Fixed
 - Kiểm soát các toast tốt hơn.
