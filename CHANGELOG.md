@@ -13,6 +13,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.12]- 2026-05-10
 ### Fixed
 - Điều chỉnh phase2/Chia sách để nó chỉ block khu vực thích hợp trong trường hợp đã có bản dịch.
+- Quá trình chuyển đổi PDF -> markdown cần có phase trung gian để tránh việc gián đoạn làm mất công sức chuyển đổi trước đó.
 
 ## [v1.0.11]- 2026-05-09
 ### Fixed
