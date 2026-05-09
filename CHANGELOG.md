@@ -9,6 +9,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Tái cấu trúc lại mã nguồn để phục vụ nhu cầu mở rộng sau này.
 - Bổ sung SI/Prompt chuyên dụng để chuyển PDF thành markdown.
+- Loại bỏ các thẻ rác (style, script,...) trong HTML khi chuyển sang markdown. 
 
 ## [v1.0.8]- 2026-05-09
 ### Fixed
