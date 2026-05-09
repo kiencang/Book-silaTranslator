@@ -10,7 +10,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Tái cấu trúc lại mã nguồn để phục vụ nhu cầu mở rộng sau này.
 - Bổ sung SI/Prompt chuyên dụng để chuyển PDF thành markdown.
 - Loại bỏ các thẻ rác (style, script,...) trong HTML khi chuyển sang markdown.
-- Tách bạch thông tin thuộc dự án đầu và cuối thuộc Project Gutenberg. Để việc dịch tập trung đúng mục tiêu vào phần nội dung chính của sách.
+- Tách bạch thông tin thuộc dự án, nằm ở đầu và cuối thuộc Project Gutenberg. Để việc dịch tập trung đúng mục tiêu vào phần nội dung chính của sách.
 - Thêm phần ước đoán số lượng token đầu vào và đầu ra.
 
 ## [v1.0.8]- 2026-05-09
