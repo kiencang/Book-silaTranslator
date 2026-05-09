@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { BookStore } from '../../core/book.store';
-import { GeminiClient } from '../../core/gemini';
+import { ToastService } from '../../core/toast.service';
+import { GeminiClient, parseGeminiError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 
@@ -13,7 +14,7 @@ import { FormsModule } from '@angular/forms';
       <div class="flex items-center justify-between mb-8">
         <div>
           <h2 class="text-2xl font-bold text-gray-900">Thiết lập Bảng Thuật Ngữ / Từ Khó (Tùy chọn)</h2>
-          <p class="text-gray-500 mt-1">Sử dụng mô hình AI mạnh nhất để quét cuốn sách và trích xuất bảng thuật ngữ/từ khó dịch. Giúp bản dịch chuyên nghiệp và thống nhất toàn cục.</p>
+          <p class="text-gray-500 mt-1">Sử dụng mô hình AI mạnh nhất để quét cuốn sách và trích xuất bảng thuật ngữ/từ khó dịch. Giúp bản dịch có chất lượng cao và thống nhất hơn. Đặc biệt cần thiết với sách chuyên ngành hoặc/và sách cổ. Tuy nhiên đây là tùy chọn, không bắt buộc phải làm nếu không thấy cần thiết.</p>
         </div>
       </div>
 
@@ -95,6 +96,7 @@ import { FormsModule } from '@angular/forms';
 export class GlossarySetup {
   store = inject(BookStore);
   gemini = inject(GeminiClient);
+  toast = inject(ToastService);
 
   isGenerating = signal<boolean>(false);
   draftTable = signal<string>(this.store.glossaryTable() || '');
@@ -111,7 +113,7 @@ export class GlossarySetup {
     }
 
     if (!fullText) {
-       this.store.showToast('Không có nội dung sách để phân tích.', 'error');
+       this.toast.error(this.toast.Messages.NO_CONTENT_TO_ANALYZE);
        return;
     }
 
@@ -130,9 +132,10 @@ export class GlossarySetup {
 
       const result = await this.gemini.generateGlossary(textToAnalyze, this.store.bookTitle(), this.store.author());
       this.draftTable.set(result);
-    } catch (e) {
+      this.toast.success(this.toast.Messages.GLOSSARY_SUCCESS);
+    } catch (e: any) {
       console.error(e);
-      this.store.showToast('Có lỗi xảy ra khi tạo bảng thuật ngữ', 'error');
+      this.toast.error(this.toast.Messages.GLOSSARY_ERROR(parseGeminiError(e)));
     } finally {
       this.isGenerating.set(false);
       this.store.isGeneratingMetadata.set(false);

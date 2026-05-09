@@ -1,9 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { BookStore, Chapter } from '../../core/book.store';
-import { GeminiClient } from '../../core/gemini';
+import { ToastService } from '../../core/toast.service';
+import { GeminiClient, parseGeminiError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
-import { marked } from 'marked';
 import { FormsModule } from '@angular/forms';
 import { TokenEstimationComponent } from './components/token-estimation';
 import { TranslatorConfigComponent } from './components/translator-config';
@@ -122,6 +121,7 @@ import { ChapterItemComponent } from './components/chapter-item';
 export class Translator {
   store = inject(BookStore);
   gemini = inject(GeminiClient);
+  toast = inject(ToastService);
   
   expanded: Record<string, boolean> = {};
 
@@ -173,10 +173,10 @@ export class Translator {
         latestVersionNumber: newVersionNumber,
         activeVersionNumber: newVersionNumber
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       this.store.updateChapter(chapter.id, { status: 'error' });
-      alert('Dịch thất bại đối với ' + chapter.title);
+      this.toast.error(this.toast.Messages.TRANSLATION_ERROR(chapter.title, parseGeminiError(e)));
     }
   }
 
@@ -202,6 +202,7 @@ export class Translator {
         // Do it sequentially to avoid rate limiting
         await this.translateSingle(chapter);
       }
+      this.toast.success(this.toast.Messages.TRANSLATION_COMPLETED);
     } finally {
       this.translateOperation.set('none');
     }

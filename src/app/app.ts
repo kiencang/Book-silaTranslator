@@ -8,11 +8,12 @@ import {Translator} from './features/translator/translator';
 import {Home} from './features/home/home';
 import {ProjectModal} from './shared/components/project-modal';
 import {MatIconModule} from '@angular/material/icon';
+import {ToastComponent} from './shared/components/toast.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
-  imports: [Uploader, Splitter, PronounSetup, GlossarySetup, Translator, Home, ProjectModal, MatIconModule],
+  imports: [Uploader, Splitter, PronounSetup, GlossarySetup, Translator, Home, ProjectModal, ToastComponent, MatIconModule],
   template: `
     <div class="h-screen bg-gray-50 flex flex-col font-sans overflow-hidden">
       <header class="bg-white border-b border-gray-200 shrink-0 w-full py-4 px-6 flex items-center justify-between shadow-sm">
@@ -35,35 +36,35 @@ import {MatIconModule} from '@angular/material/icon';
           @if (store.phase() > 0) {
             <div class="hidden lg:flex items-center text-sm font-medium text-gray-400 mr-2 border-r border-gray-200 pr-6">
               <div class="flex items-center space-x-6">
-                <div class="flex items-center" [class.text-blue-600]="store.phase() >= 1">
+                <button (click)="goToPhase(1)" [disabled]="store.phase() > 1" class="flex items-center hover:text-blue-600 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:hover:text-gray-400" [class.text-blue-600]="store.phase() >= 1">
                   <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2" 
                         [class.border-blue-600]="store.phase() >= 1" [class.bg-blue-600]="store.phase() > 1" [class.text-white]="store.phase() > 1">1</span>
                   Tải lên
-                </div>
-                <div class="w-8 h-px bg-gray-200"></div>
-                <div class="flex items-center" [class.text-blue-600]="store.phase() >= 2">
+                </button>
+                <div class="w-8 h-px bg-gray-200" [class.bg-blue-600]="store.phase() > 1"></div>
+                <button (click)="goToPhase(2)" [disabled]="!store.rawMarkdown()" class="flex items-center hover:text-blue-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-400" [class.text-blue-600]="store.phase() >= 2">
                   <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2"
                         [class.border-blue-600]="store.phase() >= 2" [class.bg-blue-600]="store.phase() > 2" [class.text-white]="store.phase() > 2">2</span>
                   Chia chương
-                </div>
-                <div class="w-8 h-px bg-gray-200"></div>
-                <div class="flex items-center" [class.text-blue-600]="store.phase() >= 3">
+                </button>
+                <div class="w-8 h-px bg-gray-200" [class.bg-blue-600]="store.phase() > 2"></div>
+                <button (click)="goToPhase(3)" [disabled]="store.chapters().length === 0" class="flex items-center hover:text-blue-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-400" [class.text-blue-600]="store.phase() >= 3">
                   <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2"
                         [class.border-blue-600]="store.phase() >= 3" [class.bg-blue-600]="store.phase() > 3" [class.text-white]="store.phase() > 3">3</span>
                   Đại từ
-                </div>
-                <div class="w-8 h-px bg-gray-200"></div>
-                <div class="flex items-center" [class.text-blue-600]="store.phase() >= 4">
+                </button>
+                <div class="w-8 h-px bg-gray-200" [class.bg-blue-600]="store.phase() > 3"></div>
+                <button (click)="goToPhase(4)" [disabled]="store.chapters().length === 0" class="flex items-center hover:text-blue-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-400" [class.text-blue-600]="store.phase() >= 4">
                   <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2"
                         [class.border-blue-600]="store.phase() >= 4" [class.bg-blue-600]="store.phase() > 4" [class.text-white]="store.phase() > 4">4</span>
                   Từ khó
-                </div>
-                <div class="w-8 h-px bg-gray-200"></div>
-                <div class="flex items-center" [class.text-blue-600]="store.phase() === 5">
+                </button>
+                <div class="w-8 h-px bg-gray-200" [class.bg-blue-600]="store.phase() > 4"></div>
+                <button (click)="goToPhase(5)" [disabled]="store.chapters().length === 0" class="flex items-center hover:text-blue-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-400" [class.text-blue-600]="store.phase() === 5">
                   <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2"
                         [class.border-blue-600]="store.phase() === 5">5</span>
                   Dịch thuật
-                </div>
+                </button>
               </div>
             </div>
           }
@@ -97,7 +98,7 @@ import {MatIconModule} from '@angular/material/icon';
 
       <footer class="shrink-0 bg-white border-t border-gray-200 py-2.5 px-6 text-xs text-gray-500 flex justify-center items-center">
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-gray-600">v1.0.10</span>
+          <span class="font-medium text-gray-600">v1.0.11</span>
           <span class="text-gray-300">•</span>
           <a href="https://github.com/kiencang/Book-silaTranslator" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 transition-colors">GitHub</a>
           <span class="text-gray-300">•</span>
@@ -115,26 +116,21 @@ import {MatIconModule} from '@angular/material/icon';
          <app-project-modal (close)="showProjectModal.set(false)" />
       }
 
-      @if (store.toastMessage(); as toast) {
-        <div class="fixed bottom-6 right-6 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium flex items-center z-50 transition-all shadow-red-100"
-             [class.bg-red-50]="toast.type === 'error'"
-             [class.text-red-700]="toast.type === 'error'"
-             [class.border-red-200]="toast.type === 'error'"
-             [class.bg-green-50]="toast.type === 'success'"
-             [class.text-green-700]="toast.type === 'success'"
-             [class.border-green-200]="toast.type === 'success'"
-             [class.shadow-green-100]="toast.type === 'success'">
-          <mat-icon class="mr-2">{{ toast.type === 'error' ? 'error_outline' : 'check_circle' }}</mat-icon>
-          <span>{{ toast.message }}</span>
-          <button (click)="store.toastMessage.set(null)" class="ml-4 opacity-50 hover:opacity-100 transition-opacity flex items-center justify-center">
-            <mat-icon class="!w-4 !h-4 !text-base">close</mat-icon>
-          </button>
-        </div>
-      }
+      <app-toast />
     </div>
   `
 })
 export class App {
   store = inject(BookStore);
   showProjectModal = signal<boolean>(false);
+
+  goToPhase(phase: number) {
+    if (phase === 1 && this.store.phase() === 1) {
+      this.store.phase.set(1);
+    } else if (phase === 2 && this.store.rawMarkdown()) {
+      this.store.phase.set(2);
+    } else if (phase >= 3 && this.store.chapters().length > 0) {
+      this.store.phase.set(phase as 1 | 2 | 3 | 4 | 5);
+    }
+  }
 }

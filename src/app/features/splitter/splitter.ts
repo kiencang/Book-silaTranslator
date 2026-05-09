@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { BookStore, Chapter } from '../../core/book.store';
 import { MatIconModule } from '@angular/material/icon';
+import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-splitter',
@@ -10,13 +11,40 @@ import { MatIconModule } from '@angular/material/icon';
     <div class="max-w-4xl mx-auto py-8">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900">Chia theo chương dịch</h2>
-          <p class="text-gray-500 mt-1">Đang phân tích "{{ store.fileName() }}" để tìm ra cách chia phần tốt nhất.</p>
+          <h2 class="text-2xl font-bold text-gray-900">Chia theo chương dịch (hoặc khối dịch)</h2>
+          <p class="text-gray-500 mt-1">Đang phân tích "{{ store.fileName() }}" để tìm ra cách phân chia tốt nhất.</p>
         </div>
+        <button 
+          (click)="downloadMarkdown()"
+          class="flex items-center space-x-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
+          title="Tải về file markdown đã được trích xuất"
+        >
+          <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center text-gray-500">download</mat-icon>
+          <span class="hidden sm:inline">Tải file Markdown</span>
+        </button>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Tùy chỉnh phân chia</h3>
+      @if (store.hasAnyTranslation()) {
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-xl shadow-sm">
+          <div class="flex">
+            <div class="flex-shrink-0 mt-0.5">
+              <mat-icon class="text-amber-500 !text-xl !w-5 !h-5">warning</mat-icon>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm text-amber-800 font-medium">
+                Việc chia lại chương bị vô hiệu hóa do dự án đã có nội dung đã được dịch.
+              </p>
+              <p class="text-sm text-amber-700 mt-1 leading-relaxed">
+                Hãy tải về file Markdown đã xử lý ở nút phía trên bên phải, và tạo một dự án mới nếu bạn muốn chia lại sách.
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Điều chỉnh cách phân chia</h3>
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
           <div class="md:col-span-5">
             <label class="block text-sm font-medium text-gray-700 mb-1">Từ khóa chia</label>
@@ -69,7 +97,7 @@ import { MatIconModule } from '@angular/material/icon';
             (click)="selectMethod(method.keyword)"
           >
             <div class="flex justify-between items-start mb-3">
-              <h3 class="font-semibold text-gray-900">Theo "{{ method.keyword }}"</h3>
+              <h3 class="font-semibold text-gray-900">Theo {{ method.keyword }} / Khối</h3>
               @if (selectedMethod() === method.keyword) {
                 <mat-icon class="text-blue-500">check_circle</mat-icon>
               }
@@ -88,7 +116,7 @@ import { MatIconModule } from '@angular/material/icon';
       @if (selectedMethodData()) {
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
           <div class="border-b border-gray-200 bg-gray-50 px-6 py-4 flex justify-between items-center">
-            <h3 class="font-semibold text-gray-900">Xem trước: Phân chia theo "{{ selectedMethodData()?.keyword }}"</h3>
+            <h3 class="font-semibold text-gray-900">Xem trước: Phân chia theo {{ selectedMethodData()?.keyword }} / Khối</h3>
             <div class="text-sm text-gray-500">{{ selectedMethodData()?.count }} khối</div>
           </div>
           <div class="max-h-96 overflow-y-auto p-0">
@@ -120,6 +148,7 @@ import { MatIconModule } from '@angular/material/icon';
           </button>
         </div>
       }
+      </div>
 
       @if (previewBlock()) {
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 sm:p-6" (click)="previewBlock.set(null)">
@@ -146,6 +175,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class Splitter {
   store = inject(BookStore);
+  toast = inject(ToastService);
 
   draftKeywords = signal<string[]>(['Chapter', 'Part', 'Section']);
   draftMinWords = signal(1000);
@@ -249,6 +279,34 @@ export class Splitter {
 
   selectMethod(kw: string) {
     this.selectedMethod.set(kw);
+  }
+
+  downloadMarkdown() {
+    try {
+      const text = this.store.rawMarkdown();
+      if (!text) {
+        this.toast.error(this.toast.Messages.DOWNLOAD_MARKDOWN_ERROR);
+        return;
+      }
+      const blob = new Blob([text], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      // Generate safe filename from store.fileName
+      let safeName = (this.store.fileName() || 'book_content').replace(/\.[^/.]+$/, "");
+      if (!safeName) safeName = 'book_content';
+      a.download = `${safeName}.md`;
+      
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      this.toast.success(this.toast.Messages.DOWNLOAD_MARKDOWN_SUCCESS);
+    } catch (error) {
+      this.toast.error(this.toast.Messages.DOWNLOAD_MARKDOWN_ERROR);
+    }
   }
 
   generatePreview(text: string, kw: string, minWords: number): {title: string, previewText: string, wordCount: number, originalText: string}[] {

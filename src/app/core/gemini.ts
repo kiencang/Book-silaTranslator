@@ -1,6 +1,26 @@
 import { Injectable } from '@angular/core';
 import { GoogleGenAI } from '@google/genai';
 
+export function parseGeminiError(e: any): string {
+  const msg = e?.message || e?.toString() || '';
+  if (msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('429')) {
+    return 'Lỗi: Đã vượt quá giới hạn API miễn phí (Quota exceeded). Vui lòng thử lại sau hoặc cấu hình API Key riêng.';
+  }
+  if (msg.toLowerCase().includes('api key') || msg.toLowerCase().includes('403')) {
+    return 'Lỗi: API Key không hợp lệ hoặc không có quyền truy cập.';
+  }
+  if (msg.toLowerCase().includes('network') || msg.toLowerCase().includes('fetch failed')) {
+    return 'Lỗi: Mất kết nối mạng. Vui lòng kiểm tra lại đường truyền của bạn.';
+  }
+  if (msg.toLowerCase().includes('timeout')) {
+    return 'Lỗi: Request quá hạn (Timeout). Máy chủ đang quá tải, vui lòng thử lại sau.';
+  }
+  if (msg.toLowerCase().includes('overloaded') || msg.toLowerCase().includes('503')) {
+    return 'Lỗi: Máy chủ Gemini đang quá tải (Overloaded). Vui lòng thử lại sau ít phút.';
+  }
+  return `Lỗi hệ thống: ${msg}`;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GeminiClient {
   private ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });

@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit, Output, EventEmitter } from '@angular/core';
 import { DbService, Project } from '../../core/db';
 import { BookStore } from '../../core/book.store';
+import { ToastService } from '../../core/toast.service';
 import { DatePipe, DecimalPipe } from '@angular/common';
 
 @Component({
@@ -125,6 +126,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 export class ProjectModal implements OnInit {
   db = inject(DbService);
   store = inject(BookStore);
+  toast = inject(ToastService);
   
   projects = signal<Project[]>([]);
   isLoading = signal(true);
@@ -181,6 +183,7 @@ export class ProjectModal implements OnInit {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    this.toast.success(this.toast.Messages.PROJECT_BACKUP_SUCCESS);
   }
 
   async importProject(event: Event) {
@@ -192,9 +195,8 @@ export class ProjectModal implements OnInit {
       const text = await file.text();
       const proj = JSON.parse(text) as Project;
       
-      // Basic validation
       if (!proj || !proj.id || !proj.name) {
-        this.store.showToast('File không hợp lệ hoặc dữ liệu bị lỗi.');
+        this.toast.error(this.toast.Messages.PROJECT_IMPORT_DRAFT_ERROR);
         return;
       }
       
@@ -209,11 +211,11 @@ export class ProjectModal implements OnInit {
       proj.updatedAt = Date.now();
       
       await this.db.saveProject(proj);
-      this.store.showToast('Đã nhập dự án thành công!');
+      this.toast.success(this.toast.Messages.PROJECT_IMPORT_SUCCESS);
       await this.loadProjects();
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      this.store.showToast('Có lỗi xảy ra khi đọc file dự án.');
+      this.toast.error(this.toast.Messages.PROJECT_IMPORT_ERROR);
     } finally {
       input.value = ''; // Reset the input
     }
@@ -222,6 +224,7 @@ export class ProjectModal implements OnInit {
   async deleteProject(id: string, event: Event) {
     event.stopPropagation();
     await this.db.deleteProject(id);
+    this.toast.success(this.toast.Messages.PROJECT_DELETE_SUCCESS);
     if (this.store.currentProjectId() === id) {
        this.store.closeProject();
     }

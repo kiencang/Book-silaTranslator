@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { BookStore } from '../../core/book.store';
-import { GeminiClient } from '../../core/gemini';
+import { ToastService } from '../../core/toast.service';
+import { GeminiClient, parseGeminiError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 
@@ -96,6 +97,7 @@ import { FormsModule } from '@angular/forms';
 export class PronounSetup {
   store = inject(BookStore);
   gemini = inject(GeminiClient);
+  toast = inject(ToastService);
 
   isGeneratingPronouns = signal<boolean>(false);
   draftPronounTable = signal<string>(this.store.pronounTable() || '');
@@ -114,7 +116,7 @@ export class PronounSetup {
     }
 
     if (!fullText) {
-       this.store.showToast('Không có nội dung sách để phân tích.', 'error');
+       this.toast.error(this.toast.Messages.NO_CONTENT_TO_ANALYZE);
        return;
     }
 
@@ -133,9 +135,10 @@ export class PronounSetup {
 
       const result = await this.gemini.generatePronouns(textToAnalyze, this.pronounModel(), this.store.bookTitle(), this.store.author());
       this.draftPronounTable.set(result);
-    } catch (e) {
+      this.toast.success(this.toast.Messages.PRONOUNS_SUCCESS);
+    } catch (e: any) {
       console.error(e);
-      this.store.showToast('Có lỗi xảy ra khi tạo bảng đại từ', 'error');
+      this.toast.error(this.toast.Messages.PRONOUNS_ERROR(parseGeminiError(e)));
     } finally {
       this.isGeneratingPronouns.set(false);
       this.store.isGeneratingMetadata.set(false);

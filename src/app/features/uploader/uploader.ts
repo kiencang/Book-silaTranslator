@@ -1,6 +1,7 @@
 import { Component, ElementRef, inject, viewChild } from '@angular/core';
 import { BookStore } from '../../core/book.store';
-import { GeminiClient } from '../../core/gemini';
+import { ToastService } from '../../core/toast.service';
+import { GeminiClient, parseGeminiError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
 import TurndownService from 'turndown';
 import { PDFDocument } from 'pdf-lib';
@@ -30,7 +31,7 @@ import { PDFDocument } from 'pdf-lib';
           type="file" 
           #fileInput 
           class="hidden" 
-          accept=".txt,.html,.htm,.pdf" 
+          accept=".txt,.html,.htm,.pdf,.md" 
           (change)="onFileSelected($event)" 
         />
         
@@ -50,6 +51,7 @@ import { PDFDocument } from 'pdf-lib';
               <p class="text-sm text-gray-500 mt-1">Click chọn hoặc kéo thả vào đây.</p>
               <div class="flex gap-2 justify-center mt-3">
                 <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md font-mono">TXT</span>
+                <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md font-mono">MD</span>
                 <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md font-mono">HTML</span>
                 <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md font-mono">PDF</span>
               </div>
@@ -64,6 +66,7 @@ import { PDFDocument } from 'pdf-lib';
 export class Uploader {
   store = inject(BookStore);
   gemini = inject(GeminiClient);
+  toast = inject(ToastService);
   fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
   
   isDragging = false;
@@ -109,6 +112,7 @@ export class Uploader {
     // File size validation
     const LIMITS: Record<string, number> = {
        'txt': 3 * 1024 * 1024,
+       'md': 3 * 1024 * 1024,
        'html': 5 * 1024 * 1024,
        'htm': 5 * 1024 * 1024,
        'pdf': 50 * 1024 * 1024,
@@ -118,7 +122,7 @@ export class Uploader {
        const limit = LIMITS[ext];
        if (file.size > limit) {
          const limitMB = limit / (1024 * 1024);
-         this.store.showToast(`Dung lượng file vượt giới hạn (${limitMB}MB đối với file .${ext}). Vui lòng chọn file nhẹ hơn.`);
+         this.toast.error(this.toast.Messages.FILE_TOO_LARGE(limitMB, ext));
          this.fileInput().nativeElement.value = '';
          return;
        }
@@ -127,7 +131,7 @@ export class Uploader {
     this.store.setConverting(true);
     
     try {
-      if (file.name.toLowerCase().endsWith('.txt')) {
+      if (file.name.toLowerCase().endsWith('.txt') || file.name.toLowerCase().endsWith('.md')) {
         const text = await file.text();
         this.store.setMarkdown(text, file.name);
       } else if (file.name.toLowerCase().endsWith('.html') || file.name.toLowerCase().endsWith('.htm')) {
@@ -149,7 +153,7 @@ export class Uploader {
           const CHUNK_SIZE = 50;
           for (let i = 0; i < pageCount; i += CHUNK_SIZE) {
             const endPage = Math.min(i + CHUNK_SIZE, pageCount) - 1;
-            this.store.showToast(`Đang xử lý trang ${i + 1} đến ${endPage + 1} / ${pageCount}...`);
+            this.toast.info(this.toast.Messages.FILE_PROCESSING_PAGE(i + 1, endPage + 1, pageCount));
             const newPdf = await PDFDocument.create();
             const pageIndices = Array.from({ length: endPage - i + 1 }, (_, k) => k + i);
             const copiedPages = await newPdf.copyPages(pdfDoc, pageIndices);
@@ -162,13 +166,17 @@ export class Uploader {
         }
         
         this.store.setMarkdown(markdown, file.name);
+        this.toast.success(this.toast.Messages.FILE_PROCESS_SUCCESS);
       } else {
-        this.store.showToast('Định dạng file không được hỗ trợ. Vui lòng tải lên file TXT, HTML hoặc PDF.');
+        this.toast.error(this.toast.Messages.FILE_INVALID_FORMAT);
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       console.error(e);
-      const msg = e instanceof Error ? e.message : String(e);
-      this.store.showToast('Lỗi khi xử lý file: ' + msg);
+      let msg = e instanceof Error ? e.message : String(e);
+      if (file.type === 'application/pdf' && (msg.includes('quota') || msg.toLowerCase().includes('failed'))) {
+        msg = parseGeminiError(e);
+      }
+      this.toast.error(this.toast.Messages.FILE_PROCESS_ERROR(msg));
     } finally {
       this.store.setConverting(false);
       this.fileInput().nativeElement.value = '';

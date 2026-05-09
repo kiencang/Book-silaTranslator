@@ -1,6 +1,7 @@
 import { Injectable, signal, effect, PLATFORM_ID, inject, untracked, computed } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { DbService, Project } from './db';
+import { ToastService } from './toast.service';
 import { marked } from 'marked';
 
 export interface TranslationVersion {
@@ -36,6 +37,7 @@ export interface TranslationConfig {
 export class BookStore {
   private platformId = inject(PLATFORM_ID);
   private db = inject(DbService);
+  private toastService = inject(ToastService);
   
   readonly currentProjectId = signal<string | null>(null);
   readonly currentProjectName = signal<string>('');
@@ -59,7 +61,6 @@ export class BookStore {
   readonly estimatedVietnameseTokens = computed(() => this.estimatedVietnameseWords() * 1.5);
   readonly hasAnyTranslation = computed(() => this.chapters().some(c => !!c.translatedText));
   readonly isTranslatingAny = computed(() => this.chapters().some(c => c.status === 'translating'));
-  readonly toastMessage = signal<{message: string, type: 'error' | 'success'} | null>(null);
   readonly config = signal<TranslationConfig>({
     model: 'gemini-pro-latest',
     temperature: 0.5
@@ -227,16 +228,6 @@ export class BookStore {
     this.chapters.set([]);
   }
 
-  showToast(message: string, type: 'error' | 'success' = 'error') {
-    this.toastMessage.set({ message, type });
-    setTimeout(() => {
-      const current = this.toastMessage();
-      if (current && current.message === message) {
-        this.toastMessage.set(null);
-      }
-    }, 4000);
-  }
-
   async exportProjectToHtml(project?: Project) {
     if (!isPlatformBrowser(this.platformId)) return;
 
@@ -305,9 +296,10 @@ ${htmlBody}
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (e) {
+      this.toastService.success(this.toastService.Messages.EXPORT_HTML_SUCCESS);
+    } catch (e: any) {
       console.error('Error exporting to HTML:', e);
-      this.showToast('Có lỗi xảy ra khi xuất file HTML', 'error');
+      this.toastService.error(this.toastService.Messages.EXPORT_HTML_ERROR);
     }
   }
 }
