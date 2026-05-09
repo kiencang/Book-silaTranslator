@@ -9,6 +9,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Tách file PDF dài thành các phần, gửi lên nhận về kết quả rồi ghép lại.
 - Triển khai tính năng xuất/nhập dự án.
+- Lưu lại cấu hình thiết lập đại từ và từ khó để hiển thị chính xác khi người dùng quay lại để điều chỉnh.
 
 ## [v1.0.9]- 2026-05-09
 ### Fixed
