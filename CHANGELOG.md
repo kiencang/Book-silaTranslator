@@ -8,6 +8,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.10]- 2026-05-09
 ### Fixed
 - Tách file PDF dài thành các phần, gửi lên nhận về kết quả rồi ghép lại.
+- Triển khai tính năng xuất/nhập dự án.
 
 ## [v1.0.9]- 2026-05-09
 ### Fixed
