@@ -42,8 +42,7 @@ import { ToastService } from '../../core/toast.service';
         </div>
       }
 
-      <div class="transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8 transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Điều chỉnh cách phân chia</h3>
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
           <div class="md:col-span-5">
@@ -143,12 +142,11 @@ import { ToastService } from '../../core/toast.service';
             [disabled]="selectedMethodData()?.count === 0"
             class="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>Tiến hành dịch</span>
+            <span>Bước kế tiếp</span>
             <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center">arrow_forward</mat-icon>
           </button>
         </div>
       }
-      </div>
 
       @if (previewBlock()) {
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 sm:p-6" (click)="previewBlock.set(null)">
@@ -443,6 +441,11 @@ export class Splitter {
   }
 
   applySplit() {
+    if (this.store.hasAnyTranslation()) {
+      this.store.phase.set(3);
+      return;
+    }
+
     const data = this.selectedMethodData();
     if (!data) return;
 

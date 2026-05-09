@@ -1,6 +1,19 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
+export interface PdfConversionChunk {
+  index: number;
+  base64Pdf?: string;
+  markdown?: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  error?: string;
+}
+
+export interface PdfConversionTask {
+  fileName: string;
+  chunks: PdfConversionChunk[];
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -17,6 +30,7 @@ export interface Project {
   usePronouns?: boolean;
   glossaryTable?: string;
   useGlossary?: boolean;
+  pdfTask?: PdfConversionTask;
 }
 
 @Injectable({ providedIn: 'root' })

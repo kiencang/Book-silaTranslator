@@ -73,6 +73,11 @@ import { DatePipe, DecimalPipe } from '@angular/common';
                           Giai đoạn {{p.phase}}: 
                           {{p.phase === 1 ? 'Tải lên' : (p.phase === 2 ? 'Chia chương' : (p.phase === 3 ? 'Đại từ' : (p.phase === 4 ? 'Từ khó' : 'Dịch thuật')))}}
                         </span>
+                        @if (p.pdfTask) {
+                           <span class="flex items-center text-orange-600 bg-orange-50 px-2 py-0.5 rounded text-xs font-medium border border-orange-100 uppercase tracking-wide">
+                             <span class="material-icons !text-[14px] !w-3.5 !h-3.5 mr-1 leading-none flex items-center justify-center">warning</span> Gián đoạn PDF
+                           </span>
+                        }
                       </div>
                       @if (getProgress(p); as prog) {
                         <div class="w-full sm:w-2/3 max-w-sm mt-1 mb-1 flex items-center gap-3">

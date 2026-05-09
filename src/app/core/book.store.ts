@@ -52,6 +52,7 @@ export class BookStore {
   readonly phase = signal<0 | 1 | 2 | 3 | 4 | 5>(0);
   readonly fileName = signal<string | null>(null);
   readonly rawMarkdown = signal<string | null>(null);
+  readonly pdfTask = signal<import('./db').PdfConversionTask | undefined>(undefined);
   readonly isConverting = signal<boolean>(false);
   readonly isGeneratingMetadata = signal<boolean>(false);
   readonly chapters = signal<Chapter[]>([]);
@@ -93,7 +94,8 @@ export class BookStore {
         pronounTable: this.pronounTable(),
         usePronouns: this.usePronouns(),
         glossaryTable: this.glossaryTable(),
-        useGlossary: this.useGlossary()
+        useGlossary: this.useGlossary(),
+        pdfTask: this.pdfTask()
       };
       
       if (isPlatformBrowser(this.platformId)) {
@@ -125,6 +127,7 @@ export class BookStore {
     
     this.fileName.set(null);
     this.rawMarkdown.set(null);
+    this.pdfTask.set(undefined);
     this.chapters.set([]);
     this.phase.set(1);
   }
@@ -144,6 +147,7 @@ export class BookStore {
       
       this.fileName.set(proj.fileName);
       this.rawMarkdown.set(proj.rawMarkdown);
+      this.pdfTask.set(proj.pdfTask);
       
       const adjustedChapters = proj.chapters.map((c: Chapter) => 
         c.status === 'translating' ? { ...c, status: 'error' as const } : c
@@ -167,10 +171,15 @@ export class BookStore {
     this.usePronouns.set(false);
     this.glossaryTable.set('');
     this.useGlossary.set(false);
+    this.pdfTask.set(undefined);
     this.phase.set(0);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('md-translator-last-id');
     }
+  }
+
+  setPdfTask(task: import('./db').PdfConversionTask | undefined) {
+    this.pdfTask.set(task);
   }
 
   setMarkdown(md: string, name: string) {
@@ -225,6 +234,7 @@ export class BookStore {
     this.phase.set(1);
     this.fileName.set(null);
     this.rawMarkdown.set(null);
+    this.pdfTask.set(undefined);
     this.chapters.set([]);
   }
 

@@ -4,21 +4,34 @@ import { GoogleGenAI } from '@google/genai';
 export function parseGeminiError(e: any): string {
   const msg = e?.message || e?.toString() || '';
   if (msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('429')) {
-    return 'Lỗi: Đã vượt quá giới hạn API miễn phí (Quota exceeded). Vui lòng thử lại sau hoặc cấu hình API Key riêng.';
+    return 'Lỗi: Đã vượt quá giới hạn API miễn phí (Quota exceeded). Vui thử lại vào ngày mai hoặc đăng nhập tài khoản khác còn API miễn phí.';
   }
-  if (msg.toLowerCase().includes('api key') || msg.toLowerCase().includes('403')) {
-    return 'Lỗi: API Key không hợp lệ hoặc không có quyền truy cập.';
+  if (msg.toLowerCase().includes('api key') || msg.toLowerCase().includes('403') || msg.toLowerCase().includes('permission_denied')) {
+    return 'Lỗi: Thao tác bị từ chối do API Key không hợp lệ hoặc thiếu quyền hạn (Permission Denied). Đợi một lúc rồi thử lại có thể giải quyết được vấn đề này.';
   }
   if (msg.toLowerCase().includes('network') || msg.toLowerCase().includes('fetch failed')) {
-    return 'Lỗi: Mất kết nối mạng. Vui lòng kiểm tra lại đường truyền của bạn.';
+    return 'Lỗi: Bị gián đoạn mạng. Vui lòng kiểm tra lại kết nối internet.';
   }
   if (msg.toLowerCase().includes('timeout')) {
-    return 'Lỗi: Request quá hạn (Timeout). Máy chủ đang quá tải, vui lòng thử lại sau.';
+    return 'Lỗi: Quá thời gian chờ (Timeout).';
   }
   if (msg.toLowerCase().includes('overloaded') || msg.toLowerCase().includes('503')) {
-    return 'Lỗi: Máy chủ Gemini đang quá tải (Overloaded). Vui lòng thử lại sau ít phút.';
+    return 'Lỗi: Máy chủ cung cấp AI đang quá tải, vui lòng thử lại sau một chút.';
   }
-  return `Lỗi hệ thống: ${msg}`;
+  
+  // Try to parse json from msg if it's a raw google error
+  try {
+     let str = msg;
+     if (str.includes('{')) {
+       str = str.substring(str.indexOf('{'));
+       const obj = JSON.parse(str);
+       if (obj?.error?.message) {
+         return `Lỗi từ AI: ${obj.error.message}`;
+       }
+     }
+  } catch (err) {}
+
+  return `Lỗi không xác định trong quá trình xử lý, vui lòng thử lại.`;
 }
 
 @Injectable({ providedIn: 'root' })
