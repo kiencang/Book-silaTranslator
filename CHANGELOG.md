@@ -8,6 +8,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.11]- 2026-05-09
 ### Fixed
 - Kiểm soát các toast tốt hơn.
+- Cải tiến việc di chuyển qua lại giữa các phase.
 
 ## [v1.0.10]- 2026-05-09
 ### Fixed
