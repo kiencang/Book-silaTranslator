@@ -1,12 +1,12 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {BookStore} from './book.store';
-import {Uploader} from './uploader';
-import {Splitter} from './splitter';
-import {PronounSetup} from './pronoun-setup';
-import {GlossarySetup} from './glossary-setup';
-import {Translator} from './translator';
-import {Home} from './home';
-import {ProjectModal} from './project-modal';
+import {BookStore} from './core/book.store';
+import {Uploader} from './features/uploader/uploader';
+import {Splitter} from './features/splitter/splitter';
+import {PronounSetup} from './features/setup/pronoun-setup';
+import {GlossarySetup} from './features/setup/glossary-setup';
+import {Translator} from './features/translator/translator';
+import {Home} from './features/home/home';
+import {ProjectModal} from './shared/components/project-modal';
 import {MatIconModule} from '@angular/material/icon';
 
 @Component({
@@ -97,7 +97,7 @@ import {MatIconModule} from '@angular/material/icon';
 
       <footer class="shrink-0 bg-white border-t border-gray-200 py-2.5 px-6 text-xs text-gray-500 flex justify-center items-center">
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-gray-600">v1.0.8</span>
+          <span class="font-medium text-gray-600">v1.0.9</span>
           <span class="text-gray-300">•</span>
           <a href="https://github.com/kiencang/Book-silaTranslator" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 transition-colors">GitHub</a>
           <span class="text-gray-300">•</span>
