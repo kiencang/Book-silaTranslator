@@ -10,6 +10,11 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Bổ sung giao diện chỉnh sửa trực quan hơn cho phần Đại từ nhân xưng & Thuật ngữ / Từ khó.
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.15]- 2026-05-10
+### Fixed
+- Tối ưu mã nguồn, khắc phục các thông báo lỗi.
+- Tối ưu IndexedDB.
+
 ## [v1.0.14]- 2026-05-10
 ### Fixed
 - Chế độ toàn màn hình và download cho từng chương/block đã dịch.
