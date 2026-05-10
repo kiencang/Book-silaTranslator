@@ -14,8 +14,8 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Thu gọn lại không gian các phase trên header.
 - Thay đổi màu sắc của giao diện.
-- Bổ sung nút Dừng dịch ở phase dịch thuật.
-- Bổ sung xác nhận và tất cả các yêu cầu dịch nhiều chương hoặc toàn bộ sách (để tránh người dùng tốn token).
+- Bổ sung nút `Dừng dịch` ở phase Dịch thuật.
+- Bổ sung yêu cầu xác nhận ở tất cả các yêu cầu dịch nhiều chương hoặc toàn bộ sách (để tránh người dùng tốn token).
 
 ## [v1.0.16]- 2026-05-10
 ### Fixed
