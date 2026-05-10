@@ -17,10 +17,10 @@ import { CommonModule } from '@angular/common';
            [class.text-green-700]="toast.type === 'success'"
            [class.border-green-200]="toast.type === 'success'"
            [class.shadow-green-100]="toast.type === 'success'"
-           [class.bg-blue-50]="toast.type === 'info'"
-           [class.text-blue-700]="toast.type === 'info'"
-           [class.border-blue-200]="toast.type === 'info'"
-           [class.shadow-blue-100]="toast.type === 'info'">
+           [class.bg-indigo-50]="toast.type === 'info'"
+           [class.text-indigo-700]="toast.type === 'info'"
+           [class.border-indigo-200]="toast.type === 'info'"
+           [class.shadow-indigo-100]="toast.type === 'info'">
         
         <mat-icon class="mr-3">
           {{ toast.type === 'error' ? 'error_outline' : toast.type === 'success' ? 'check_circle' : 'info' }}

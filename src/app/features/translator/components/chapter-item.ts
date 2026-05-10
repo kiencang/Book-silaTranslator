@@ -12,21 +12,21 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
   standalone: true,
   imports: [MatIconModule, DatePipe],
   template: `
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 cursor-pointer" 
+    <div class="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-zinc-100 flex justify-between items-center bg-zinc-50 cursor-pointer" 
             (click)="toggleExpand()" 
             tabindex="0" 
             (keydown.enter)="toggleExpand()">
         <div class="flex items-center space-x-3 w-full">
-          <mat-icon class="text-gray-400 transition-transform" [class.rotate-90]="isExpanded()">chevron_right</mat-icon>
+          <mat-icon class="text-zinc-400 transition-transform" [class.rotate-90]="isExpanded()">chevron_right</mat-icon>
           <div class="flex-1">
-            <h4 class="font-semibold text-gray-900">{{ chapter().title || 'Phần ' + (index() + 1) }}</h4>
+            <h4 class="font-semibold text-zinc-900">{{ chapter().title || 'Phần ' + (index() + 1) }}</h4>
             <div class="flex items-center space-x-3 mt-1">
-              <span class="text-xs text-gray-500 font-mono">{{ chapter().wordCount }} từ</span>
-              <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+              <span class="text-xs text-zinc-500 font-mono">{{ chapter().wordCount }} từ</span>
+              <span class="w-1 h-1 rounded-full bg-zinc-300"></span>
               @switch (chapter().status) {
-                @case ('pending') { <span class="text-xs font-medium text-gray-500 bg-gray-200 px-2 rounded-full py-0.5">Chờ dịch</span> }
-                @case ('translating') { <span class="text-xs font-medium text-blue-700 bg-blue-100 px-2 rounded-full py-0.5 animate-pulse">Đang dịch...</span> }
+                @case ('pending') { <span class="text-xs font-medium text-zinc-500 bg-zinc-200 px-2 rounded-full py-0.5">Chờ dịch</span> }
+                @case ('translating') { <span class="text-xs font-medium text-indigo-700 bg-indigo-100 px-2 rounded-full py-0.5 animate-pulse">Đang dịch...</span> }
                 @case ('done') { <span class="text-xs font-medium text-green-700 bg-green-100 px-2 rounded-full py-0.5">Đã dịch</span> }
                 @case ('error') { <span class="text-xs font-medium text-red-700 bg-red-100 px-2 rounded-full py-0.5">Lỗi</span> }
               }
@@ -40,7 +40,7 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
               [disabled]="store.isTranslatingAny()"
               [class.opacity-50]="store.isTranslatingAny()"
               [class.cursor-not-allowed]="store.isTranslatingAny()"
-              class="px-3 py-1.5 bg-white text-blue-600 hover:bg-blue-50 border border-blue-200 hover:border-blue-300 rounded-lg transition-colors flex items-center space-x-1.5 shadow-sm disabled:hover:bg-white disabled:hover:border-blue-200"
+              class="px-3 py-1.5 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 hover:border-indigo-300 rounded-lg transition-colors flex items-center space-x-1.5 shadow-sm disabled:hover:bg-white disabled:hover:border-indigo-200"
               [title]="chapter().status === 'done' || chapter().status === 'error' ? 'Dịch lại riêng phần này' : 'Dịch riêng phần này'"
             >
               <mat-icon class="!w-4 !h-4 !text-base flex items-center justify-center">looks_one</mat-icon>
@@ -53,25 +53,25 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
       @if (isExpanded()) {
         <div class="flex flex-col">
           @if (chapter().versions && chapter().versions!.length > 0) {
-            <div class="px-6 py-3 bg-white border-b border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="px-6 py-3 bg-white border-b border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-2">
-                  <span class="text-xs font-medium text-gray-500 mr-2">Phiên bản:</span>
+                  <span class="text-xs font-medium text-zinc-500 mr-2">Phiên bản:</span>
                   @for (v of chapter().versions; track v.versionNumber) {
                     <button 
                       (click)="store.selectVersion(chapter().id, v.versionNumber)"
-                      [class.bg-blue-100]="chapter().activeVersionNumber === v.versionNumber"
-                      [class.text-blue-700]="chapter().activeVersionNumber === v.versionNumber"
+                      [class.bg-indigo-100]="chapter().activeVersionNumber === v.versionNumber"
+                      [class.text-indigo-700]="chapter().activeVersionNumber === v.versionNumber"
                       [class.font-semibold]="chapter().activeVersionNumber === v.versionNumber"
-                      [class.bg-gray-100]="chapter().activeVersionNumber !== v.versionNumber"
-                      [class.text-gray-600]="chapter().activeVersionNumber !== v.versionNumber"
-                      class="px-2 py-1.5 min-w-[36px] rounded-md text-xs font-medium transition-colors hover:bg-gray-200"
+                      [class.bg-zinc-100]="chapter().activeVersionNumber !== v.versionNumber"
+                      [class.text-zinc-600]="chapter().activeVersionNumber !== v.versionNumber"
+                      class="px-2 py-1.5 min-w-[36px] rounded-md text-xs font-medium transition-colors hover:bg-zinc-200"
                     >
                       v{{ v.versionNumber }}
                     </button>
                   }
                 </div>
                 @if (getActiveVersion(chapter()); as activeV) {
-                  <div class="text-[11px] text-gray-500 flex flex-wrap items-center gap-x-4 gap-y-2 bg-gray-50 px-3 py-1.5 rounded-md border border-gray-100">
+                  <div class="text-[11px] text-zinc-500 flex flex-wrap items-center gap-x-4 gap-y-2 bg-zinc-50 px-3 py-1.5 rounded-md border border-zinc-100">
                     <span class="flex items-center gap-1.5">
                       <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-indigo-500">smart_toy</mat-icon> {{ activeV.model }}
                     </span>
@@ -86,34 +86,34 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
             </div>
           }
 
-          <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+          <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-zinc-100">
             <div class="p-6">
-              <h5 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Bản gốc (Markdown)</h5>
-              <div class="prose prose-sm max-w-none text-gray-700" [innerHTML]="parseMarkdown(chapter().originalText)"></div>
+              <h5 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-4">Bản gốc (Markdown)</h5>
+              <div class="prose prose-sm max-w-none text-zinc-700" [innerHTML]="parseMarkdown(chapter().originalText)"></div>
             </div>
-            <div class="p-6 bg-gray-50 relative">
+            <div class="p-6 bg-zinc-50 relative">
               <div class="flex items-center justify-between mb-4">
-                <h5 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Bản dịch</h5>
+                <h5 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Bản dịch</h5>
                 @if (chapter().translatedText) {
                   <div class="flex items-center gap-2">
-                    <button (click)="downloadHtml()" class="tooltip-trigger flex items-center justify-center p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors" title="Tải xuống HTML">
+                    <button (click)="downloadHtml()" class="tooltip-trigger flex items-center justify-center p-1.5 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors" title="Tải xuống HTML">
                       <mat-icon class="!w-4 !h-4 !text-[16px]">download</mat-icon>
                     </button>
-                    <button (click)="openFullscreen()" class="tooltip-trigger flex items-center justify-center p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors" title="Đọc toàn màn hình">
+                    <button (click)="openFullscreen()" class="tooltip-trigger flex items-center justify-center p-1.5 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors" title="Đọc toàn màn hình">
                       <mat-icon class="!w-4 !h-4 !text-[16px]">fullscreen</mat-icon>
                     </button>
                   </div>
                 }
               </div>
               @if (chapter().translatedText) {
-                <div class="prose prose-sm max-w-none text-gray-900" [innerHTML]="parseMarkdown(chapter().translatedText)"></div>
+                <div class="prose prose-sm max-w-none text-zinc-900" [innerHTML]="parseMarkdown(chapter().translatedText)"></div>
               } @else if (chapter().status === 'translating') {
-                <div class="flex flex-col items-center justify-center py-12 text-blue-600">
+                <div class="flex flex-col items-center justify-center py-12 text-indigo-600">
                   <mat-icon class="animate-spin mb-2">sync</mat-icon>
                   <span class="text-sm">Gemini đang tiến hành dịch</span>
                 </div>
               } @else {
-                <div class="flex items-center justify-center py-12 text-gray-400">
+                <div class="flex items-center justify-center py-12 text-zinc-400">
                   <span class="text-sm">Chưa được dịch.</span>
                 </div>
               }
@@ -169,7 +169,7 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
             </div>
 
             <!-- Close button -->
-            <button (click)="closeFullscreen()" class="fixed top-6 left-6 w-10 h-10 flex items-center justify-center bg-white/80 dark:bg-gray-800/80 rounded-full shadow-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors backdrop-blur-sm z-50 cursor-pointer" title="Thu gọn toàn màn hình">
+            <button (click)="closeFullscreen()" class="fixed top-6 left-6 w-10 h-10 flex items-center justify-center bg-white/80 dark:bg-zinc-800/80 rounded-full shadow-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors backdrop-blur-sm z-50 cursor-pointer" title="Thu gọn toàn màn hình">
               <mat-icon>fullscreen_exit</mat-icon>
             </button>
 
@@ -242,8 +242,8 @@ export class ChapterItemComponent {
 
   getToolbarClass(theme: string) {
     switch (theme) {
-      case 'dark': return 'bg-gray-800 text-gray-300 border-gray-700';
-      case 'white': return 'bg-gray-100 text-gray-600 border-gray-200';
+      case 'dark': return 'bg-zinc-800 text-zinc-300 border-zinc-700';
+      case 'white': return 'bg-zinc-100 text-zinc-600 border-zinc-200';
       case 'sepia':
       default: return 'bg-[#F3EFE0] text-[#5C4D3C] border-[#E8DFC8]';
     }
@@ -251,8 +251,8 @@ export class ChapterItemComponent {
 
   getContentClass(theme: string) {
     switch (theme) {
-      case 'dark': return 'prose-invert prose-p:text-gray-300 prose-headings:text-gray-100 prose-strong:text-gray-200 prose-blockquote:text-gray-400';
-      case 'white': return 'prose-p:text-gray-800 prose-headings:text-gray-900';
+      case 'dark': return 'prose-invert prose-p:text-zinc-300 prose-headings:text-zinc-100 prose-strong:text-zinc-200 prose-blockquote:text-zinc-400';
+      case 'white': return 'prose-p:text-zinc-800 prose-headings:text-zinc-900';
       case 'sepia':
       default: return 'prose-p:text-[#333333] prose-headings:text-[#111111] prose-blockquote:text-[#555555]';
     }

@@ -15,26 +15,26 @@ import { FormsModule } from '@angular/forms';
     <div class="max-w-7xl mx-auto py-8 lg:px-8 px-4">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900">Thiết lập Đại từ Nhân xưng (Tùy chọn)</h2>
-          <p class="text-gray-500 mt-1">Sử dụng AI phân tích nội dung truyện và xây dựng bảng đại từ nhân xưng, đảm bảo nhất quán khi dịch. Phù hợp cho thể loại tiểu thuyết, truyện ngắn. Các loại sách khác có thể không cần thiết.</p>
+          <h2 class="text-2xl font-bold text-zinc-900">Thiết lập Đại từ Nhân xưng (Tùy chọn)</h2>
+          <p class="text-zinc-500 mt-1">Sử dụng AI phân tích nội dung truyện và xây dựng bảng đại từ nhân xưng, đảm bảo nhất quán khi dịch. Phù hợp cho thể loại tiểu thuyết, truyện ngắn. Các loại sách khác có thể không cần thiết.</p>
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+      <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8">
         <div class="space-y-6">
-          <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-4">
+          <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-200 space-y-4">
             <div class="flex flex-col sm:flex-row gap-4">
               <div class="flex-1">
-                <label for="pronounExtractRatio" class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2">Trích xuất nội dung từ bản text đã lọc</label>
-                <select id="pronounExtractRatio" [value]="pronounExtractRatio()" (change)="pronounExtractRatio.set(+$any($event.target).value)" [disabled]="isGeneratingPronouns()" class="w-full pl-3 pr-8 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
+                <label for="pronounExtractRatio" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2">Trích xuất nội dung từ bản text đã lọc</label>
+                <select id="pronounExtractRatio" [value]="pronounExtractRatio()" (change)="pronounExtractRatio.set(+$any($event.target).value)" [disabled]="isGeneratingPronouns()" class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
                   <option value="0.25">25% nội dung sách</option>
                   <option value="0.5">50% nội dung sách</option>
                   <option value="1">100% nội dung sách</option>
                 </select>
               </div>
               <div class="flex-1">
-                <label for="pronounModel" class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2">Mô hình nhận diện</label>
-                <select id="pronounModel" [value]="pronounModel()" (change)="pronounModel.set($any($event.target).value)" [disabled]="isGeneratingPronouns()" class="w-full pl-3 pr-8 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
+                <label for="pronounModel" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2">Mô hình nhận diện</label>
+                <select id="pronounModel" [value]="pronounModel()" (change)="pronounModel.set($any($event.target).value)" [disabled]="isGeneratingPronouns()" class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
                   <option value="gemini-flash-latest">Flash (Nhanh & Tiết kiệm)</option>
                   <option value="gemini-pro-latest">Pro (Tư duy sâu & Chuẩn xác)</option>
                 </select>
@@ -60,7 +60,7 @@ import { FormsModule } from '@angular/forms';
           </div>
 
           <div>
-            <label for="draftPronounTable" class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2 flex justify-between items-center">
+            <label for="draftPronounTable" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2 flex justify-between items-center">
               Nội dung bảng (Có thể chỉnh sửa)
             </label>
             <textarea 
@@ -69,7 +69,7 @@ import { FormsModule } from '@angular/forms';
               (input)="onTextareaInput($event)"
               [disabled]="isGeneratingPronouns()"
               rows="12" 
-              class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-lg bg-white disabled:bg-gray-100 p-3 font-mono text-sm leading-relaxed"
+              class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-zinc-300 rounded-lg bg-white disabled:bg-zinc-100 p-3 font-mono text-sm leading-relaxed"
               placeholder="Ví dụ:&#10;- Harry: cậu, cậu bé, hắn&#10;- Dumbledore: ông, cụ thày&#10;- Snape (với Harry): mi, trò..."></textarea>
           </div>
         </div>
@@ -79,7 +79,7 @@ import { FormsModule } from '@angular/forms';
         <button 
           (click)="skipAndContinue()"
           [disabled]="isGeneratingPronouns()"
-          class="flex items-center space-x-2 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-6 py-3 rounded-lg font-medium shadow-sm transition-colors disabled:opacity-50"
+          class="flex items-center space-x-2 text-zinc-700 bg-white border border-zinc-300 hover:bg-zinc-50 px-6 py-3 rounded-lg font-medium shadow-sm transition-colors disabled:opacity-50"
         >
           <span>Bỏ qua phần này</span>
           <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center">fast_forward</mat-icon>
@@ -88,7 +88,7 @@ import { FormsModule } from '@angular/forms';
         <button 
           (click)="saveAndContinue()"
           [disabled]="isGeneratingPronouns() || draftPronounTable().trim().length === 0"
-          class="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex items-center space-x-2 bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span>{{ isManuallyEdited() ? 'Lưu và Tiếp tục' : 'Tiếp tục' }}</span>
           <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center">arrow_forward</mat-icon>

@@ -18,34 +18,34 @@ import { PDFDocument } from 'pdf-lib';
       <div class="w-full max-w-2xl">
         
         @if (store.pdfTask(); as task) {
-          <div class="bg-white border text-center border-gray-200 rounded-2xl p-8 shadow-sm">
+          <div class="bg-white border text-center border-zinc-200 rounded-2xl p-8 shadow-sm">
             <h3 class="text-xl font-semibold mb-2">Đang chuyển đổi PDF</h3>
-            <p class="text-sm text-gray-500 mb-6">Tài liệu: {{task.fileName}}</p>
+            <p class="text-sm text-zinc-500 mb-6">Tài liệu: {{task.fileName}}</p>
             
             <div class="space-y-3 mb-6 text-left">
                @for (chunk of task.chunks; track chunk.index) {
                  <div class="flex items-center justify-between p-3 rounded-lg border" 
                       [class.bg-green-50]="chunk.status === 'completed'"
                       [class.border-green-200]="chunk.status === 'completed'"
-                      [class.bg-blue-50]="chunk.status === 'processing'"
-                      [class.border-blue-200]="chunk.status === 'processing'"
+                      [class.bg-indigo-50]="chunk.status === 'processing'"
+                      [class.border-indigo-200]="chunk.status === 'processing'"
                       [class.bg-red-50]="chunk.status === 'failed'"
                       [class.border-red-200]="chunk.status === 'failed'"
-                      [class.bg-gray-50]="chunk.status === 'pending'"
-                      [class.border-gray-200]="chunk.status === 'pending'">
+                      [class.bg-zinc-50]="chunk.status === 'pending'"
+                      [class.border-zinc-200]="chunk.status === 'pending'">
                    <span class="font-medium text-sm">Phần {{chunk.index + 1}}</span>
                    <div>
                      @if (chunk.status === 'completed') {
                        <span class="text-xs text-green-600 font-medium flex items-center gap-1"><mat-icon class="!w-[16px] !h-[16px] !text-[16px] flex items-center justify-center">check_circle</mat-icon> Hoàn tất</span>
                      }
                      @if (chunk.status === 'processing') {
-                       <span class="text-xs text-blue-600 font-medium flex items-center gap-1"><mat-icon class="!w-[16px] !h-[16px] !text-[16px] flex items-center justify-center animate-spin">autorenew</mat-icon> Đang xử lý</span>
+                       <span class="text-xs text-indigo-600 font-medium flex items-center gap-1"><mat-icon class="!w-[16px] !h-[16px] !text-[16px] flex items-center justify-center animate-spin">autorenew</mat-icon> Đang xử lý</span>
                      }
                      @if (chunk.status === 'failed') {
                        <span class="text-xs text-red-600 font-medium flex items-center gap-1"><mat-icon class="!w-[16px] !h-[16px] !text-[16px] flex items-center justify-center">error</mat-icon> Thất bại</span>
                      }
                      @if (chunk.status === 'pending') {
-                       <span class="text-xs text-gray-500 font-medium">Chờ xử lý</span>
+                       <span class="text-xs text-zinc-500 font-medium">Chờ xử lý</span>
                      }
                    </div>
                  </div>
@@ -55,14 +55,14 @@ import { PDFDocument } from 'pdf-lib';
                }
             </div>
             
-            <div class="flex justify-center gap-4 border-t border-gray-100 pt-6">
+            <div class="flex justify-center gap-4 border-t border-zinc-100 pt-6">
               @if (isAllCompleted(task.chunks)) {
-                <button (click)="finishPdfTask()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">
+                <button (click)="finishPdfTask()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">
                   <span>Chuyển sang bước kế tiếp</span>
                   <mat-icon class="!w-5 !h-5 !text-xl">arrow_forward</mat-icon>
                 </button>
               } @else {
-                <button (click)="resumePdfTask()" [disabled]="store.isConverting()" class="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-6 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50">
+                <button (click)="resumePdfTask()" [disabled]="store.isConverting()" class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50">
                   <mat-icon class="!w-[20px] !h-[20px] !text-[20px] flex items-center justify-center">{{ store.isConverting() ? 'autorenew' : 'play_arrow' }}</mat-icon>
                   <span>{{ store.isConverting() ? 'Đang xử lý...' : 'Tiếp tục chuyển đổi' }}</span>
                 </button>
@@ -71,7 +71,7 @@ import { PDFDocument } from 'pdf-lib';
           </div>
         } @else {
           <div 
-            class="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:bg-gray-50 hover:border-gray-400 transition-colors cursor-pointer relative"
+            class="border-2 border-dashed border-zinc-300 rounded-2xl p-12 text-center hover:bg-zinc-50 hover:border-zinc-400 transition-colors cursor-pointer relative"
           role="button"
           tabindex="0"
           (keydown.enter)="fileInput.click()"
@@ -79,8 +79,8 @@ import { PDFDocument } from 'pdf-lib';
           (dragover)="onDragOver($event)"
           (dragleave)="onDragLeave($event)"
           (drop)="onDrop($event)"
-          [class.bg-gray-50]="isDragging"
-          [class.border-gray-400]="isDragging"
+          [class.bg-zinc-50]="isDragging"
+          [class.border-zinc-400]="isDragging"
           [class.opacity-50]="store.isConverting()"
           [class.pointer-events-none]="store.isConverting()"
         >
@@ -94,23 +94,23 @@ import { PDFDocument } from 'pdf-lib';
           
           @if (store.isConverting()) {
             <div class="flex flex-col items-center justify-center space-y-4">
-              <mat-icon class="animate-spin text-gray-500 w-12 h-12 text-5xl">autorenew</mat-icon>
-              <h3 class="text-xl font-medium text-gray-900">Đang tạo tiến trình...</h3>
-              <p class="text-sm text-gray-500">Quá trình này có thể mất một lúc tùy thuộc vào dung lượng file.</p>
+              <mat-icon class="animate-spin text-zinc-500 w-12 h-12 text-5xl">autorenew</mat-icon>
+              <h3 class="text-xl font-medium text-zinc-900">Đang tạo tiến trình...</h3>
+              <p class="text-sm text-zinc-500">Quá trình này có thể mất một lúc tùy thuộc vào dung lượng file.</p>
             </div>
           } @else {
             <div class="flex flex-col items-center space-y-4">
-              <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
+              <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center">
                 <mat-icon class="!text-3xl !w-8 !h-8 !flex !items-center !justify-center">upload_file</mat-icon>
               </div>
               <div>
-                <h3 class="text-lg font-medium text-gray-900">Tải lên cuốn sách cần dịch</h3>
-                <p class="text-sm text-gray-500 mt-1">Click chọn hoặc kéo thả vào đây.</p>
+                <h3 class="text-lg font-medium text-zinc-900">Tải lên cuốn sách cần dịch</h3>
+                <p class="text-sm text-zinc-500 mt-1">Click chọn hoặc kéo thả vào đây.</p>
                 <div class="flex gap-2 justify-center mt-3">
-                  <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md font-mono">TXT</span>
-                  <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md font-mono">MD</span>
-                  <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md font-mono">HTML</span>
-                  <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md font-mono">PDF</span>
+                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">TXT</span>
+                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">MD</span>
+                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">HTML</span>
+                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">PDF</span>
                 </div>
               </div>
             </div>

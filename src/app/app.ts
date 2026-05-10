@@ -15,54 +15,54 @@ import {ToastComponent} from './shared/components/toast.component';
   selector: 'app-root',
   imports: [Uploader, Splitter, PronounSetup, GlossarySetup, Translator, Home, ProjectModal, ToastComponent, MatIconModule],
   template: `
-    <div class="h-screen bg-gray-50 flex flex-col font-sans overflow-hidden">
-      <header class="bg-white border-b border-gray-200 shrink-0 w-full py-4 px-6 flex items-center justify-between shadow-sm">
+    <div class="h-screen bg-zinc-50 flex flex-col font-sans overflow-hidden">
+      <header class="bg-white border-b border-zinc-200 shrink-0 w-full py-4 px-6 flex items-center justify-between shadow-sm">
         <button class="flex items-center space-x-2 bg-transparent border-none p-0 focus:outline-none" 
              [class.cursor-pointer]="!store.isBusy()" 
              [class.cursor-default]="store.isBusy()"
              title="Quay lại danh sách dự án" 
              (click)="!store.isBusy() && store.closeProject()">
-          <div class="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center text-white font-bold text-xl">B</div>
-          <div class="text-xl font-semibold text-gray-900 tracking-tight flex items-center">
+          <div class="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center text-white font-bold text-xl">B</div>
+          <div class="text-xl font-semibold text-zinc-900 tracking-tight flex items-center">
             <span class="hidden sm:inline">Book silaTranslator</span>
             @if (store.currentProjectName()) {
-              <span class="text-gray-400 font-normal mx-2">/</span>
-              <span class="text-blue-700 truncate max-w-[150px] sm:max-w-xs" [title]="store.currentProjectName()">{{store.currentProjectName()}}</span>
+              <span class="text-zinc-400 font-normal mx-2">/</span>
+              <span class="text-indigo-700 truncate max-w-[150px] sm:max-w-xs" [title]="store.currentProjectName()">{{store.currentProjectName()}}</span>
             }
           </div>
         </button>
         
         <div class="flex items-center justify-end space-x-6">
           @if (store.phase() > 0) {
-            <div class="hidden lg:flex items-center text-sm font-medium text-gray-400 mr-2 border-r border-gray-200 pr-6">
-              <div class="flex items-center space-x-6">
-                <button (click)="goToPhase(1)" [disabled]="store.phase() > 1 || store.isBusy()" class="flex items-center hover:text-blue-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-400" [class.text-blue-600]="store.phase() >= 1">
-                  <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2" 
-                        [class.border-blue-600]="store.phase() >= 1" [class.bg-blue-600]="store.phase() > 1" [class.text-white]="store.phase() > 1">1</span>
+            <div class="hidden lg:flex items-center text-sm font-medium text-zinc-400 mr-2 border-r border-zinc-200 pr-6">
+              <div class="flex items-center space-x-3">
+                <button (click)="goToPhase(1)" [disabled]="store.phase() > 1 || store.isBusy()" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() >= 1">
+                  <span class="w-5 h-5 text-xs rounded-full border-2 flex items-center justify-center mr-1.5" 
+                        [class.border-indigo-600]="store.phase() >= 1" [class.bg-indigo-600]="store.phase() > 1" [class.text-white]="store.phase() > 1">1</span>
                   Tải lên
                 </button>
-                <div class="w-8 h-px bg-gray-200" [class.bg-blue-600]="store.phase() > 1"></div>
-                <button (click)="goToPhase(2)" [disabled]="!store.rawMarkdown() || store.isBusy()" class="flex items-center hover:text-blue-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-400" [class.text-blue-600]="store.phase() >= 2">
-                  <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2"
-                        [class.border-blue-600]="store.phase() >= 2" [class.bg-blue-600]="store.phase() > 2" [class.text-white]="store.phase() > 2">2</span>
+                <div class="w-3 h-0.5 rounded-full bg-zinc-200" [class.bg-indigo-600]="store.phase() > 1"></div>
+                <button (click)="goToPhase(2)" [disabled]="!store.rawMarkdown() || store.isBusy()" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() >= 2">
+                  <span class="w-5 h-5 text-xs rounded-full border-2 flex items-center justify-center mr-1.5"
+                        [class.border-indigo-600]="store.phase() >= 2" [class.bg-indigo-600]="store.phase() > 2" [class.text-white]="store.phase() > 2">2</span>
                   Chia chương
                 </button>
-                <div class="w-8 h-px bg-gray-200" [class.bg-blue-600]="store.phase() > 2"></div>
-                <button (click)="goToPhase(3)" [disabled]="store.chapters().length === 0 || store.isBusy()" class="flex items-center hover:text-blue-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-400" [class.text-blue-600]="store.phase() >= 3">
-                  <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2"
-                        [class.border-blue-600]="store.phase() >= 3" [class.bg-blue-600]="store.phase() > 3" [class.text-white]="store.phase() > 3">3</span>
+                <div class="w-3 h-0.5 rounded-full bg-zinc-200" [class.bg-indigo-600]="store.phase() > 2"></div>
+                <button (click)="goToPhase(3)" [disabled]="store.chapters().length === 0 || store.isBusy()" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() >= 3">
+                  <span class="w-5 h-5 text-xs rounded-full border-2 flex items-center justify-center mr-1.5"
+                        [class.border-indigo-600]="store.phase() >= 3" [class.bg-indigo-600]="store.phase() > 3" [class.text-white]="store.phase() > 3">3</span>
                   Đại từ
                 </button>
-                <div class="w-8 h-px bg-gray-200" [class.bg-blue-600]="store.phase() > 3"></div>
-                <button (click)="goToPhase(4)" [disabled]="store.chapters().length === 0 || store.isBusy()" class="flex items-center hover:text-blue-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-400" [class.text-blue-600]="store.phase() >= 4">
-                  <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2"
-                        [class.border-blue-600]="store.phase() >= 4" [class.bg-blue-600]="store.phase() > 4" [class.text-white]="store.phase() > 4">4</span>
+                <div class="w-3 h-0.5 rounded-full bg-zinc-200" [class.bg-indigo-600]="store.phase() > 3"></div>
+                <button (click)="goToPhase(4)" [disabled]="store.chapters().length === 0 || store.isBusy()" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() >= 4">
+                  <span class="w-5 h-5 text-xs rounded-full border-2 flex items-center justify-center mr-1.5"
+                        [class.border-indigo-600]="store.phase() >= 4" [class.bg-indigo-600]="store.phase() > 4" [class.text-white]="store.phase() > 4">4</span>
                   Từ khó
                 </button>
-                <div class="w-8 h-px bg-gray-200" [class.bg-blue-600]="store.phase() > 4"></div>
-                <button (click)="goToPhase(5)" [disabled]="store.chapters().length === 0 || store.isBusy()" class="flex items-center hover:text-blue-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-400" [class.text-blue-600]="store.phase() === 5">
-                  <span class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2"
-                        [class.border-blue-600]="store.phase() === 5">5</span>
+                <div class="w-3 h-0.5 rounded-full bg-zinc-200" [class.bg-indigo-600]="store.phase() > 4"></div>
+                <button (click)="goToPhase(5)" [disabled]="store.chapters().length === 0 || store.isBusy()" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() === 5">
+                  <span class="w-5 h-5 text-xs rounded-full border-2 flex items-center justify-center mr-1.5"
+                        [class.border-indigo-600]="store.phase() === 5">5</span>
                   Dịch thuật
                 </button>
               </div>
@@ -73,7 +73,7 @@ import {ToastComponent} from './shared/components/toast.component';
                   [class.opacity-50]="store.isBusy()" 
                   [class.cursor-not-allowed]="store.isBusy()"
                   [disabled]="store.isBusy()"
-                  class="flex items-center text-gray-600 hover:text-blue-600 font-medium text-sm transition-colors bg-gray-100 hover:bg-blue-50 px-3 py-2 rounded-lg whitespace-nowrap">
+                  class="flex items-center text-zinc-600 hover:text-indigo-600 font-medium text-sm transition-colors bg-zinc-100 hover:bg-indigo-50 px-3 py-2 rounded-lg whitespace-nowrap">
             <span class="material-icons sm:mr-1.5 text-[18px]">folder_copy</span>
             <span class="hidden sm:inline">Quản lý dự án</span>
           </button>
@@ -96,19 +96,19 @@ import {ToastComponent} from './shared/components/toast.component';
         </div>
       </main>
 
-      <footer class="shrink-0 bg-white border-t border-gray-200 py-2.5 px-6 text-xs text-gray-500 flex justify-center items-center">
+      <footer class="shrink-0 bg-white border-t border-zinc-200 py-2.5 px-6 text-xs text-zinc-500 flex justify-center items-center">
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-gray-600">v1.0.16</span>
-          <span class="text-gray-300">•</span>
-          <a href="https://github.com/kiencang/Book-silaTranslator" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 transition-colors">GitHub</a>
-          <span class="text-gray-300">•</span>
+          <span class="font-medium text-zinc-600">v1.0.17</span>
+          <span class="text-zinc-300">•</span>
+          <a href="https://github.com/kiencang/Book-silaTranslator" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition-colors">GitHub</a>
+          <span class="text-zinc-300">•</span>
           <span>Chỉ dùng cho mục đích cá nhân</span>
-          <span class="text-gray-300">•</span>
+          <span class="text-zinc-300">•</span>
           <span class="font-medium">Nguyễn Đức Anh</span>
-          <span class="text-gray-300">•</span>
+          <span class="text-zinc-300">•</span>
           <span>contact&#64;wpsila.com</span>
-          <span class="text-gray-300">•</span>
-          <a href="#" class="hover:text-blue-600 transition-colors">Hướng dẫn sử dụng</a>
+          <span class="text-zinc-300">•</span>
+          <a href="#" class="hover:text-indigo-600 transition-colors">Hướng dẫn sử dụng</a>
         </div>
       </footer>
 

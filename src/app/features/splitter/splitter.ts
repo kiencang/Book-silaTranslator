@@ -11,15 +11,15 @@ import { ToastService } from '../../core/toast.service';
     <div class="max-w-4xl mx-auto py-8">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900">Chia theo chương dịch (hoặc khối dịch)</h2>
-          <p class="text-gray-500 mt-1">Đang phân tích "{{ store.fileName() }}" để tìm ra cách phân chia tốt nhất.</p>
+          <h2 class="text-2xl font-bold text-zinc-900">Chia theo chương dịch (hoặc khối dịch)</h2>
+          <p class="text-zinc-500 mt-1">Đang phân tích "{{ store.fileName() }}" để tìm ra cách phân chia tốt nhất.</p>
         </div>
         <button 
           (click)="downloadMarkdown()"
-          class="flex items-center space-x-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
+          class="flex items-center space-x-2 bg-white border border-zinc-300 hover:bg-zinc-50 text-zinc-700 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
           title="Tải về file markdown đã được trích xuất"
         >
-          <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center text-gray-500">download</mat-icon>
+          <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center text-zinc-500">download</mat-icon>
           <span class="hidden sm:inline">Tải file Markdown</span>
         </button>
       </div>
@@ -42,16 +42,16 @@ import { ToastService } from '../../core/toast.service';
         </div>
       }
 
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8 transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Điều chỉnh cách phân chia</h3>
+      <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8 transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
+        <h3 class="text-lg font-semibold text-zinc-900 mb-4">Điều chỉnh cách phân chia</h3>
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
           <div class="md:col-span-5">
-            <label for="keywordInput" class="block text-sm font-medium text-gray-700 mb-1">Từ khóa chia</label>
-            <div class="w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-shadow bg-white flex flex-wrap gap-2 items-center min-h-[50px]">
+            <label for="keywordInput" class="block text-sm font-medium text-zinc-700 mb-1">Từ khóa chia</label>
+            <div class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-shadow bg-white flex flex-wrap gap-2 items-center min-h-[50px]">
               @for (kw of draftKeywords(); track kw) {
-                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
                   {{ kw }}
-                  <button type="button" class="ml-1.5 flex-shrink-0 inline-flex rounded-full text-blue-500 hover:text-blue-800 hover:bg-blue-100 transition-colors" (click)="removeKeyword(kw)">
+                  <button type="button" class="ml-1.5 flex-shrink-0 inline-flex rounded-full text-indigo-500 hover:text-indigo-800 hover:bg-indigo-100 transition-colors" (click)="removeKeyword(kw)">
                     <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">close</mat-icon>
                   </button>
                 </span>
@@ -61,25 +61,25 @@ import { ToastService } from '../../core/toast.service';
                     #keywordInput
                     (keydown)="handleKeywordKeydown($event, keywordInput)"
                     (blur)="addKeyword(keywordInput)"
-                    class="flex-1 min-w-[120px] border-0 bg-transparent p-1 text-sm text-gray-900 focus:ring-0 placeholder:text-gray-400 outline-none" 
+                    class="flex-1 min-w-[120px] border-0 bg-transparent p-1 text-sm text-zinc-900 focus:ring-0 placeholder:text-zinc-400 outline-none" 
                     placeholder="Thêm từ khóa... (Enter để lưu)">
             </div>
-            <p class="text-xs text-gray-500 mt-2">Bấm Enter hoặc phẩy để thêm. Hỗ trợ ký tự đặc biệt.</p>
+            <p class="text-xs text-zinc-500 mt-2">Bấm Enter hoặc phẩy để thêm. Hỗ trợ ký tự đặc biệt.</p>
           </div>
           <div class="md:col-span-5">
-            <label for="draftMinWords" class="block text-sm font-medium text-gray-700 mb-1">Số từ tối thiểu mỗi phần</label>
+            <label for="draftMinWords" class="block text-sm font-medium text-zinc-700 mb-1">Số từ tối thiểu mỗi phần</label>
             <input type="number" 
                   id="draftMinWords"
                   [value]="draftMinWords()" 
                   (input)="draftMinWords.set(+$any($event.target).value)" 
                   min="1000" max="20000" step="500" 
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-lg text-center transition-shadow">
-            <p class="text-xs text-gray-500 mt-2">Các phần nhỏ hơn sẽ tự động được gộp.</p>
+                  class="w-full px-4 py-3 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-lg text-center transition-shadow">
+            <p class="text-xs text-zinc-500 mt-2">Các phần nhỏ hơn sẽ tự động được gộp.</p>
           </div>
           <div class="md:col-span-2 pt-6">
             <button 
               (click)="applySettings()"
-              class="w-full h-[50px] flex items-center justify-center space-x-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-medium transition-colors border border-gray-300">
+              class="w-full h-[50px] flex items-center justify-center space-x-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 rounded-lg font-medium transition-colors border border-zinc-300">
               <mat-icon class="!w-5 !h-5 !text-base">refresh</mat-icon>
               <span>Áp dụng</span>
             </button>
@@ -93,24 +93,24 @@ import { ToastService } from '../../core/toast.service';
             role="button"
             tabindex="0"
             class="p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col"
-            [class.border-blue-500]="selectedMethod() === method.keyword"
-            [class.bg-blue-50]="selectedMethod() === method.keyword"
-            [class.border-gray-200]="selectedMethod() !== method.keyword"
-            [class.hover:border-gray-300]="selectedMethod() !== method.keyword"
+            [class.border-indigo-500]="selectedMethod() === method.keyword"
+            [class.bg-indigo-50]="selectedMethod() === method.keyword"
+            [class.border-zinc-200]="selectedMethod() !== method.keyword"
+            [class.hover:border-zinc-300]="selectedMethod() !== method.keyword"
             (keydown.enter)="selectMethod(method.keyword)"
             (click)="selectMethod(method.keyword)"
           >
             <div class="flex justify-between items-start mb-3">
-              <h3 class="font-semibold text-gray-900">Theo {{ method.keyword }} / Khối</h3>
+              <h3 class="font-semibold text-zinc-900">Theo {{ method.keyword }} / Khối</h3>
               @if (selectedMethod() === method.keyword) {
-                <mat-icon class="text-blue-500">check_circle</mat-icon>
+                <mat-icon class="text-indigo-500">check_circle</mat-icon>
               }
             </div>
             
             <div class="mt-auto flex items-end justify-between">
               <div>
-                <div class="text-3xl font-light text-gray-900">{{ method.count }}</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-1">Khối được chia</div>
+                <div class="text-3xl font-light text-zinc-900">{{ method.count }}</div>
+                <div class="text-xs text-zinc-500 uppercase tracking-wider font-semibold mt-1">Khối được chia</div>
               </div>
             </div>
           </div>
@@ -118,22 +118,22 @@ import { ToastService } from '../../core/toast.service';
       </div>
 
       @if (selectedMethodData()) {
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-          <div class="border-b border-gray-200 bg-gray-50 px-6 py-4 flex justify-between items-center">
-            <h3 class="font-semibold text-gray-900">Xem trước: Phân chia theo {{ selectedMethodData()?.keyword }} / Khối</h3>
-            <div class="text-sm text-gray-500">{{ selectedMethodData()?.count }} khối</div>
+        <div class="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden mb-8">
+          <div class="border-b border-zinc-200 bg-zinc-50 px-6 py-4 flex justify-between items-center">
+            <h3 class="font-semibold text-zinc-900">Xem trước: Phân chia theo {{ selectedMethodData()?.keyword }} / Khối</h3>
+            <div class="text-sm text-zinc-500">{{ selectedMethodData()?.count }} khối</div>
           </div>
           <div class="max-h-96 overflow-y-auto p-0">
             @for (chap of selectedMethodData()?.previewChapters; track $index) {
-              <div role="button" tabindex="0" (keydown.enter)="previewBlock.set(chap)" class="px-6 py-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors flex items-center justify-between group cursor-pointer" (click)="previewBlock.set(chap)">
+              <div role="button" tabindex="0" (keydown.enter)="previewBlock.set(chap)" class="px-6 py-4 border-b border-zinc-100 last:border-0 hover:bg-zinc-50 transition-colors flex items-center justify-between group cursor-pointer" (click)="previewBlock.set(chap)">
                 <div class="flex-1 min-w-0 pr-4">
                   <div class="flex items-center mb-1">
-                    <h4 class="font-medium text-gray-900 truncate pr-4">{{ chap.title }}</h4>
-                    <span class="text-xs font-mono text-gray-500 whitespace-nowrap ml-auto">{{ chap.wordCount }} từ</span>
+                    <h4 class="font-medium text-zinc-900 truncate pr-4">{{ chap.title }}</h4>
+                    <span class="text-xs font-mono text-zinc-500 whitespace-nowrap ml-auto">{{ chap.wordCount }} từ</span>
                   </div>
-                  <p class="text-sm text-gray-500 line-clamp-2">{{ chap.previewText }}</p>
+                  <p class="text-sm text-zinc-500 line-clamp-2">{{ chap.previewText }}</p>
                 </div>
-                <div class="text-gray-300 group-hover:text-blue-500 transition-colors ml-4 flex-shrink-0">
+                <div class="text-zinc-300 group-hover:text-indigo-500 transition-colors ml-4 flex-shrink-0">
                   <mat-icon class="!w-6 !h-6 !text-2xl">visibility</mat-icon>
                 </div>
               </div>
@@ -145,28 +145,28 @@ import { ToastService } from '../../core/toast.service';
           <button 
             (click)="applySplit()"
             [disabled]="selectedMethodData()?.count === 0"
-            class="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex items-center space-x-2 bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>Bước kế tiếp</span>
+            <span>Tiếp tục</span>
             <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center">arrow_forward</mat-icon>
           </button>
         </div>
       }
 
       @if (previewBlock()) {
-        <div role="button" tabindex="0" (keydown.enter)="previewBlock.set(null)" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 sm:p-6" (click)="previewBlock.set(null)">
+        <div role="button" tabindex="0" (keydown.enter)="previewBlock.set(null)" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm p-4 sm:p-6" (click)="previewBlock.set(null)">
           <div role="presentation" class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all cursor-default" (click)="$event.stopPropagation()">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50/80">
+            <div class="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50/80">
               <div>
-                <h3 class="text-lg font-semibold text-gray-900">{{ previewBlock()?.title }}</h3>
-                <p class="text-sm text-gray-500">{{ previewBlock()?.wordCount }} từ</p>
+                <h3 class="text-lg font-semibold text-zinc-900">{{ previewBlock()?.title }}</h3>
+                <p class="text-sm text-zinc-500">{{ previewBlock()?.wordCount }} từ</p>
               </div>
-              <button class="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200/50 flex items-center justify-center" (click)="previewBlock.set(null)">
+              <button class="text-zinc-400 hover:text-zinc-600 transition-colors p-2 rounded-full hover:bg-zinc-200/50 flex items-center justify-center" (click)="previewBlock.set(null)">
                 <mat-icon>close</mat-icon>
               </button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 bg-white">
-              <div class="whitespace-pre-wrap font-mono text-sm text-gray-700 leading-relaxed">
+              <div class="whitespace-pre-wrap font-mono text-sm text-zinc-700 leading-relaxed">
                 {{ previewBlock()?.originalText }}
               </div>
             </div>

@@ -22,15 +22,15 @@ import { BookStore } from '../../../core/book.store';
       @if (isExpanded()) {
         <div class="mt-4 pt-4 border-t border-indigo-100/50 animate-in fade-in slide-in-from-top-2 duration-300">
           <div class="grid grid-cols-3 gap-4 text-sm mb-3">
-              <div class="font-medium text-gray-400 pb-2 border-b border-indigo-100"></div>
-              <div class="font-semibold text-gray-800 pb-2 border-b border-indigo-100 flex items-center gap-2">Tiếng Anh</div>
-              <div class="font-semibold text-gray-800 pb-2 border-b border-indigo-100 flex items-center gap-2">Tiếng Việt</div>
+              <div class="font-medium text-zinc-400 pb-2 border-b border-indigo-100"></div>
+              <div class="font-semibold text-zinc-800 pb-2 border-b border-indigo-100 flex items-center gap-2">Tiếng Anh</div>
+              <div class="font-semibold text-zinc-800 pb-2 border-b border-indigo-100 flex items-center gap-2">Tiếng Việt</div>
               
-              <div class="font-medium text-gray-600 py-1">Số từ ước tính</div>
-              <div class="font-bold text-gray-900 py-1">{{ formatNumber(store.estimatedEnglishWords()) }}</div>
-              <div class="font-bold text-gray-900 py-1">{{ formatNumber(store.estimatedVietnameseWords()) }}</div>
+              <div class="font-medium text-zinc-600 py-1">Số từ ước tính</div>
+              <div class="font-bold text-zinc-900 py-1">{{ formatNumber(store.estimatedEnglishWords()) }}</div>
+              <div class="font-bold text-zinc-900 py-1">{{ formatNumber(store.estimatedVietnameseWords()) }}</div>
               
-              <div class="font-medium text-gray-600 py-1">Token ước tính</div>
+              <div class="font-medium text-zinc-600 py-1">Token ước tính</div>
               <div class="font-bold text-indigo-700 py-1">{{ formatNumber(store.estimatedEnglishTokens()) }}</div>
               <div class="font-bold text-indigo-700 py-1">{{ formatNumber(store.estimatedVietnameseTokens()) }}</div>
           </div>

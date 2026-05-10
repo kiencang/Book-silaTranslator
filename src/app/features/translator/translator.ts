@@ -16,8 +16,8 @@ import { ChapterItemComponent } from './components/chapter-item';
     <div class="max-w-6xl mx-auto py-8 px-4">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h2 class="text-3xl font-bold text-gray-900">Dịch thuật</h2>
-          <p class="text-gray-500 mt-1">Đã sẵn sàng dịch {{ store.chapters().length }} phần của "{{ store.fileName() }}".</p>
+          <h2 class="text-3xl font-bold text-zinc-900">Dịch thuật</h2>
+          <p class="text-zinc-500 mt-1">Đã sẵn sàng dịch {{ store.chapters().length }} phần của "{{ store.fileName() }}".</p>
         </div>
       </div>
 
@@ -31,58 +31,70 @@ import { ChapterItemComponent } from './components/chapter-item';
       <div class="mb-4 flex justify-between items-start w-full">
         <div class="flex gap-4 items-center">
           @if (translateOperation() !== 'none') {
-            <button 
-              disabled
-              class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm flex items-center space-x-2 opacity-75 cursor-not-allowed"
-            >
-              <mat-icon class="animate-spin">sync</mat-icon>
-              @if (translateOperation() === 'retranslate') {
-                <span>Đang dịch lại toàn bộ sách...</span>
-              } @else if (translateOperation() === 'all') {
-                <span>Đang khởi tạo bản dịch...</span>
-              } @else {
-                <span>Đang dịch các phần chưa dịch...</span>
-              }
-            </button>
-          } @else if (translationState() === 'all') {
-            @if (showConfirmRetranslate()) {
-              <div class="flex items-center space-x-3 bg-red-50 text-red-700 px-4 py-2 rounded-lg border border-red-100 shadow-sm transition-all duration-200">
-                <span class="text-sm font-medium">Bạn có chắc muốn dịch lại từ đầu? Lựa chọn này sẽ tốn thời gian & Token.</span>
-                <div class="flex items-center space-x-2 border-l border-red-200 pl-3">
-                  <button (click)="executeTranslateAll(true)" class="text-sm font-bold hover:text-red-900 transition-colors">Đồng ý</button>
-                  <button (click)="showConfirmRetranslate.set(false)" class="text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">Hủy</button>
-                </div>
+            <div class="flex items-center space-x-2">
+              <div class="bg-indigo-50 text-indigo-700 border border-indigo-200 px-4 py-2 rounded-lg font-medium shadow-sm flex items-center space-x-2">
+                <mat-icon class="animate-spin">sync</mat-icon>
+                @if (translateOperation() === 'retranslate') {
+                  <span>Đang dịch lại toàn bộ sách...</span>
+                } @else if (translateOperation() === 'all') {
+                  <span>Đang khởi tạo bản dịch...</span>
+                } @else {
+                  <span>Đang dịch các phần chưa dịch...</span>
+                }
               </div>
-            } @else {
-               <button 
-                (click)="showConfirmRetranslate.set(true)"
-                [disabled]="store.isTranslatingAny()"
-                [class.opacity-50]="store.isTranslatingAny()"
-                [class.cursor-not-allowed]="store.isTranslatingAny()"
-                class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center space-x-2"
+              <button 
+                (click)="stopRequested.set(true)"
+                [disabled]="stopRequested()"
+                class="bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center"
               >
-                <mat-icon>refresh</mat-icon>
-                <span>Dịch lại toàn bộ cuốn sách</span>
+                <span>{{ stopRequested() ? 'Đang dừng...' : 'Dừng dịch' }}</span>
               </button>
-            }
-          } @else if (translationState() === 'none') {
+            </div>
+          } @else if (confirmAction() !== 'none') {
+            <div class="flex items-center space-x-3 bg-red-50 text-red-700 px-4 py-2 rounded-lg border border-red-100 shadow-sm transition-all duration-200">
+              <span class="text-sm font-medium">
+                @if (confirmAction() === 'retranslate') {
+                  Bạn có chắc muốn dịch lại từ đầu? Lựa chọn này sẽ tốn thời gian & Token.
+                } @else if (confirmAction() === 'all') {
+                  Bạn có chắc muốn dịch toàn bộ cuốn sách? Lựa chọn này sẽ tốn thời gian & Token.
+                } @else {
+                  Bạn có chắc muốn dịch các phần chưa dịch? Lựa chọn này sẽ tốn thời gian & Token.
+                }
+              </span>
+              <div class="flex items-center space-x-2 border-l border-red-200 pl-3">
+                <button (click)="executeConfirmedAction()" class="text-sm font-bold hover:text-red-900 transition-colors">Đồng ý</button>
+                <button (click)="confirmAction.set('none')" class="text-sm font-medium text-zinc-500 hover:text-zinc-700 transition-colors">Hủy</button>
+              </div>
+            </div>
+          } @else if (translationState() === 'all') {
             <button 
-              (click)="executeTranslateAll(false)"
+              (click)="confirmAction.set('retranslate')"
               [disabled]="store.isTranslatingAny()"
               [class.opacity-50]="store.isTranslatingAny()"
               [class.cursor-not-allowed]="store.isTranslatingAny()"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center space-x-2 disabled:hover:bg-blue-600"
+              class="bg-white border border-zinc-300 hover:bg-zinc-50 text-zinc-700 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center space-x-2"
+            >
+              <mat-icon>refresh</mat-icon>
+              <span>Dịch lại toàn bộ cuốn sách</span>
+            </button>
+          } @else if (translationState() === 'none') {
+            <button 
+              (click)="confirmAction.set('all')"
+              [disabled]="store.isTranslatingAny()"
+              [class.opacity-50]="store.isTranslatingAny()"
+              [class.cursor-not-allowed]="store.isTranslatingAny()"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center space-x-2 disabled:hover:bg-indigo-600"
             >
               <mat-icon>translate</mat-icon>
               <span>Dịch toàn bộ cuốn sách</span>
             </button>
           } @else {
             <button 
-              (click)="executeTranslateAll(false)"
+              (click)="confirmAction.set('untranslated')"
               [disabled]="store.isTranslatingAny()"
               [class.opacity-50]="store.isTranslatingAny()"
               [class.cursor-not-allowed]="store.isTranslatingAny()"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center space-x-2 disabled:hover:bg-blue-600"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center space-x-2 disabled:hover:bg-indigo-600"
             >
               <mat-icon>translate</mat-icon>
               <span>Dịch tất cả các phần chưa dịch</span>
@@ -125,7 +137,8 @@ export class Translator {
   
   expanded: Record<string, boolean> = {};
 
-  showConfirmRetranslate = signal(false);
+  confirmAction = signal<'none' | 'retranslate' | 'all' | 'untranslated'>('none');
+  stopRequested = signal(false);
   translateOperation = signal<'none' | 'all' | 'retranslate' | 'untranslated'>('none');
 
   translationState = computed(() => {
@@ -180,8 +193,15 @@ export class Translator {
     }
   }
 
+  executeConfirmedAction() {
+    const action = this.confirmAction();
+    if (action === 'none') return;
+    this.executeTranslateAll(action === 'retranslate');
+  }
+
   async executeTranslateAll(forceAll: boolean) {
-    this.showConfirmRetranslate.set(false);
+    this.confirmAction.set('none');
+    this.stopRequested.set(false);
     
     let toTranslate = this.store.chapters();
     if (forceAll) {
@@ -199,12 +219,19 @@ export class Translator {
 
     try {
       for (const chapter of toTranslate) {
+        if (this.stopRequested()) {
+          this.toast.info('Đã dừng dịch thuật hàng loạt theo yêu cầu.');
+          break;
+        }
         // Do it sequentially to avoid rate limiting
         await this.translateSingle(chapter);
       }
-      this.toast.success(this.toast.Messages.TRANSLATION_COMPLETED);
+      if (!this.stopRequested()) {
+        this.toast.success(this.toast.Messages.TRANSLATION_COMPLETED);
+      }
     } finally {
       this.translateOperation.set('none');
+      this.stopRequested.set(false);
     }
   }
 }

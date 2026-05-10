@@ -7,10 +7,10 @@ import { BookStore } from '../../../core/book.store';
   standalone: true,
   imports: [MatIconModule],
   template: `
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8 flex flex-col md:flex-row gap-8 relative">
+    <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8 flex flex-col md:flex-row gap-8 relative">
       <!-- Model Selection -->
       <div class="flex-1">
-        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Chọn mô hình</h3>
+        <h3 class="text-sm font-semibold text-zinc-900 uppercase tracking-wider mb-4">Chọn mô hình</h3>
         <div class="flex flex-col space-y-2">
           <label class="flex items-center space-x-3 transition-opacity"
                   [class.cursor-pointer]="!store.isTranslatingAny()"
@@ -20,8 +20,8 @@ import { BookStore } from '../../../core/book.store';
               [disabled]="store.isTranslatingAny()"
               [checked]="store.config().model === 'gemini-flash-latest'"
               (change)="store.updateConfig({model: 'gemini-flash-latest'})"
-              class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:cursor-not-allowed">
-            <span class="text-sm text-gray-700 font-medium tracking-tight">[Nhanh & Tiết kiệm] - flash</span>
+              class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500 disabled:cursor-not-allowed">
+            <span class="text-sm text-zinc-700 font-medium tracking-tight">[Nhanh & Tiết kiệm] - flash</span>
           </label>
           <label class="flex items-center space-x-3 transition-opacity"
                   [class.cursor-pointer]="!store.isTranslatingAny()"
@@ -31,17 +31,17 @@ import { BookStore } from '../../../core/book.store';
               [disabled]="store.isTranslatingAny()"
               [checked]="store.config().model === 'gemini-pro-latest'"
               (change)="store.updateConfig({model: 'gemini-pro-latest'})"
-              class="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500 disabled:cursor-not-allowed">
-            <span class="text-sm text-gray-700 font-medium tracking-tight">[Tư duy sâu] - pro</span>
+              class="w-4 h-4 text-red-600 border-zinc-300 focus:ring-red-500 disabled:cursor-not-allowed">
+            <span class="text-sm text-zinc-700 font-medium tracking-tight">[Tư duy sâu] - pro</span>
           </label>
         </div>
       </div>
 
-      <div class="w-px bg-gray-200 hidden md:block"></div>
+      <div class="w-px bg-zinc-200 hidden md:block"></div>
 
       <!-- Temperature Selection -->
       <div class="flex-1">
-        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Độ sáng tạo</h3>
+        <h3 class="text-sm font-semibold text-zinc-900 uppercase tracking-wider mb-4">Độ sáng tạo</h3>
         <div class="flex space-x-6">
           <button class="flex flex-col items-center group transition-opacity outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                   [class.cursor-pointer]="!store.isTranslatingAny()"
@@ -52,21 +52,21 @@ import { BookStore } from '../../../core/book.store';
                   [class.ring-black]="store.config().temperature === 0.3">
               @if (store.config().temperature === 0.3) { <mat-icon class="!text-white !w-5 !h-5 !text-xl !flex !items-center !justify-center font-bold">check</mat-icon> }
             </div>
-            <span class="mt-2 text-xs font-semibold text-gray-700">0.3</span>
-            <span class="text-[10px] text-gray-400">Chặt chẽ</span>
+            <span class="mt-2 text-xs font-semibold text-zinc-700">0.3</span>
+            <span class="text-[10px] text-zinc-400">Chặt chẽ</span>
           </button>
 
           <button class="flex flex-col items-center group transition-opacity outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                   [class.cursor-pointer]="!store.isTranslatingAny()"
                   [disabled]="store.isTranslatingAny()"
                   (click)="store.updateConfig({temperature: 0.5})">
-            <div class="w-8 h-8 rounded-full bg-blue-500 ring-offset-2 transition-all flex items-center justify-center"
+            <div class="w-8 h-8 rounded-full bg-indigo-500 ring-offset-2 transition-all flex items-center justify-center"
                   [class.ring-2]="store.config().temperature === 0.5"
-                  [class.ring-blue-500]="store.config().temperature === 0.5">
+                  [class.ring-indigo-500]="store.config().temperature === 0.5">
                 @if (store.config().temperature === 0.5) { <mat-icon class="!text-white !w-5 !h-5 !text-xl !flex !items-center !justify-center font-bold">check</mat-icon> }
             </div>
-            <span class="mt-2 text-xs font-semibold text-gray-700">0.5</span>
-            <span class="text-[10px] text-gray-400">Cân bằng</span>
+            <span class="mt-2 text-xs font-semibold text-zinc-700">0.5</span>
+            <span class="text-[10px] text-zinc-400">Cân bằng</span>
           </button>
 
           <button class="flex flex-col items-center group transition-opacity outline-none disabled:opacity-50 disabled:cursor-not-allowed"
@@ -78,17 +78,17 @@ import { BookStore } from '../../../core/book.store';
                   [class.ring-red-500]="store.config().temperature === 0.7">
                 @if (store.config().temperature === 0.7) { <mat-icon class="!text-white !w-5 !h-5 !text-xl !flex !items-center !justify-center font-bold">check</mat-icon> }
             </div>
-            <span class="mt-2 text-xs font-semibold text-gray-700">0.7</span>
-            <span class="text-[10px] text-gray-400">Uyển chuyển</span>
+            <span class="mt-2 text-xs font-semibold text-zinc-700">0.7</span>
+            <span class="text-[10px] text-zinc-400">Uyển chuyển</span>
           </button>
         </div>
       </div>
 
-      <div class="w-px bg-gray-200 hidden md:block"></div>
+      <div class="w-px bg-zinc-200 hidden md:block"></div>
 
       <!-- Pronouns Table Toggle -->
       <div class="flex-1">
-        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <h3 class="text-sm font-semibold text-zinc-900 uppercase tracking-wider mb-4 flex items-center gap-2">
           Đại từ nhân xưng
         </h3>
         <div class="flex flex-col space-y-3">
@@ -97,11 +97,11 @@ import { BookStore } from '../../../core/book.store';
               [checked]="store.usePronouns()"
               (change)="toggleUsePronouns($event)"
               [disabled]="store.isTranslatingAny() || !store.pronounTable()"
-              class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 disabled:cursor-not-allowed"
+              class="w-4 h-4 text-indigo-600 rounded border-zinc-300 focus:ring-indigo-500 disabled:cursor-not-allowed"
               [class.cursor-pointer]="!!store.pronounTable()">
-            <span class="text-gray-700 font-medium tracking-tight">Kích hoạt Bảng đại từ</span>
+            <span class="text-zinc-700 font-medium tracking-tight">Kích hoạt Bảng đại từ</span>
           </label>
-          <div class="text-xs text-gray-500 italic mt-0">
+          <div class="text-xs text-zinc-500 italic mt-0">
             @if (store.pronounTable()) {
                 Đã có bảng đại từ.
             } @else {
@@ -119,11 +119,11 @@ import { BookStore } from '../../../core/book.store';
         </div>
       </div>
 
-      <div class="w-px bg-gray-200 hidden md:block"></div>
+      <div class="w-px bg-zinc-200 hidden md:block"></div>
 
       <!-- Glossary Table Toggle -->
       <div class="flex-1">
-        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <h3 class="text-sm font-semibold text-zinc-900 uppercase tracking-wider mb-4 flex items-center gap-2">
           Thuật ngữ / Từ khó
         </h3>
         <div class="flex flex-col space-y-3">
@@ -132,11 +132,11 @@ import { BookStore } from '../../../core/book.store';
               [checked]="store.useGlossary()"
               (change)="toggleUseGlossary($event)"
               [disabled]="store.isTranslatingAny() || !store.glossaryTable()"
-              class="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500 disabled:cursor-not-allowed"
+              class="w-4 h-4 text-green-600 rounded border-zinc-300 focus:ring-green-500 disabled:cursor-not-allowed"
               [class.cursor-pointer]="!!store.glossaryTable()">
-            <span class="text-gray-700 font-medium tracking-tight">Kích hoạt Bảng từ khó</span>
+            <span class="text-zinc-700 font-medium tracking-tight">Kích hoạt Bảng từ khó</span>
           </label>
-          <div class="text-xs text-gray-500 italic mt-0">
+          <div class="text-xs text-zinc-500 italic mt-0">
             @if (store.glossaryTable()) {
                 Đã có bảng thuật ngữ.
             } @else {
