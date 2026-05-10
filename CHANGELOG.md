@@ -10,6 +10,13 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Bổ sung giao diện chỉnh sửa trực quan hơn cho phần Đại từ nhân xưng & Thuật ngữ / Từ khó.
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.17]- 2026-05-11
+### Fixed
+- Thu gọn lại không gian các phase trên header.
+- Thay đổi màu sắc của giao diện.
+- Bổ sung nút Dừng dịch ở phase dịch thuật.
+- Bổ sung xác nhận và tất cả các yêu cầu dịch nhiều chương hoặc toàn bộ sách (để tránh người dùng tốn token).
+
 ## [v1.0.16]- 2026-05-10
 ### Fixed
 - Tách chức năng thu gọn màn hình khỏi bộ công cụ điều chỉnh font, nền.
