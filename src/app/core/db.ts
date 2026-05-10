@@ -151,11 +151,7 @@ export class DbService {
           if (pdfReq.result) asset.pdfTask = pdfReq.result.data;
 
           const chapters = chapReq.result || [];
-          chapters.sort((a: ChapterEntity, b: ChapterEntity) => {
-            const aIdx = parseInt(a.id.split('_')[1] || '0');
-            const bIdx = parseInt(b.id.split('_')[1] || '0');
-            return aIdx - bIdx;
-          });
+          chapters.sort((a: ChapterEntity, b: ChapterEntity) => (a.order ?? 0) - (b.order ?? 0));
           
           resolve({
             ...meta,

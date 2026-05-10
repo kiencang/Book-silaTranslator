@@ -15,6 +15,7 @@ export interface TranslationVersion {
 
 export interface Chapter {
   id: string;
+  order: number;
   title: string;
   originalText: string;
   wordCount: number;
@@ -63,6 +64,7 @@ export class BookStore {
   readonly estimatedVietnameseTokens = computed(() => this.estimatedVietnameseWords() * 1.5);
   readonly hasAnyTranslation = computed(() => this.chapters().some(c => !!c.translatedText));
   readonly isTranslatingAny = computed(() => this.chapters().some(c => c.status === 'translating'));
+  readonly isBusy = computed(() => this.isConverting() || this.isGeneratingMetadata() || this.isTranslatingAny());
   readonly config = signal<TranslationConfig>({
     model: 'gemini-pro-latest',
     temperature: 0.5

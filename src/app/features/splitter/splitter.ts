@@ -455,7 +455,8 @@ export class Splitter {
     if (!data) return;
 
     const chapters: Chapter[] = data.previewChapters.map((c, idx) => ({
-      id: `chapter-${idx}-${Date.now()}`,
+      id: `chapter_${idx}_${Date.now()}`,
+      order: idx,
       title: c.title,
       originalText: c.originalText,
       wordCount: c.wordCount,

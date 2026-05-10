@@ -139,12 +139,6 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
 
               <div class="flex flex-col items-center gap-2 p-1.5 rounded-full shadow border transition-colors duration-300 w-11"
                    [class]="getToolbarClass(readerStore.prefs().theme)">
-                <button (click)="closeFullscreen()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors" title="Thu gọn">
-                  <mat-icon class="!w-5 !h-5 !text-[20px] flex items-center justify-center">fullscreen_exit</mat-icon>
-                </button>
-                
-                <div class="w-6 h-[1px] bg-current opacity-20"></div>
-
                 <div class="flex flex-col gap-1 items-center">
                   <button (click)="changeFontSize(2)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors font-medium text-[16px] leading-none text-center" title="Tăng cỡ chữ">A+</button>
                   <button (click)="changeFontSize(-2)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors font-medium text-[12px] leading-none text-center" title="Giảm cỡ chữ">A-</button>
@@ -174,8 +168,8 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
               </div>
             </div>
 
-            <!-- Mobile close button -->
-            <button (click)="closeFullscreen()" class="md:hidden fixed top-6 right-6 w-10 h-10 flex items-center justify-center bg-white/80 dark:bg-gray-800/80 rounded-full shadow-sm text-gray-500 transition-colors backdrop-blur-sm z-10" title="Thu gọn">
+            <!-- Close button -->
+            <button (click)="closeFullscreen()" class="fixed top-6 left-6 w-10 h-10 flex items-center justify-center bg-white/80 dark:bg-gray-800/80 rounded-full shadow-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors backdrop-blur-sm z-50 cursor-pointer" title="Thu gọn toàn màn hình">
               <mat-icon>fullscreen_exit</mat-icon>
             </button>
 

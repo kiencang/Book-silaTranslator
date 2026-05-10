@@ -215,12 +215,23 @@ export class ProjectModal implements OnInit {
         return;
       }
       
-      // Check if project already exists, if so generate a new unique timestamp ID
-      // To ensure no overlapping, since they can import the same project multiple times
+      // Always generate a new unique ID for imported projects to prevent ANY collision
+      // since users might import a project they already have, or deleted and re-imported.
+      const newProjectId = Date.now().toString() + Math.random().toString(36).substring(2, 9);
       const existingIds = this.projects().map(p => p.id);
+      
       if (existingIds.includes(proj.id)) {
-        proj.id = Date.now().toString() + Math.random().toString(36).substring(2, 9);
         proj.name = `${proj.name} (Imported)`;
+      }
+      proj.id = newProjectId;
+      
+      // We MUST assign new unique IDs to the imported chapters, because IndexedDB uses `id` as the primary key.
+      // If we don't, importing the same project again will overwrite the old project's chapters in the DB!
+      if (proj.chapters) {
+        proj.chapters = proj.chapters.map(c => ({
+          ...c,
+          id: `${newProjectId}_${c.id}`
+        }));
       }
       
       proj.updatedAt = Date.now();
