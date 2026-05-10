@@ -37,7 +37,7 @@ export interface Project {
 export class DbService {
   private dbName = 'MarkdownTranslatorDB';
   private storeName = 'projects';
-  private version = 1;
+  private version = 2;
   private platformId = inject(PLATFORM_ID);
 
   private getDB(): Promise<IDBDatabase> {
@@ -53,8 +53,39 @@ export class DbService {
         if (!db.objectStoreNames.contains(this.storeName)) {
           db.createObjectStore(this.storeName, { keyPath: 'id' });
         }
+        if (!db.objectStoreNames.contains('settings')) {
+          db.createObjectStore('settings', { keyPath: 'id' });
+        }
       };
     });
+  }
+
+  async getSettings(id: string): Promise<any> {
+    try {
+      const db = await this.getDB();
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction('settings', 'readonly');
+        const store = transaction.objectStore('settings');
+        const request = store.get(id);
+        request.onsuccess = () => resolve(request.result?.value);
+        request.onerror = () => reject(request.error);
+      });
+    } catch {
+      return undefined;
+    }
+  }
+
+  async saveSettings(id: string, value: any): Promise<void> {
+    try {
+      const db = await this.getDB();
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction('settings', 'readwrite');
+        const store = transaction.objectStore('settings');
+        const request = store.put({ id, value });
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    } catch {}
   }
 
   async getAllProjects(): Promise<Project[]> {

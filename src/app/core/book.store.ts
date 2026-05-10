@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { DbService, Project } from './db';
 import { ToastService } from './toast.service';
 import { marked } from 'marked';
+import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HTML } from './html-export.util';
 
 export interface TranslationVersion {
   versionNumber: number;
@@ -261,39 +262,17 @@ export class BookStore {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${name}</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-size: 18px;
-    line-height: 1.6;
-    color: #333;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    color: #111;
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
-  }
-  p {
-    margin-bottom: 1em;
-  }
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-  blockquote {
-    border-left: 4px solid #ddd;
-    padding-left: 1rem;
-    color: #666;
-    margin-left: 0;
-  }
+${OFFLINE_READER_STYLES}
 </style>
 </head>
 <body>
+${OFFLINE_READER_TOOLBAR_HTML}
+<div class="content-wrapper">
 ${htmlBody}
+</div>
+${OFFLINE_READER_SCRIPT}
 </body>
 </html>`;
 
