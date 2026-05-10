@@ -52,7 +52,7 @@ img { max-width: 100%; height: auto; }
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  right: 16px;
+  left: 16px;
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -65,11 +65,11 @@ img { max-width: 100%; height: auto; }
   }
 }
 .reader-toolbar-container.collapsed {
-  transform: translate(calc(100% + 16px), -50%);
+  transform: translate(calc(-100% - 16px), -50%);
 }
 .reader-toggle-btn {
   position: absolute;
-  left: -24px;
+  right: -24px;
   top: 50%;
   transform: translateY(-50%);
   width: 24px;
@@ -77,9 +77,9 @@ img { max-width: 100%; height: auto; }
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px 0 0 6px;
+  border-radius: 0 6px 6px 0;
   border: 1px solid var(--toolbar-border);
-  border-right: none;
+  border-left: none;
   background-color: var(--toolbar-bg);
   color: var(--toolbar-text);
   cursor: pointer;
@@ -147,8 +147,8 @@ img { max-width: 100%; height: auto; }
 export const OFFLINE_READER_TOOLBAR_HTML = `
 <div class="reader-toolbar-container" id="readerToolbar">
   <button class="reader-toggle-btn" id="toggleBtn" title="Ẩn/Hiện công cụ">
-    <svg id="toggleIconPrev" viewBox="0 0 24 24" style="display:none;"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
-    <svg id="toggleIconNext" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+    <svg id="toggleIconPrev" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+    <svg id="toggleIconNext" viewBox="0 0 24 24" style="display:none;"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
   </button>
   <div class="reader-toolbar">
     <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
@@ -221,12 +221,12 @@ export const OFFLINE_READER_SCRIPT = `
     if (container && togglePrev && toggleNext) {
       if (prefs.isToolbarExpanded) {
         container.classList.remove('collapsed');
-        togglePrev.style.display = 'none';
-        toggleNext.style.display = 'block';
-      } else {
-        container.classList.add('collapsed');
         togglePrev.style.display = 'block';
         toggleNext.style.display = 'none';
+      } else {
+        container.classList.add('collapsed');
+        togglePrev.style.display = 'none';
+        toggleNext.style.display = 'block';
       }
     }
 

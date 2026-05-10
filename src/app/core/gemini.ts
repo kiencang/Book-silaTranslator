@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { GoogleGenAI } from '@google/genai';
 
-export function parseGeminiError(e: any): string {
-  const msg = e?.message || e?.toString() || '';
+export function parseGeminiError(e: unknown): string {
+  const msg = (e as Error)?.message || e?.toString() || '';
   if (msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('429')) {
     return 'Lỗi: Đã vượt quá giới hạn API miễn phí (Quota exceeded). Vui thử lại vào ngày mai hoặc đăng nhập tài khoản khác còn API miễn phí.';
   }
@@ -29,7 +29,9 @@ export function parseGeminiError(e: any): string {
          return `Lỗi từ AI: ${obj.error.message}`;
        }
      }
-  } catch (err) {}
+  } catch {
+    // ignore parse error
+  }
 
   return `Lỗi không xác định trong quá trình xử lý, vui lòng thử lại.`;
 }
@@ -55,6 +57,7 @@ export class GeminiClient {
 
     const textPrompt = pdfP || 'You are an exact document converter. Convert the provided document into standard Markdown. Preserve all headings, lists, paragraphs, tables, and overall structure precisely without adding any extra conversational text. Ignore images and header/footer elements like page numbers.';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
       temperature: 0.1,
       thinkingConfig: { thinkingLevel: 'HIGH' }
@@ -83,7 +86,7 @@ export class GeminiClient {
     return result;
   }
 
-  async translateChapter(text: string, model: string, temperature: number, bookTitle: string = '', author: string = '', pronounTable: string = '', usePronouns: boolean = false, glossaryTable: string = '', useGlossary: boolean = false): Promise<string> {
+  async translateChapter(text: string, model: string, temperature: number, bookTitle = '', author = '', pronounTable = '', usePronouns = false, glossaryTable = '', useGlossary = false): Promise<string> {
     let systemInstruction = null;
     let finalPrompt = '';
     
@@ -127,6 +130,7 @@ export class GeminiClient {
        }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
       temperature: temperature,
       thinkingConfig: { thinkingLevel: 'HIGH' }
@@ -156,9 +160,9 @@ export class GeminiClient {
     return result;
   }
 
-  async generatePronouns(text: string, model: string, bookTitle: string = '', author: string = ''): Promise<string> {
+  async generatePronouns(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
     const psi = await this.loadPromptText('/prompts/pronouns_system_instructions.md');
-    let pp = await this.loadPromptText('/prompts/pronouns_prompt.md');
+    const pp = await this.loadPromptText('/prompts/pronouns_prompt.md');
 
     let finalPrompt = pp || `Hãy phân tích đoạn văn bản nguồn dưới đây và lập Bảng đại từ nhân xưng chuẩn xác nhất.\n\n<metadata>\n- Tên sách: [tên sách]\n- Tác giả: [tên tác giả]\n</metadata>\n\n<source_text>\n[nội dung]\n</source_text>`;
     
@@ -166,6 +170,7 @@ export class GeminiClient {
     finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
     finalPrompt = finalPrompt.replace('[nội dung]', text);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
       temperature: 0.3,
       thinkingConfig: { thinkingLevel: 'HIGH' }
@@ -183,9 +188,9 @@ export class GeminiClient {
     return response.text || '';
   }
 
-  async generateGlossary(text: string, bookTitle: string = '', author: string = ''): Promise<string> {
+  async generateGlossary(text: string, bookTitle = '', author = ''): Promise<string> {
     const gsi = await this.loadPromptText('/prompts/glossary_system_instructions.md');
-    let gp = await this.loadPromptText('/prompts/glossary_prompt.md');
+    const gp = await this.loadPromptText('/prompts/glossary_prompt.md');
 
     let finalPrompt = gp || `Hãy phân tích nội dung và trích xuất Bảng thuật ngữ chuyên ngành/Từ khó dịch tiếng Anh - Việt.\n\n<metadata>\n- Tên sách: [tên sách]\n- Tác giả: [tên tác giả]\n</metadata>\n\n<source_text>\n[nội dung]\n</source_text>`;
     
@@ -193,6 +198,7 @@ export class GeminiClient {
     finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
     finalPrompt = finalPrompt.replace('[nội dung]', text);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
       temperature: 0.3,
       thinkingConfig: { thinkingLevel: 'HIGH' }

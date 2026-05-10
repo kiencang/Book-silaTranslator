@@ -126,15 +126,15 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
              [style.background-color]="getContainerBg(readerStore.prefs().theme)">
           <div class="max-w-3xl mx-auto px-6 py-12 relative min-h-screen">
             
-            <div class="fixed top-1/2 -translate-y-1/2 right-4 transition-transform duration-300 z-50 flex-col items-center hidden md:flex" 
-                 [class.translate-x-[calc(100%+1rem)]]="!readerStore.prefs().isToolbarExpanded">
+            <div class="fixed top-1/2 -translate-y-1/2 left-4 transition-transform duration-300 z-50 flex-col items-center hidden md:flex" 
+                 [class.-translate-x-[calc(100%+1rem)]]="!readerStore.prefs().isToolbarExpanded">
               
               <!-- Toggle Button -->
               <button (click)="toggleToolbar()"
-                      class="absolute -left-6 top-1/2 -translate-y-1/2 w-6 h-12 flex items-center justify-center rounded-l-md border-y border-l shadow-sm transition-colors duration-300 cursor-pointer"
+                      class="absolute -right-6 top-1/2 -translate-y-1/2 w-6 h-12 flex items-center justify-center rounded-r-md border-y border-r shadow-sm transition-colors duration-300 cursor-pointer"
                       [class]="getToolbarClass(readerStore.prefs().theme)"
                       [title]="readerStore.prefs().isToolbarExpanded ? 'Ẩn công cụ' : 'Hiện công cụ'">
-                <mat-icon class="!w-4 !h-4 !text-[16px] flex items-center justify-center">{{ readerStore.prefs().isToolbarExpanded ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+                <mat-icon class="!w-4 !h-4 !text-[16px] flex items-center justify-center">{{ readerStore.prefs().isToolbarExpanded ? 'chevron_left' : 'chevron_right' }}</mat-icon>
               </button>
 
               <div class="flex flex-col items-center gap-2 p-1.5 rounded-full shadow border transition-colors duration-300 w-11"
@@ -310,7 +310,7 @@ ${OFFLINE_READER_SCRIPT}
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       this.toast.success('Đã tải xuống file HTML.');
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Error exporting to HTML:', e);
       this.toast.error('Có lỗi xảy ra khi tải xuống HTML.');
     }

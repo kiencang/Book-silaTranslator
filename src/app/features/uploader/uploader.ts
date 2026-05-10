@@ -72,6 +72,9 @@ import { PDFDocument } from 'pdf-lib';
         } @else {
           <div 
             class="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:bg-gray-50 hover:border-gray-400 transition-colors cursor-pointer relative"
+          role="button"
+          tabindex="0"
+          (keydown.enter)="fileInput.click()"
           (click)="fileInput.click()"
           (dragover)="onDragOver($event)"
           (dragleave)="onDragLeave($event)"
@@ -211,7 +214,7 @@ export class Uploader {
              newChunks[i] = { ...newChunks[i], status: 'completed', markdown, error: undefined };
             this.store.setPdfTask({ ...successTaskState, chunks: newChunks });
           }
-        } catch (e: any) {
+        } catch (e: unknown) {
            console.error(e);
            const msg = parseGeminiError(e);
            const failTaskState = this.store.pdfTask();
@@ -309,9 +312,9 @@ export class Uploader {
       } else {
         this.toast.error(this.toast.Messages.FILE_INVALID_FORMAT);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      let msg = parseGeminiError(e);
+      const msg = parseGeminiError(e);
       this.toast.error(this.toast.Messages.FILE_PROCESS_ERROR(msg));
     } finally {
       this.store.setConverting(false);

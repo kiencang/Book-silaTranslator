@@ -25,16 +25,16 @@ import { FormsModule } from '@angular/forms';
           <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-4">
             <div class="flex flex-col sm:flex-row gap-4">
               <div class="flex-1">
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2">Trích xuất nội dung từ bản text đã lọc</label>
-                <select [value]="pronounExtractRatio()" (change)="pronounExtractRatio.set(+$any($event.target).value)" [disabled]="isGeneratingPronouns()" class="w-full pl-3 pr-8 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
+                <label for="pronounExtractRatio" class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2">Trích xuất nội dung từ bản text đã lọc</label>
+                <select id="pronounExtractRatio" [value]="pronounExtractRatio()" (change)="pronounExtractRatio.set(+$any($event.target).value)" [disabled]="isGeneratingPronouns()" class="w-full pl-3 pr-8 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
                   <option value="0.25">25% nội dung sách</option>
                   <option value="0.5">50% nội dung sách</option>
                   <option value="1">100% nội dung sách</option>
                 </select>
               </div>
               <div class="flex-1">
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2">Mô hình nhận diện</label>
-                <select [value]="pronounModel()" (change)="pronounModel.set($any($event.target).value)" [disabled]="isGeneratingPronouns()" class="w-full pl-3 pr-8 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
+                <label for="pronounModel" class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2">Mô hình nhận diện</label>
+                <select id="pronounModel" [value]="pronounModel()" (change)="pronounModel.set($any($event.target).value)" [disabled]="isGeneratingPronouns()" class="w-full pl-3 pr-8 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
                   <option value="gemini-flash-latest">Flash (Nhanh & Tiết kiệm)</option>
                   <option value="gemini-pro-latest">Pro (Tư duy sâu & Chuẩn xác)</option>
                 </select>
@@ -60,10 +60,11 @@ import { FormsModule } from '@angular/forms';
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2 flex justify-between items-center">
+            <label for="draftPronounTable" class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2 flex justify-between items-center">
               Nội dung bảng (Có thể chỉnh sửa)
             </label>
             <textarea 
+              id="draftPronounTable"
               [value]="draftPronounTable()"
               (input)="onTextareaInput($event)"
               [disabled]="isGeneratingPronouns()"
@@ -161,7 +162,7 @@ export class PronounSetup implements OnInit, OnDestroy {
       this.isManuallyEdited.set(false);
       this.store.savePronounsConf(result, true);
       this.toast.success(this.toast.Messages.PRONOUNS_SUCCESS);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       this.toast.error(this.toast.Messages.PRONOUNS_ERROR(parseGeminiError(e)));
     } finally {

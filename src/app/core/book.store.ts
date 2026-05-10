@@ -1,6 +1,6 @@
 import { Injectable, signal, effect, PLATFORM_ID, inject, untracked, computed } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { DbService, Project } from './db';
+import { DbService, Project, ProjectMeta } from './db';
 import { ToastService } from './toast.service';
 import { marked } from 'marked';
 import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HTML } from './html-export.util';
@@ -80,41 +80,84 @@ export class BookStore {
       const projectId = this.currentProjectId();
       if (!projectId) return;
 
-      const state: Project = {
+      const meta: ProjectMeta = {
         id: projectId,
         name: this.currentProjectName(),
         phase: this.phase(),
         fileName: this.fileName(),
-        rawMarkdown: this.rawMarkdown(),
-        chapters: this.chapters(),
         config: this.config(),
         updatedAt: Date.now(),
         createdAt: untracked(() => this.currentProjectCreatedAt()),
         bookTitle: this.bookTitle(),
         author: this.author(),
-        pronounTable: this.pronounTable(),
         usePronouns: this.usePronouns(),
-        glossaryTable: this.glossaryTable(),
-        useGlossary: this.useGlossary(),
-        pdfTask: this.pdfTask()
+        useGlossary: this.useGlossary()
       };
       
       if (isPlatformBrowser(this.platformId)) {
-        this.saveCurrentProjectState(state);
+        this.saveCurrentProjectState(meta);
       }
+    });
+
+    effect(() => {
+      const projectId = this.currentProjectId();
+      if (!projectId) return;
+
+      const rawMarkdown = this.rawMarkdown();
+      untracked(() => {
+        if (isPlatformBrowser(this.platformId)) {
+          this.db.saveProjectAsset(projectId, 'rawMarkdown', rawMarkdown);
+        }
+      });
+    });
+
+    effect(() => {
+      const projectId = this.currentProjectId();
+      if (!projectId) return;
+
+      const pronounTable = this.pronounTable();
+      untracked(() => {
+        if (isPlatformBrowser(this.platformId)) {
+          this.db.saveProjectAsset(projectId, 'pronounTable', pronounTable);
+        }
+      });
+    });
+
+    effect(() => {
+      const projectId = this.currentProjectId();
+      if (!projectId) return;
+
+      const glossaryTable = this.glossaryTable();
+      untracked(() => {
+        if (isPlatformBrowser(this.platformId)) {
+          this.db.saveProjectAsset(projectId, 'glossaryTable', glossaryTable);
+        }
+      });
+    });
+
+    effect(() => {
+      const projectId = this.currentProjectId();
+      if (!projectId) return;
+
+      const pdfTask = this.pdfTask();
+      untracked(() => {
+        if (isPlatformBrowser(this.platformId)) {
+          this.db.saveProjectAsset(projectId, 'pdfTask', pdfTask);
+        }
+      });
     });
   }
 
-  private async saveCurrentProjectState(state: Project) {
+  private async saveCurrentProjectState(meta: ProjectMeta) {
     try {
-      await this.db.saveProject(state);
-      localStorage.setItem('md-translator-last-id', state.id);
+      await this.db.saveProjectMeta(meta);
+      localStorage.setItem('md-translator-last-id', meta.id);
     } catch (e) {
       console.error('Failed to auto-save to IndexedDB', e);
     }
   }
 
-  async createNewProject(name: string, title: string = '', author: string = '') {
+  async createNewProject(name: string, title = '', author = '') {
     const newId = Date.now().toString() + Math.random().toString(36).substring(2, 9);
     this.currentProjectId.set(newId);
     this.currentProjectName.set(name);
@@ -155,7 +198,7 @@ export class BookStore {
       );
       this.chapters.set(adjustedChapters);
       this.config.set(proj.config);
-      this.phase.set(proj.phase as any);
+      this.phase.set(proj.phase as 0 | 1 | 2 | 3 | 4 | 5);
       
       if (isPlatformBrowser(this.platformId)) {
         localStorage.setItem('md-translator-last-id', proj.id);
@@ -197,6 +240,13 @@ export class BookStore {
   setChapters(chs: Chapter[]) {
     this.chapters.set(chs);
     this.phase.set(3);
+    if (isPlatformBrowser(this.platformId)) {
+       const id = this.currentProjectId();
+       if (id) {
+          this.db.saveAllChapters(id, chs);
+          this.db.updateProjectStats(id, chs);
+       }
+    }
   }
 
   savePronounsConf(table: string, use: boolean) {
@@ -215,6 +265,15 @@ export class BookStore {
 
   updateChapter(id: string, partial: Partial<Chapter>) {
     this.chapters.update(chs => chs.map(c => c.id === id ? { ...c, ...partial } : c));
+    if (isPlatformBrowser(this.platformId)) {
+       const chaps = this.chapters();
+       const updated = chaps.find(c => c.id === id);
+       const pid = this.currentProjectId();
+       if (updated && pid) {
+          this.db.saveChapter(pid, updated);
+          this.db.updateProjectStats(pid, chaps);
+       }
+    }
   }
 
   selectVersion(chapterId: string, versionNumber: number) {
@@ -286,7 +345,7 @@ ${OFFLINE_READER_SCRIPT}
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       this.toastService.success(this.toastService.Messages.EXPORT_HTML_SUCCESS);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Error exporting to HTML:', e);
       this.toastService.error(this.toastService.Messages.EXPORT_HTML_ERROR);
     }

@@ -25,16 +25,16 @@ import { FormsModule } from '@angular/forms';
           <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-4">
             <div class="flex flex-col sm:flex-row gap-4">
               <div class="flex-1">
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2">Trích xuất nội dung từ bản text đã lọc</label>
-                <select [value]="glossaryExtractRatio()" (change)="glossaryExtractRatio.set(+$any($event.target).value)" [disabled]="isGenerating()" class="w-full pl-3 pr-8 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
+                <label for="glossaryExtractRatio" class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2">Trích xuất nội dung từ bản text đã lọc</label>
+                <select id="glossaryExtractRatio" [value]="glossaryExtractRatio()" (change)="glossaryExtractRatio.set(+$any($event.target).value)" [disabled]="isGenerating()" class="w-full pl-3 pr-8 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
                   <option value="0.25">25% nội dung sách</option>
                   <option value="0.5">50% nội dung sách</option>
                   <option value="1">100% nội dung sách</option>
                 </select>
               </div>
               <div class="flex-1">
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2">Mô hình nhận diện</label>
-                <select [value]="glossaryModel()" (change)="glossaryModel.set($any($event.target).value)" [disabled]="isGenerating()" class="w-full pl-3 pr-8 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
+                <label for="glossaryModel" class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2">Mô hình nhận diện</label>
+                <select id="glossaryModel" [value]="glossaryModel()" (change)="glossaryModel.set($any($event.target).value)" [disabled]="isGenerating()" class="w-full pl-3 pr-8 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border">
                   <option value="gemini-pro-latest">Pro (Tư duy sâu & Chuẩn xác - Bắt buộc)</option>
                 </select>
               </div>
@@ -59,10 +59,11 @@ import { FormsModule } from '@angular/forms';
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2 flex justify-between items-center">
+            <label for="draftTable" class="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-2 flex justify-between items-center">
               Nội dung bảng (Có thể chỉnh sửa Markdown)
             </label>
             <textarea 
+              id="draftTable"
               [value]="draftTable()"
               (input)="onTextareaInput($event)"
               [disabled]="isGenerating()"
@@ -158,7 +159,7 @@ export class GlossarySetup implements OnInit, OnDestroy {
       this.isManuallyEdited.set(false);
       this.store.saveGlossaryConf(result, true);
       this.toast.success(this.toast.Messages.GLOSSARY_SUCCESS);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       this.toast.error(this.toast.Messages.GLOSSARY_ERROR(parseGeminiError(e)));
     } finally {

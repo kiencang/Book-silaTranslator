@@ -19,14 +19,14 @@ import { FormsModule } from '@angular/forms';
       
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tên tác phẩm <span class="text-red-500">*</span></label>
-          <input type="text" [(ngModel)]="bookTitle" placeholder="Ví dụ: Moby Dick" 
+          <label for="bookTitle" class="block text-sm font-medium text-gray-700 mb-1">Tên tác phẩm <span class="text-red-500">*</span></label>
+          <input id="bookTitle" type="text" [(ngModel)]="bookTitle" placeholder="Ví dụ: Moby Dick" 
                  (keydown.enter)="canCreate() && createProject()"
                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg transition-shadow">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tác giả <span class="text-red-500">*</span></label>
-          <input type="text" [(ngModel)]="author" placeholder="Ví dụ: Herman Melville (hoặc Vô danh)" 
+          <label for="author" class="block text-sm font-medium text-gray-700 mb-1">Tác giả <span class="text-red-500">*</span></label>
+          <input id="author" type="text" [(ngModel)]="author" placeholder="Ví dụ: Herman Melville (hoặc Vô danh)" 
                  (keydown.enter)="canCreate() && createProject()"
                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg transition-shadow">
         </div>

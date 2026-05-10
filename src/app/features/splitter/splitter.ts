@@ -46,7 +46,7 @@ import { ToastService } from '../../core/toast.service';
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Điều chỉnh cách phân chia</h3>
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
           <div class="md:col-span-5">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Từ khóa chia</label>
+            <label for="keywordInput" class="block text-sm font-medium text-gray-700 mb-1">Từ khóa chia</label>
             <div class="w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-shadow bg-white flex flex-wrap gap-2 items-center min-h-[50px]">
               @for (kw of draftKeywords(); track kw) {
                 <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">
@@ -57,6 +57,7 @@ import { ToastService } from '../../core/toast.service';
                 </span>
               }
               <input type="text" 
+                    id="keywordInput"
                     #keywordInput
                     (keydown)="handleKeywordKeydown($event, keywordInput)"
                     (blur)="addKeyword(keywordInput)"
@@ -66,8 +67,9 @@ import { ToastService } from '../../core/toast.service';
             <p class="text-xs text-gray-500 mt-2">Bấm Enter hoặc phẩy để thêm. Hỗ trợ ký tự đặc biệt.</p>
           </div>
           <div class="md:col-span-5">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Số từ tối thiểu mỗi phần</label>
+            <label for="draftMinWords" class="block text-sm font-medium text-gray-700 mb-1">Số từ tối thiểu mỗi phần</label>
             <input type="number" 
+                  id="draftMinWords"
                   [value]="draftMinWords()" 
                   (input)="draftMinWords.set(+$any($event.target).value)" 
                   min="1000" max="20000" step="500" 
@@ -88,11 +90,14 @@ import { ToastService } from '../../core/toast.service';
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         @for (method of splitMethods(); track method.keyword) {
           <div 
+            role="button"
+            tabindex="0"
             class="p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col"
             [class.border-blue-500]="selectedMethod() === method.keyword"
             [class.bg-blue-50]="selectedMethod() === method.keyword"
             [class.border-gray-200]="selectedMethod() !== method.keyword"
             [class.hover:border-gray-300]="selectedMethod() !== method.keyword"
+            (keydown.enter)="selectMethod(method.keyword)"
             (click)="selectMethod(method.keyword)"
           >
             <div class="flex justify-between items-start mb-3">
@@ -120,7 +125,7 @@ import { ToastService } from '../../core/toast.service';
           </div>
           <div class="max-h-96 overflow-y-auto p-0">
             @for (chap of selectedMethodData()?.previewChapters; track $index) {
-              <div class="px-6 py-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors flex items-center justify-between group cursor-pointer" (click)="previewBlock.set(chap)">
+              <div role="button" tabindex="0" (keydown.enter)="previewBlock.set(chap)" class="px-6 py-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors flex items-center justify-between group cursor-pointer" (click)="previewBlock.set(chap)">
                 <div class="flex-1 min-w-0 pr-4">
                   <div class="flex items-center mb-1">
                     <h4 class="font-medium text-gray-900 truncate pr-4">{{ chap.title }}</h4>
@@ -149,8 +154,8 @@ import { ToastService } from '../../core/toast.service';
       }
 
       @if (previewBlock()) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 sm:p-6" (click)="previewBlock.set(null)">
-          <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all" (click)="$event.stopPropagation()">
+        <div role="button" tabindex="0" (keydown.enter)="previewBlock.set(null)" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 sm:p-6" (click)="previewBlock.set(null)">
+          <div role="presentation" class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all cursor-default" (click)="$event.stopPropagation()">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50/80">
               <div>
                 <h3 class="text-lg font-semibold text-gray-900">{{ previewBlock()?.title }}</h3>
@@ -302,7 +307,7 @@ export class Splitter {
       URL.revokeObjectURL(url);
       
       this.toast.success(this.toast.Messages.DOWNLOAD_MARKDOWN_SUCCESS);
-    } catch (error) {
+    } catch {
       this.toast.error(this.toast.Messages.DOWNLOAD_MARKDOWN_ERROR);
     }
   }

@@ -173,7 +173,7 @@ export class Translator {
         latestVersionNumber: newVersionNumber,
         activeVersionNumber: newVersionNumber
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       this.store.updateChapter(chapter.id, { status: 'error' });
       this.toast.error(this.toast.Messages.TRANSLATION_ERROR(chapter.title, parseGeminiError(e)));

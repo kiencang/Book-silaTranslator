@@ -18,7 +18,7 @@ export interface ToastConfig {
 @Injectable({ providedIn: 'root' })
 export class ToastService {
   readonly currentToast = signal<ToastConfig | null>(null);
-  private timeoutId: any = null;
+  private timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Từ điển các thông báo (Toast) chuẩn trong hệ thống.

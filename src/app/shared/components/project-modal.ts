@@ -2,15 +2,15 @@ import { Component, inject, signal, OnInit, Output, EventEmitter } from '@angula
 import { DbService, Project } from '../../core/db';
 import { BookStore } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-project-modal',
   standalone: true,
   imports: [DatePipe],
   template: `
-    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 cursor-pointer" tabindex="0" (click)="close.emit()" (keydown.escape)="close.emit()">
-      <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden cursor-default" (click)="$event.stopPropagation()">
+    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 cursor-pointer" tabindex="0" (click)="closeModal.emit()" (keydown.escape)="closeModal.emit()">
+      <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden cursor-default" (click)="$event.stopPropagation()">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50/80">
           <h2 class="text-xl font-bold text-gray-900">Quản lý dự án</h2>
           <div class="flex items-center gap-2">
@@ -18,7 +18,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
               <span class="material-icons text-[18px]">file_upload</span> Nhập dự án
             </button>
             <input #fileInput type="file" accept=".json" class="hidden" (change)="importProject($event)" />
-            <button (click)="close.emit()" class="text-gray-400 hover:text-gray-700 w-8 h-8 rounded-full hover:bg-gray-200 transition-colors flex items-center justify-center">
+            <button (click)="closeModal.emit()" class="text-gray-400 hover:text-gray-700 w-8 h-8 rounded-full hover:bg-gray-200 transition-colors flex items-center justify-center">
               <span class="material-icons !text-[20px] !w-5 !h-5 !flex !items-center !justify-center leading-none">close</span>
             </button>
           </div>
@@ -51,7 +51,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
                   }
                   
-                  <div class="flex-1 cursor-pointer" (click)="loadProject(p.id)">
+                  <div class="flex-1 cursor-pointer" role="button" tabindex="0" (keydown.enter)="loadProject(p.id)" (click)="loadProject(p.id)">
                     <h3 class="font-bold text-lg text-gray-900 mb-1 flex items-center">
                       {{p.name}}
                       @if (store.currentProjectId() === p.id) {
@@ -137,7 +137,7 @@ export class ProjectModal implements OnInit {
   isLoading = signal(true);
   confirmingDeleteId = signal<string | null>(null);
   
-  @Output() close = new EventEmitter<void>();
+  @Output() closeModal = new EventEmitter<void>();
 
   ngOnInit() {
     this.loadProjects();
@@ -154,10 +154,10 @@ export class ProjectModal implements OnInit {
 
   async loadProject(id: string) {
     if (this.store.currentProjectId() !== id) {
-      this.close.emit(); // Close UI immediately to feel snappy
+      this.closeModal.emit(); // Close UI immediately to feel snappy
       await this.store.loadProject(id);
     } else {
-      this.close.emit();
+      this.closeModal.emit();
     }
   }
 
@@ -171,14 +171,24 @@ export class ProjectModal implements OnInit {
     this.confirmingDeleteId.set(null);
   }
 
-  exportProject(p: Project, event: Event) {
+  async exportProject(p: Project, event: Event) {
     event.stopPropagation();
-    this.store.exportProjectToHtml(p);
+    const fullProject = await this.db.getProject(p.id);
+    if (!fullProject) {
+      this.toast.error('Dữ liệu dự án bị lỗi, không thể xuất bản');
+      return;
+    }
+    this.store.exportProjectToHtml(fullProject);
   }
 
-  exportProjectData(p: Project, event: Event) {
+  async exportProjectData(p: Project, event: Event) {
     event.stopPropagation();
-    const dataStr = JSON.stringify(p, null, 2);
+    const fullProject = await this.db.getProject(p.id);
+    if (!fullProject) {
+      this.toast.error('Dữ liệu dự án bị lỗi, không thể xuất bản');
+      return;
+    }
+    const dataStr = JSON.stringify(fullProject, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -218,7 +228,7 @@ export class ProjectModal implements OnInit {
       await this.db.saveProject(proj);
       this.toast.success(this.toast.Messages.PROJECT_IMPORT_SUCCESS);
       await this.loadProjects();
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       this.toast.error(this.toast.Messages.PROJECT_IMPORT_ERROR);
     } finally {
@@ -239,7 +249,7 @@ export class ProjectModal implements OnInit {
   
   closeAndGoHome() {
     this.store.closeProject();
-    this.close.emit();
+    this.closeModal.emit();
   }
 
   getProgress(p: Project) {
