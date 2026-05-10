@@ -10,6 +10,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Bổ sung giao diện chỉnh sửa trực quan hơn cho phần Đại từ nhân xưng & Thuật ngữ / Từ khó.
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.13]- 2026-05-10
+### Fixed
+- Thiết lập lưu tự động cho tính năng đại từ & từ khó. Tránh để người dùng bị mất dữ liệu.
+
 ## [v1.0.12]- 2026-05-10
 ### Fixed
 - Điều chỉnh phase2/Chia sách để nó chỉ block khu vực thích hợp trong trường hợp đã có bản dịch.
