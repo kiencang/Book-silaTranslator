@@ -1,4 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { BookStore } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
 import { GeminiClient, parseGeminiError } from '../../core/gemini';
@@ -62,7 +64,7 @@ import { FormsModule } from '@angular/forms';
             </label>
             <textarea 
               [value]="draftTable()"
-              (input)="draftTable.set($any($event.target).value)"
+              (input)="onTextareaInput($event)"
               [disabled]="isGenerating()"
               rows="15" 
               class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-lg bg-white disabled:bg-gray-100 p-3 font-mono text-sm leading-relaxed"
@@ -86,14 +88,14 @@ import { FormsModule } from '@angular/forms';
           [disabled]="isGenerating() || draftTable().trim().length === 0"
           class="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span>Lưu và Tiếp tục</span>
+          <span>{{ isManuallyEdited() ? 'Lưu và Tiếp tục' : 'Tiếp tục' }}</span>
           <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center">arrow_forward</mat-icon>
         </button>
       </div>
     </div>
   `
 })
-export class GlossarySetup {
+export class GlossarySetup implements OnInit, OnDestroy {
   store = inject(BookStore);
   gemini = inject(GeminiClient);
   toast = inject(ToastService);
@@ -102,6 +104,27 @@ export class GlossarySetup {
   draftTable = signal<string>(this.store.glossaryTable() || '');
   glossaryExtractRatio = signal<number>(this.store.config().glossaryGenRatio ?? 1); // Default 100%
   glossaryModel = signal<string>(this.store.config().glossaryGenModel ?? 'gemini-pro-latest');
+  isManuallyEdited = signal<boolean>(false);
+  private autoSaveSubject = new Subject<string>();
+
+  ngOnInit() {
+    this.autoSaveSubject.pipe(debounceTime(3000)).subscribe(val => {
+      if (val.trim().length > 0) {
+        this.store.saveGlossaryConf(val, true);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.autoSaveSubject.complete();
+  }
+
+  onTextareaInput(event: Event) {
+    const val = (event.target as HTMLTextAreaElement).value;
+    this.draftTable.set(val);
+    this.isManuallyEdited.set(true);
+    this.autoSaveSubject.next(val);
+  }
 
   async generateGlossary() {
     let fullText = '';
@@ -132,6 +155,8 @@ export class GlossarySetup {
 
       const result = await this.gemini.generateGlossary(textToAnalyze, this.store.bookTitle(), this.store.author());
       this.draftTable.set(result);
+      this.isManuallyEdited.set(false);
+      this.store.saveGlossaryConf(result, true);
       this.toast.success(this.toast.Messages.GLOSSARY_SUCCESS);
     } catch (e: any) {
       console.error(e);
