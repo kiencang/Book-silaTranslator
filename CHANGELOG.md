@@ -13,6 +13,8 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.16]- 2026-05-10
 ### Fixed
 - Tách chức năng thu gọn màn hình khỏi bộ công cụ điều chỉnh font, nền.
+- Có ID cho thứ tự các chương để nó luôn sắp xếp đúng tuần tự khi hiển thị.
+- Vô hiệu hóa hoàn toàn header khi có các thao tác dịch, trích xuất.
 
 ## [v1.0.15]- 2026-05-10
 ### Fixed
