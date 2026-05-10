@@ -12,8 +12,9 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [v1.0.15]- 2026-05-10
 ### Fixed
-- Tối ưu mã nguồn, khắc phục các thông báo lỗi.
-- Tối ưu IndexedDB.
+- Tối ưu mã nguồn, khắc phục các thông báo lỗi lặt vặt.
+- Tối ưu IndexedDB, chia để trị, chỉnh sửa phần nào thao tác phân vùng db phần đó, không can thiệp toàn bộ db.
+- Điều chỉnh vị trí của phần điều chỉnh font, cỡ chữ, màu nền.
 
 ## [v1.0.14]- 2026-05-10
 ### Fixed
