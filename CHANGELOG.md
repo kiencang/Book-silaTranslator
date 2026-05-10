@@ -13,6 +13,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.14]- 2026-05-10
 ### Fixed
 - Chế độ toàn màn hình và download cho từng chương/block đã dịch.
+- Tăng khả năng điều chỉnh giao diện (font, cỡ chữ, màu nền) cho chế độ toàn màn hình.
 
 ## [v1.0.13]- 2026-05-10
 ### Fixed
