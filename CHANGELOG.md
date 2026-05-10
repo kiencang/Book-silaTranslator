@@ -6,7 +6,6 @@ Tất cả những thay đổi đáng chú ý của dự án kiencang/Book-silaT
 và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Thêm tính năng lưu version cho phần Đại từ nhân xưng & Thuật ngữ / Từ khó.
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
 ## [v1.0.18]- 2026-05-11
