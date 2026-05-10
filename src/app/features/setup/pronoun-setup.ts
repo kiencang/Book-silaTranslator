@@ -6,11 +6,12 @@ import { ToastService } from '../../core/toast.service';
 import { GeminiClient, parseGeminiError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
+import { MarkdownTableEditorComponent } from '../../shared/components/markdown-table-editor.component';
 
 @Component({
   selector: 'app-pronoun-setup',
   standalone: true,
-  imports: [MatIconModule, FormsModule],
+  imports: [MatIconModule, FormsModule, MarkdownTableEditorComponent],
   template: `
     <div class="max-w-7xl mx-auto py-8 lg:px-8 px-4">
       <div class="flex items-center justify-between mb-8">
@@ -59,18 +60,12 @@ import { FormsModule } from '@angular/forms';
             </button>
           </div>
 
-          <div>
-            <label for="draftPronounTable" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2 flex justify-between items-center">
-              Nội dung bảng (Có thể chỉnh sửa)
-            </label>
-            <textarea 
-              id="draftPronounTable"
+          <div class="mt-8">
+            <app-markdown-table-editor
               [value]="draftPronounTable()"
-              (input)="onTextareaInput($event)"
+              (valueChange)="onTableChange($event)"
               [disabled]="isGeneratingPronouns()"
-              rows="12" 
-              class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-zinc-300 rounded-lg bg-white disabled:bg-zinc-100 p-3 font-mono text-sm leading-relaxed"
-              placeholder="Ví dụ:&#10;- Harry: cậu, cậu bé, hắn&#10;- Dumbledore: ông, cụ thày&#10;- Snape (với Harry): mi, trò..."></textarea>
+            ></app-markdown-table-editor>
           </div>
         </div>
       </div>
@@ -121,8 +116,7 @@ export class PronounSetup implements OnInit, OnDestroy {
     this.autoSaveSubject.complete();
   }
 
-  onTextareaInput(event: Event) {
-    const val = (event.target as HTMLTextAreaElement).value;
+  onTableChange(val: string) {
     this.draftPronounTable.set(val);
     this.isManuallyEdited.set(true);
     this.autoSaveSubject.next(val);
