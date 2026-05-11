@@ -10,7 +10,8 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [v1.0.22]- 2026-05-12
 ### Fixed
-- Refactoring phần chia chương sách để nó gọn gàng và rõ ràng hơn,
+- Refactoring phần chia chương sách để nó gọn gàng và rõ ràng hơn.
+- Điều chỉnh phần `Tùy chọn 1: Chia theo Từ khóa Tiêu đề` để các thay đổi từ khóa được áp dụng luôn, đỡ cho người dùng một thao tác bấm.
 
 ## [v1.0.21]- 2026-05-12
 ### Fixed
