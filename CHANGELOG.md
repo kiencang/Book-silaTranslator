@@ -7,7 +7,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
-- Đổi tên cho dự án.
+- Cung cấp khả năng đổi tên cho dự án.
 
 ## [v1.0.22]- 2026-05-12
 ### Fixed
