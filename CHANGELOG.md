@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.23]- 2026-05-12
 ### Fixed
 - Cung cấp khả năng đổi tên cho dự án.
+- Cải tiến khả năng chia cắt sách bằng hàm đệ quy chia đôi với ngưỡng tối đa có thể điều chỉnh được.
 
 ## [v1.0.22]- 2026-05-12
 ### Fixed
