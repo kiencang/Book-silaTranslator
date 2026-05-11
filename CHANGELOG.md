@@ -12,6 +12,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Cho phép xóa ngay lập tức hàng hoặc cột rỗng ở phần Đại từ nhân xưng và Từ khó.
 - Bảo vệ luồng đọc tự nhiên của người dùng bằng cách thêm button `Phần trước` & `Phần sau` vào cuối chương/block.
+- Thêm chú thích có thể bấm vào trong bài viết (click sẽ di chuyển tới phần cuối để xem chú thích).
 
 ## [v1.0.18]- 2026-05-11
 ### Fixed
