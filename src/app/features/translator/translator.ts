@@ -213,7 +213,7 @@ export class Translator {
     this.confirmAction.set('none');
     this.stopRequested.set(false);
     
-    let toTranslate = this.store.chapters();
+    let toTranslate = this.store.chapters().filter(c => !c.excludeFromTranslation);
     if (forceAll) {
       this.translateOperation.set('retranslate');
     } else {

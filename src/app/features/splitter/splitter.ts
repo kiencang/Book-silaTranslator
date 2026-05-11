@@ -57,9 +57,30 @@ import { ToastService } from '../../core/toast.service';
                     id="draftMinWords"
                     [value]="draftMinWords()" 
                     (input)="draftMinWords.set(+$any($event.target).value)" 
+                    (keydown.enter)="applyMinWords()"
                     min="1000" max="20000" step="500" 
                     class="w-32 px-4 py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
-              <span class="text-sm font-medium text-zinc-600 text-left w-24">Từ</span>
+              <div class="w-40 flex-shrink-0">
+                <button 
+                  (click)="applyMinWords()"
+                  class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm text-sm"
+                  [class.bg-indigo-600]="draftMinWords() === activeMinWords()"
+                  [class.text-white]="draftMinWords() === activeMinWords()"
+                  [class.border-indigo-600]="draftMinWords() === activeMinWords()"
+                  [class.hover:bg-indigo-700]="draftMinWords() === activeMinWords()"
+                  [class.bg-indigo-50]="draftMinWords() !== activeMinWords()"
+                  [class.text-indigo-700]="draftMinWords() !== activeMinWords()"
+                  [class.border-indigo-200]="draftMinWords() !== activeMinWords()"
+                  [class.hover:bg-indigo-100]="draftMinWords() !== activeMinWords()"
+                >
+                  @if (draftMinWords() === activeMinWords()) {
+                    <mat-icon class="!w-4 !h-4 !text-sm">check</mat-icon>
+                    <span>Đang áp dụng</span>
+                  } @else {
+                    <span>Áp dụng ngay</span>
+                  }
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -268,17 +289,17 @@ export class Splitter {
   toast = inject(ToastService);
 
   draftKeywords = signal<string[]>(['Chapter', 'Part', 'Section']);
-  draftMinWords = signal(1000);
+  draftMinWords = signal(5000);
   
   activeKeywords = signal<string[]>(['Chapter', 'Part', 'Section']);
-  activeMinWords = signal(1000);
+  activeMinWords = signal(5000);
   
   activeSplitMode = signal<'keyword' | 'heading'>('keyword');
   draftHeadingLevel = signal<'h2' | 'h3'>('h2');
   activeHeadingLevel = signal<'h2' | 'h3'>('h2');
   
   selectedMethod = signal<string | null>(null);
-  previewBlock = signal<{title: string, previewText: string, wordCount: number, originalText: string} | null>(null);
+  previewBlock = signal<{title: string, previewText: string, wordCount: number, originalText: string, excludeFromTranslation?: boolean} | null>(null);
 
   constructor() {
     const settings = this.store.splitSettings();
@@ -356,6 +377,12 @@ export class Splitter {
 
   removeKeyword(kwToRemove: string) {
     this.draftKeywords.update(kws => kws.filter(k => k !== kwToRemove));
+  }
+
+  applyMinWords() {
+    const minW = Math.max(1000, Math.min(20000, this.draftMinWords()));
+    this.draftMinWords.set(minW);
+    this.activeMinWords.set(minW);
   }
 
   applyKeywordMode() {
@@ -480,10 +507,30 @@ export class Splitter {
     }
   }
 
-  generatePreview(text: string, kw: string, minWords: number, splitRegex: RegExp | null): {title: string, previewText: string, wordCount: number, originalText: string}[] {
+  countWords(text: string): number {
+    let count = 0;
+    let inWord = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text.charCodeAt(i);
+      // Check for common whitespace characters
+      const isWhitespace = c <= 32 || c === 160 || (c >= 8192 && c <= 8202) || c === 12288;
+      
+      if (isWhitespace) {
+        inWord = false;
+      } else {
+        if (!inWord) {
+          count++;
+          inWord = true;
+        }
+      }
+    }
+    return count;
+  }
+
+  generatePreview(text: string, kw: string, minWords: number, splitRegex: RegExp | null): {title: string, previewText: string, wordCount: number, originalText: string, excludeFromTranslation?: boolean}[] {
     let textToSplit = text;
-    let gutenbergHeader: {title: string, previewText: string, wordCount: number, originalText: string} | null = null;
-    let gutenbergFooter: {title: string, previewText: string, wordCount: number, originalText: string} | null = null;
+    let gutenbergHeader: {title: string, previewText: string, wordCount: number, originalText: string, excludeFromTranslation?: boolean} | null = null;
+    let gutenbergFooter: {title: string, previewText: string, wordCount: number, originalText: string, excludeFromTranslation?: boolean} | null = null;
 
     const startMatch = textToSplit.match(/START OF THE PROJECT GUTENBERG/i);
     if (startMatch && startMatch.index !== undefined) {
@@ -495,8 +542,9 @@ export class Splitter {
         gutenbergHeader = {
           title: 'Thông tin Project Gutenberg',
           previewText: headerText.substring(0, 100).trim() + '...',
-          wordCount: headerText.split(/\s+/).filter(w => w.length > 0).length,
-          originalText: headerText
+          wordCount: this.countWords(headerText),
+          originalText: headerText,
+          excludeFromTranslation: true
         };
       }
       textToSplit = textToSplit.substring(endOfLineIdx).trim();
@@ -512,8 +560,9 @@ export class Splitter {
         gutenbergFooter = {
           title: 'Giấy phép Project Gutenberg',
           previewText: footerText.substring(0, 100).trim() + '...',
-          wordCount: footerText.split(/\s+/).filter(w => w.length > 0).length,
-          originalText: footerText
+          wordCount: this.countWords(footerText),
+          originalText: footerText,
+          excludeFromTranslation: true
         };
       }
       textToSplit = textToSplit.substring(0, startOfLineIdx).trim();
@@ -523,7 +572,7 @@ export class Splitter {
       const mainChapter = {
         title: 'Nội dung sách',
         previewText: textToSplit.substring(0, 150) + '...',
-        wordCount: textToSplit.split(/\s+/).filter(w => w.length > 0).length,
+        wordCount: this.countWords(textToSplit),
         originalText: textToSplit
       };
       
@@ -568,7 +617,7 @@ export class Splitter {
       if (!currentAcc) {
         currentAcc = { titles: [chunk.title], originalText: chunk.originalText };
       } else {
-        const currentWords = currentAcc.originalText.split(/\s+/).filter(w => w.length > 0).length;
+        const currentWords = this.countWords(currentAcc.originalText);
         if (currentWords < MIN_WORDS) {
           currentAcc.titles.push(chunk.title);
           currentAcc.originalText += '\n\n' + chunk.originalText;
@@ -580,11 +629,20 @@ export class Splitter {
     }
     
     if (currentAcc) {
-      mergedChapters.push(currentAcc);
+      const currentWords = this.countWords(currentAcc.originalText);
+      const trailingThreshold = Math.min(2000, MIN_WORDS);
+
+      if (currentWords < trailingThreshold && mergedChapters.length > 0) {
+        const lastMerged = mergedChapters[mergedChapters.length - 1];
+        lastMerged.titles.push(...currentAcc.titles);
+        lastMerged.originalText += '\n\n' + currentAcc.originalText;
+      } else {
+        mergedChapters.push(currentAcc);
+      }
     }
 
     const processedMain = mergedChapters.map(c => {
-      const wordCount = c.originalText.split(/\s+/).filter(w => w.length > 0).length;
+      const wordCount = this.countWords(c.originalText);
       
       let finalTitle = c.titles[0];
       if (c.titles.length === 2) {
@@ -630,7 +688,9 @@ export class Splitter {
       title: c.title,
       originalText: c.originalText,
       wordCount: c.wordCount,
-      status: 'pending'
+      status: c.excludeFromTranslation ? 'done' : 'pending',
+      excludeFromTranslation: c.excludeFromTranslation,
+      translatedText: c.excludeFromTranslation ? c.originalText : undefined
     }));
 
     this.store.setChapters(chapters);

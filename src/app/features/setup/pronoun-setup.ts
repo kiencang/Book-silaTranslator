@@ -128,7 +128,7 @@ export class PronounSetup implements OnInit, OnDestroy {
     let fullText = '';
     const chapters = this.store.chapters();
     if (chapters && chapters.length > 0) {
-       fullText = chapters.map(c => c.title + '\n' + c.originalText).join('\n\n');
+       fullText = chapters.filter(c => !c.excludeFromTranslation).map(c => c.title + '\n' + c.originalText).join('\n\n');
     } else {
        fullText = this.store.rawMarkdown() || '';
     }

@@ -24,6 +24,7 @@ export interface Chapter {
   versions?: TranslationVersion[];
   activeVersionNumber?: number;
   latestVersionNumber?: number;
+  excludeFromTranslation?: boolean;
 }
 
 export interface TranslationConfig {
@@ -58,11 +59,11 @@ export class BookStore {
   readonly isConverting = signal<boolean>(false);
   readonly isGeneratingMetadata = signal<boolean>(false);
   readonly chapters = signal<Chapter[]>([]);
-  readonly estimatedEnglishWords = computed(() => this.chapters().reduce((sum, c) => sum + (c.wordCount || 0), 0));
+  readonly estimatedEnglishWords = computed(() => this.chapters().filter(c => !c.excludeFromTranslation).reduce((sum, c) => sum + (c.wordCount || 0), 0));
   readonly estimatedEnglishTokens = computed(() => this.estimatedEnglishWords() * 1.4);
   readonly estimatedVietnameseWords = computed(() => this.estimatedEnglishWords() * 1.45);
   readonly estimatedVietnameseTokens = computed(() => this.estimatedVietnameseWords() * 1.5);
-  readonly hasAnyTranslation = computed(() => this.chapters().some(c => !!c.translatedText));
+  readonly hasAnyTranslation = computed(() => this.chapters().filter(c => !c.excludeFromTranslation).some(c => !!c.translatedText));
   readonly isTranslatingAny = computed(() => this.chapters().some(c => c.status === 'translating'));
   readonly isBusy = computed(() => this.isConverting() || this.isGeneratingMetadata() || this.isTranslatingAny());
   readonly config = signal<TranslationConfig>({

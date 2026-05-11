@@ -37,11 +37,11 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
           @if (chapter().status !== 'translating') {
             <button 
               (click)="translateSingle.emit(); $event.stopPropagation()"
-              [disabled]="store.isTranslatingAny()"
-              [class.opacity-50]="store.isTranslatingAny()"
-              [class.cursor-not-allowed]="store.isTranslatingAny()"
+              [disabled]="store.isTranslatingAny() || chapter().excludeFromTranslation"
+              [class.opacity-50]="store.isTranslatingAny() || chapter().excludeFromTranslation"
+              [class.cursor-not-allowed]="store.isTranslatingAny() || chapter().excludeFromTranslation"
               class="px-3 py-1.5 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 hover:border-indigo-300 rounded-lg transition-colors flex items-center space-x-1.5 shadow-sm disabled:hover:bg-white disabled:hover:border-indigo-200"
-              [title]="chapter().status === 'done' || chapter().status === 'error' ? 'Dịch lại riêng phần này' : 'Dịch riêng phần này'"
+              [title]="chapter().excludeFromTranslation ? 'Không thể dịch khối này' : (chapter().status === 'done' || chapter().status === 'error' ? 'Dịch lại riêng phần này' : 'Dịch riêng phần này')"
             >
               <mat-icon class="!w-4 !h-4 !text-base flex items-center justify-center">looks_one</mat-icon>
               <span class="text-sm font-medium">{{ chapter().status === 'done' || chapter().status === 'error' ? 'Dịch lại riêng phần này' : 'Dịch riêng phần này' }}</span>
@@ -105,7 +105,11 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
                   </div>
                 }
               </div>
-              @if (chapter().translatedText) {
+              @if (chapter().excludeFromTranslation) {
+                <div class="flex items-center justify-center py-12 px-6 text-center text-zinc-500 bg-zinc-100 rounded-lg">
+                  <span class="text-sm">Đây là nội dung bản quyền / metadata, nội dung sẽ được giữ nguyên bản gốc khi xuất file.</span>
+                </div>
+              } @else if (chapter().translatedText) {
                 <div class="prose prose-sm max-w-none text-zinc-900" [innerHTML]="parseMarkdown(chapter().translatedText)"></div>
               } @else if (chapter().status === 'translating') {
                 <div class="flex flex-col items-center justify-center py-12 text-indigo-600">
@@ -235,16 +239,18 @@ export class ChapterItemComponent {
 
   prevTranslatedChapterIndex(): number {
     const chapters = this.store.chapters();
-    for (let i = this.index() - 1; i >= 0; i--) {
-      if (chapters[i].translatedText) return i;
+    const prevIndex = this.index() - 1;
+    if (prevIndex >= 0 && chapters[prevIndex].translatedText) {
+      return prevIndex;
     }
     return -1;
   }
 
   nextTranslatedChapterIndex(): number {
     const chapters = this.store.chapters();
-    for (let i = this.index() + 1; i < chapters.length; i++) {
-      if (chapters[i].translatedText) return i;
+    const nextIndex = this.index() + 1;
+    if (nextIndex < chapters.length && chapters[nextIndex].translatedText) {
+      return nextIndex;
     }
     return -1;
   }
