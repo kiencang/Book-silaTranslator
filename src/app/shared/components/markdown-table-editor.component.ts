@@ -38,9 +38,9 @@ import { MatIconModule } from '@angular/material/icon';
       }
 
       <div class="flex items-center justify-between">
-        <label class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest flex items-center">
+        <span class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest flex items-center">
           Nội dung (Có thể chỉnh sửa)
-        </label>
+        </span>
         <div class="flex bg-zinc-100 p-1 rounded-lg border border-zinc-200">
           <button 
             type="button"
@@ -309,7 +309,7 @@ export class MarkdownTableEditorComponent {
     
     const parsedRows: string[][] = [];
     for (const line of lines) {
-      if (/^[\|\s\-:]+$/.test(line) && line.includes('-')) {
+      if (/^[|\s\-:]+$/.test(line) && line.includes('-')) {
         continue; // delimiter line
       }
       let cleaned = line;

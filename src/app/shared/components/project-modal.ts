@@ -51,15 +51,19 @@ import { DatePipe } from '@angular/common';
                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
                   }
                   
-                  <div class="flex-1 cursor-pointer" role="button" tabindex="0" (keydown.enter)="loadProject(p.id)" (click)="loadProject(p.id)">
-                    <h3 class="font-bold text-lg text-zinc-900 mb-1 flex items-center">
-                      {{p.name}}
-                      @if (store.currentProjectId() === p.id) {
-                        <span class="ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                  <div class="flex-1 cursor-pointer min-w-0" role="button" tabindex="0" (keydown.enter)="loadProject(p.id)" (click)="loadProject(p.id)">
+                    @if (store.currentProjectId() === p.id) {
+                      <div class="mb-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                           Đang mở
                         </span>
-                      }
-                    </h3>
+                      </div>
+                    }
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="font-bold text-base text-zinc-900 mb-1 line-clamp-2" [title]="p.name">
+                        {{p.name}}
+                      </h3>
+                    </div>
                     <div class="flex flex-col gap-2 w-full mt-2">
                       <div class="flex flex-wrap items-center text-sm text-zinc-500 gap-x-4 gap-y-2">
                         <span class="flex items-center"><span class="material-icons text-[16px] mr-1">update</span> {{p.updatedAt | date:'short'}}</span>

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, effect } from '@angular/core';
 import { BookStore, Chapter } from '../../core/book.store';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../core/toast.service';
@@ -43,46 +43,133 @@ import { ToastService } from '../../core/toast.service';
       }
 
       <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8 transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
-        <h3 class="text-lg font-semibold text-zinc-900 mb-4">Điều chỉnh cách phân chia</h3>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-          <div class="md:col-span-5">
-            <label for="keywordInput" class="block text-sm font-medium text-zinc-700 mb-1">Từ khóa chia</label>
-            <div class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-shadow bg-white flex flex-wrap gap-2 items-center min-h-[50px]">
-              @for (kw of draftKeywords(); track kw) {
-                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
-                  {{ kw }}
-                  <button type="button" class="ml-1.5 flex-shrink-0 inline-flex rounded-full text-indigo-500 hover:text-indigo-800 hover:bg-indigo-100 transition-colors" (click)="removeKeyword(kw)">
-                    <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">close</mat-icon>
-                  </button>
-                </span>
-              }
-              <input type="text" 
-                    id="keywordInput"
-                    #keywordInput
-                    (keydown)="handleKeywordKeydown($event, keywordInput)"
-                    (blur)="addKeyword(keywordInput)"
-                    class="flex-1 min-w-[120px] border-0 bg-transparent p-1 text-sm text-zinc-900 focus:ring-0 placeholder:text-zinc-400 outline-none" 
-                    placeholder="Thêm từ khóa... (Enter để lưu)">
+        <h3 class="text-lg font-semibold text-zinc-900 mb-6">Điều chỉnh cách phân chia</h3>
+        
+        <!-- Số từ tối thiểu cross-cutting -->
+        <div class="mb-6 pb-6 border-b border-zinc-200 border-dashed">
+          <div class="flex items-center gap-4">
+            <div class="w-1/3">
+              <label for="draftMinWords" class="block text-sm font-bold text-zinc-900 mb-1">Số từ tối thiểu mỗi phần</label>
+              <p class="text-xs text-zinc-500">Các phần nhỏ hơn sẽ được tự động gộp lại.</p>
             </div>
-            <p class="text-xs text-zinc-500 mt-2">Bấm Enter hoặc phẩy để thêm. Hỗ trợ ký tự đặc biệt.</p>
+            <div class="w-2/3 flex items-center gap-3">
+              <input type="number" 
+                    id="draftMinWords"
+                    [value]="draftMinWords()" 
+                    (input)="draftMinWords.set(+$any($event.target).value)" 
+                    min="1000" max="20000" step="500" 
+                    class="w-32 px-4 py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
+              <span class="text-sm font-medium text-zinc-600 text-left w-24">Từ</span>
+            </div>
           </div>
-          <div class="md:col-span-5">
-            <label for="draftMinWords" class="block text-sm font-medium text-zinc-700 mb-1">Số từ tối thiểu mỗi phần</label>
-            <input type="number" 
-                  id="draftMinWords"
-                  [value]="draftMinWords()" 
-                  (input)="draftMinWords.set(+$any($event.target).value)" 
-                  min="1000" max="20000" step="500" 
-                  class="w-full px-4 py-3 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-lg text-center transition-shadow">
-            <p class="text-xs text-zinc-500 mt-2">Các phần nhỏ hơn sẽ tự động được gộp.</p>
+        </div>
+
+        <!-- Tùy chọn 1: Chia theo từ khóa -->
+        <div class="mb-4 p-5 rounded-xl border-2 transition-colors relative"
+             [class.border-indigo-500]="activeSplitMode() === 'keyword'"
+             [class.bg-indigo-50]="activeSplitMode() === 'keyword'"
+             [class.bg-opacity-20]="activeSplitMode() === 'keyword'"
+             [class.border-transparent]="activeSplitMode() !== 'keyword'">
+          <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
+            <div class="flex-1 w-full">
+              <label for="keywordInput" class="block text-sm font-bold text-zinc-900 mb-2">Tùy chọn 1: Chia theo Từ khóa Tiêu đề</label>
+              <div class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-shadow bg-white flex flex-wrap gap-2 items-center min-h-[50px] cursor-text" tabindex="0" (click)="focusInput(keywordInput)" (keydown.enter)="focusInput(keywordInput)">
+                @for (kw of draftKeywords(); track kw) {
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    {{ kw }}
+                    <button type="button" class="ml-1.5 flex-shrink-0 inline-flex rounded-full text-indigo-500 hover:text-indigo-800 hover:bg-indigo-100 transition-colors" (click)="removeKeyword(kw); $event.stopPropagation()">
+                      <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">close</mat-icon>
+                    </button>
+                  </span>
+                }
+                <input type="text" 
+                      id="keywordInput"
+                      #keywordInput
+                      (keydown)="handleKeywordKeydown($event, keywordInput)"
+                      (blur)="addKeyword(keywordInput)"
+                      class="flex-1 min-w-[120px] border-0 bg-transparent p-1 text-sm text-zinc-900 focus:ring-0 placeholder:text-zinc-400 outline-none" 
+                      placeholder="Thêm từ khóa... (Enter để lưu)">
+              </div>
+              <p class="text-xs text-zinc-500 mt-2">Dùng khi các chương bắt đầu bằng chữ "Chương", "Part", "Phần", v.v.</p>
+            </div>
+            <div class="w-full md:w-32 flex-shrink-0">
+              <button 
+                (click)="applyKeywordMode()"
+                class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm"
+                [class.bg-indigo-600]="activeSplitMode() === 'keyword'"
+                [class.text-white]="activeSplitMode() === 'keyword'"
+                [class.border-indigo-600]="activeSplitMode() === 'keyword'"
+                [class.hover:bg-indigo-700]="activeSplitMode() === 'keyword'"
+                [class.bg-white]="activeSplitMode() !== 'keyword'"
+                [class.text-zinc-700]="activeSplitMode() !== 'keyword'"
+                [class.border-zinc-300]="activeSplitMode() !== 'keyword'"
+                [class.hover:bg-zinc-50]="activeSplitMode() !== 'keyword'"
+              >
+                @if (activeSplitMode() === 'keyword') {
+                  <mat-icon class="!w-5 !h-5 !text-base">check</mat-icon>
+                  <span>Đang dùng</span>
+                } @else {
+                  <span>Sử dụng</span>
+                }
+              </button>
+            </div>
           </div>
-          <div class="md:col-span-2 pt-6">
-            <button 
-              (click)="applySettings()"
-              class="w-full h-[50px] flex items-center justify-center space-x-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 rounded-lg font-medium transition-colors border border-zinc-300">
-              <mat-icon class="!w-5 !h-5 !text-base">refresh</mat-icon>
-              <span>Áp dụng</span>
-            </button>
+        </div>
+
+        <div class="flex items-center justify-center my-2 opacity-60">
+          <div class="h-px bg-zinc-300 w-full max-w-[100px]"></div>
+          <span class="mx-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Hoặc</span>
+          <div class="h-px bg-zinc-300 w-full max-w-[100px]"></div>
+        </div>
+
+        <!-- Tùy chọn 2: Chia theo Tiêu đề Heading -->
+        <div class="p-5 rounded-xl border-2 transition-colors relative"
+             [class.border-indigo-500]="activeSplitMode() === 'heading'"
+             [class.bg-indigo-50]="activeSplitMode() === 'heading'"
+             [class.bg-opacity-20]="activeSplitMode() === 'heading'"
+             [class.border-transparent]="activeSplitMode() !== 'heading'">
+          <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
+            <div class="flex-1 w-full">
+              <h4 class="block text-sm font-bold text-zinc-900 mb-3">Tùy chọn 2: Chia theo cấu trúc Thẻ Heading (H2, H3)</h4>
+              <div class="flex flex-wrap gap-6 items-center">
+                <label class="flex items-center gap-2 cursor-pointer p-2 -m-2 rounded-lg hover:bg-zinc-50 transition-colors">
+                  <input type="radio" name="headingLvl" value="h2" 
+                         [checked]="activeSplitMode() === 'heading' && draftHeadingLevel() === 'h2'" 
+                         (change)="onHeadingLevelChange('h2')"
+                         class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500">
+                  <span class="text-sm font-medium text-zinc-900">Thẻ H2</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer p-2 -m-2 rounded-lg hover:bg-zinc-50 transition-colors">
+                  <input type="radio" name="headingLvl" value="h3" 
+                         [checked]="activeSplitMode() === 'heading' && draftHeadingLevel() === 'h3'" 
+                         (change)="onHeadingLevelChange('h3')"
+                         class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500">
+                  <span class="text-sm font-medium text-zinc-900">Thẻ H3</span>
+                </label>
+              </div>
+              <p class="text-xs text-zinc-500 mt-3">Dùng khi sách gốc không có từ "Chapter", "Section" nhưng có thẻ <code>##</code> (H2) hoặc <code>###</code> (H3) phân định rõ ràng.</p>
+            </div>
+            <div class="w-full md:w-32 flex-shrink-0">
+              <button 
+                (click)="applyHeadingModeDefault()"
+                class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm"
+                [class.bg-indigo-600]="activeSplitMode() === 'heading'"
+                [class.text-white]="activeSplitMode() === 'heading'"
+                [class.border-indigo-600]="activeSplitMode() === 'heading'"
+                [class.hover:bg-indigo-700]="activeSplitMode() === 'heading'"
+                [class.bg-white]="activeSplitMode() !== 'heading'"
+                [class.text-zinc-700]="activeSplitMode() !== 'heading'"
+                [class.border-zinc-300]="activeSplitMode() !== 'heading'"
+                [class.hover:bg-zinc-50]="activeSplitMode() !== 'heading'"
+              >
+                @if (activeSplitMode() === 'heading') {
+                  <mat-icon class="!w-5 !h-5 !text-base">check</mat-icon>
+                  <span>Đang dùng</span>
+                } @else {
+                  <span>Sử dụng</span>
+                }
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -93,16 +180,16 @@ import { ToastService } from '../../core/toast.service';
             role="button"
             tabindex="0"
             class="p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col"
-            [class.border-indigo-500]="selectedMethod() === method.keyword"
-            [class.bg-indigo-50]="selectedMethod() === method.keyword"
-            [class.border-zinc-200]="selectedMethod() !== method.keyword"
-            [class.hover:border-zinc-300]="selectedMethod() !== method.keyword"
+            [class.border-indigo-500]="selectedMethodData()?.keyword === method.keyword"
+            [class.bg-indigo-50]="selectedMethodData()?.keyword === method.keyword"
+            [class.border-zinc-200]="selectedMethodData()?.keyword !== method.keyword"
+            [class.hover:border-zinc-300]="selectedMethodData()?.keyword !== method.keyword"
             (keydown.enter)="selectMethod(method.keyword)"
             (click)="selectMethod(method.keyword)"
           >
             <div class="flex justify-between items-start mb-3">
               <h3 class="font-semibold text-zinc-900">Theo {{ method.keyword }} / Khối</h3>
-              @if (selectedMethod() === method.keyword) {
+              @if (selectedMethodData()?.keyword === method.keyword) {
                 <mat-icon class="text-indigo-500">check_circle</mat-icon>
               }
             </div>
@@ -186,8 +273,60 @@ export class Splitter {
   activeKeywords = signal<string[]>(['Chapter', 'Part', 'Section']);
   activeMinWords = signal(1000);
   
+  activeSplitMode = signal<'keyword' | 'heading'>('keyword');
+  draftHeadingLevel = signal<'h2' | 'h3'>('h2');
+  activeHeadingLevel = signal<'h2' | 'h3'>('h2');
+  
   selectedMethod = signal<string | null>(null);
   previewBlock = signal<{title: string, previewText: string, wordCount: number, originalText: string} | null>(null);
+
+  constructor() {
+    const settings = this.store.splitSettings();
+    if (settings) {
+      this.draftKeywords.set(settings.activeKeywords);
+      this.activeKeywords.set(settings.activeKeywords);
+      
+      this.draftMinWords.set(settings.activeMinWords);
+      this.activeMinWords.set(settings.activeMinWords);
+      
+      this.draftHeadingLevel.set(settings.activeHeadingLevel);
+      this.activeHeadingLevel.set(settings.activeHeadingLevel);
+      
+      this.activeSplitMode.set(settings.activeSplitMode);
+      if (settings.selectedMethod !== undefined) {
+        this.selectedMethod.set(settings.selectedMethod);
+      }
+    }
+
+    effect(() => {
+      this.store.splitSettings.set({
+        activeSplitMode: this.activeSplitMode(),
+        activeKeywords: this.activeKeywords(),
+        activeHeadingLevel: this.activeHeadingLevel(),
+        activeMinWords: this.activeMinWords(),
+        selectedMethod: this.selectedMethod()
+      });
+    }, { allowSignalWrites: true });
+  }
+
+  focusInput(input: HTMLInputElement) {
+    input.focus();
+  }
+
+  onHeadingLevelChange(level: 'h2' | 'h3') {
+    this.draftHeadingLevel.set(level);
+    if (this.activeSplitMode() !== 'heading') {
+      this.activeSplitMode.set('heading');
+    }
+    this.applyHeadingMode();
+  }
+
+  applyHeadingModeDefault() {
+    if (this.activeSplitMode() !== 'heading') {
+      this.draftHeadingLevel.set('h2');
+    }
+    this.applyHeadingMode();
+  }
 
   handleKeywordKeydown(event: KeyboardEvent, inputElement: HTMLInputElement) {
     if (event.key === 'Enter' || event.key === ',') {
@@ -219,14 +358,25 @@ export class Splitter {
     this.draftKeywords.update(kws => kws.filter(k => k !== kwToRemove));
   }
 
-  applySettings() {
+  applyKeywordMode() {
     const kwArray = this.draftKeywords();
-    
     this.activeKeywords.set(kwArray.length > 0 ? kwArray : ['Chapter']);
     
     const minW = Math.max(1000, Math.min(20000, this.draftMinWords()));
-    this.draftMinWords.set(minW); // Reset draft if out of bounds
+    this.draftMinWords.set(minW);
     this.activeMinWords.set(minW);
+    
+    this.activeSplitMode.set('keyword');
+  }
+
+  applyHeadingMode() {
+    const minW = Math.max(1000, Math.min(20000, this.draftMinWords()));
+    this.draftMinWords.set(minW);
+    this.activeMinWords.set(minW);
+    
+    this.activeHeadingLevel.set(this.draftHeadingLevel());
+    
+    this.activeSplitMode.set('heading');
   }
 
   escapeRegExp(string: string) {
@@ -236,24 +386,43 @@ export class Splitter {
   splitMethods = computed(() => {
     const text = this.store.rawMarkdown() || '';
     const minW = this.activeMinWords();
-    const activeKw = this.activeKeywords();
+    const mode = this.activeSplitMode();
     
     // First, add default "No split / Entire Book" method just in case
     const methods = [{
       keyword: 'Toàn bộ file',
       count: 1,
-      previewChapters: this.generatePreview(text, 'Toàn bộ file', minW)
+      previewChapters: this.generatePreview(text, 'Toàn bộ file', minW, null)
     }];
 
-    for (const kw of activeKw) {
-      const escapedKw = this.escapeRegExp(kw);
-      // Regex to find headings (optional #s) that start with keyword (case insensitive)
-      // Example: ## Chapter 1 or Chapter 1
-      const regex = new RegExp(`^(#*\\s*${escapedKw}\\s+.*)$`, 'gim');
+    if (mode === 'keyword') {
+      const activeKw = this.activeKeywords();
+      for (const kw of activeKw) {
+        const escapedKw = this.escapeRegExp(kw);
+        // Regex to find headings (optional #s) that start with keyword (case insensitive)
+        const regex = new RegExp(`^(#*\\s*${escapedKw}\\s+.*)$`, 'gim');
+        const matches = text.match(regex);
+        
+        if (matches && matches.length > 0) {
+          const previewChapters = this.generatePreview(text, kw, minW, regex);
+          methods.push({
+            keyword: kw,
+            count: previewChapters.length,
+            previewChapters
+          });
+        }
+      }
+    } else if (mode === 'heading') {
+      const level = this.activeHeadingLevel();
+      const regexStr = level === 'h2' 
+        ? '^((?:##\\s+.*)|(?:.+\\r?\\n[-=]{3,}\\s*))$' 
+        : '^(###\\s+.*)$';
+      const regex = new RegExp(regexStr, 'gim');
       const matches = text.match(regex);
       
       if (matches && matches.length > 0) {
-        const previewChapters = this.generatePreview(text, kw, minW);
+        const kw = `Thẻ ${level.toUpperCase()}`;
+        const previewChapters = this.generatePreview(text, kw, minW, regex);
         methods.push({
           keyword: kw,
           count: previewChapters.length,
@@ -262,23 +431,22 @@ export class Splitter {
       }
     }
     
-    // Auto-select the one with most parts if no selection made yet
-    // Do it in an effect or just compute the highest one
     return methods.sort((a,b) => b.count - a.count);
   });
 
   selectedMethodData = computed(() => {
     const sel = this.selectedMethod();
     const methods = this.splitMethods();
-    if (!sel && methods.length > 0) {
-      return methods[0];
+    if (methods.length === 0) return null;
+    
+    if (sel) {
+      const found = methods.find(m => m.keyword === sel);
+      if (found) return found;
     }
-    return methods.find(m => m.keyword === sel) || null;
+    return methods[0];
   });
 
-  constructor() {
-    // We can't set signals inside computed directly, so we rely on selectedMethodData returning the first if null
-  }
+
 
   selectMethod(kw: string) {
     this.selectedMethod.set(kw);
@@ -312,7 +480,7 @@ export class Splitter {
     }
   }
 
-  generatePreview(text: string, kw: string, minWords: number): {title: string, previewText: string, wordCount: number, originalText: string}[] {
+  generatePreview(text: string, kw: string, minWords: number, splitRegex: RegExp | null): {title: string, previewText: string, wordCount: number, originalText: string}[] {
     let textToSplit = text;
     let gutenbergHeader: {title: string, previewText: string, wordCount: number, originalText: string} | null = null;
     let gutenbergFooter: {title: string, previewText: string, wordCount: number, originalText: string} | null = null;
@@ -351,7 +519,7 @@ export class Splitter {
       textToSplit = textToSplit.substring(0, startOfLineIdx).trim();
     }
 
-    if (kw === 'Toàn bộ file') {
+    if (kw === 'Toàn bộ file' || !splitRegex) {
       const mainChapter = {
         title: 'Nội dung sách',
         previewText: textToSplit.substring(0, 150) + '...',
@@ -366,21 +534,23 @@ export class Splitter {
       return result;
     }
 
-    const regex = new RegExp(`^(#*\\s*${kw}\\s+.*)$`, 'gim');
-    const splits = textToSplit.split(regex);
+    const splits = textToSplit.split(splitRegex);
     
     const rawChunks: {title: string, originalText: string}[] = [];
     
+    const isHeadingMode = kw.startsWith('Thẻ H');
+
     // The split array will be: [textBeforeFirstMatch, match1, text1, match2, text2, ...]
     if (splits[0].trim().length > 0) {
       rawChunks.push({
-        title: 'Mở đầu / Giới thiệu',
+        title: isHeadingMode ? 'Phần đầu' : 'Mở đầu / Giới thiệu',
         originalText: splits[0].trim()
       });
     }
 
     for (let i = 1; i < splits.length; i += 2) {
-      const title = splits[i].replace(/^#+\s*/, '').trim();
+      const rawTitle = splits[i];
+      const title = rawTitle.replace(/^#+\s*/, '').replace(/\r?\n[-=]+\s*$/, '').trim();
       const content = splits[i + 1] ? splits[i + 1].trim() : '';
       const fullContent = splits[i] + '\n' + content;
       

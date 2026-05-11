@@ -19,6 +19,14 @@ export interface PdfConversionTask {
   chunks: PdfConversionChunk[];
 }
 
+export interface SplitSettings {
+  activeSplitMode: 'keyword' | 'heading';
+  activeKeywords: string[];
+  activeHeadingLevel: 'h2' | 'h3';
+  activeMinWords: number;
+  selectedMethod?: string | null;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -38,6 +46,7 @@ export interface Project {
   pdfTask?: PdfConversionTask;
   totalWords?: number;
   translatedWords?: number;
+  splitSettings?: SplitSettings;
 }
 
 export type ProjectMeta = Omit<Project, 'chapters' | 'rawMarkdown' | 'pronounTable' | 'glossaryTable' | 'pdfTask'>;
@@ -242,14 +251,24 @@ export class DbService {
         const tx = db.transaction('project_chapters', 'readwrite');
         const store = tx.objectStore('project_chapters');
         
-        let i = 0;
-        function putNext() {
-            if (i < chapters.length) {
-                store.put({ ...chapters[i], projectId }).onsuccess = putNext;
-                i++;
-            }
-        }
-        putNext();
+        const idx = store.index('projectId');
+        const req = idx.openCursor(IDBKeyRange.only(projectId));
+        req.onsuccess = (e: Event) => {
+           const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+           if (cursor) {
+              cursor.delete();
+              cursor.continue();
+           } else {
+              let i = 0;
+              function putNext() {
+                  if (i < chapters.length) {
+                      store.put({ ...chapters[i], projectId }).onsuccess = putNext;
+                      i++;
+                  }
+              }
+              putNext();
+           }
+        };
 
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);
@@ -314,6 +333,7 @@ export class DbService {
           config: project.config,
           usePronouns: project.usePronouns,
           useGlossary: project.useGlossary,
+          splitSettings: project.splitSettings,
           totalWords,
           translatedWords,
           pdfTaskMeta: project.pdfTask ? { fileName: project.pdfTask.fileName, chunkCount: project.pdfTask.chunks.length } : undefined
@@ -327,7 +347,17 @@ export class DbService {
         assetStore.put({ id: `${project.id}_pdfTask`, data: project.pdfTask });
 
         const chapStore = tx.objectStore('project_chapters');
-        project.chapters?.forEach(c => chapStore.put({ ...c, projectId: project.id }));
+        const idx = chapStore.index('projectId');
+        const req = idx.openCursor(IDBKeyRange.only(project.id));
+        req.onsuccess = (e: Event) => {
+           const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+           if (cursor) {
+              cursor.delete();
+              cursor.continue();
+           } else {
+              project.chapters?.forEach(c => chapStore.put({ ...c, projectId: project.id }));
+           }
+        };
 
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);

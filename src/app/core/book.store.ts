@@ -1,6 +1,6 @@
 import { Injectable, signal, effect, PLATFORM_ID, inject, untracked, computed } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { DbService, Project, ProjectMeta } from './db';
+import { DbService, Project, ProjectMeta, SplitSettings } from './db';
 import { ToastService } from './toast.service';
 import { getConfiguredMarked } from './marked-setup';
 import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HTML } from './html-export.util';
@@ -69,6 +69,7 @@ export class BookStore {
     model: 'gemini-pro-latest',
     temperature: 0.5
   });
+  readonly splitSettings = signal<SplitSettings | undefined>(undefined);
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
@@ -93,7 +94,8 @@ export class BookStore {
         bookTitle: this.bookTitle(),
         author: this.author(),
         usePronouns: this.usePronouns(),
-        useGlossary: this.useGlossary()
+        useGlossary: this.useGlossary(),
+        splitSettings: this.splitSettings()
       };
       
       if (isPlatformBrowser(this.platformId)) {
@@ -175,6 +177,7 @@ export class BookStore {
     this.rawMarkdown.set(null);
     this.pdfTask.set(undefined);
     this.chapters.set([]);
+    this.splitSettings.set(undefined);
     this.phase.set(1);
   }
 
@@ -200,6 +203,7 @@ export class BookStore {
       );
       this.chapters.set(adjustedChapters);
       this.config.set(proj.config);
+      this.splitSettings.set(proj.splitSettings);
       this.phase.set(proj.phase as 0 | 1 | 2 | 3 | 4 | 5);
       
       if (isPlatformBrowser(this.platformId)) {
@@ -218,6 +222,7 @@ export class BookStore {
     this.glossaryTable.set('');
     this.useGlossary.set(false);
     this.pdfTask.set(undefined);
+    this.splitSettings.set(undefined);
     this.phase.set(0);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('md-translator-last-id');

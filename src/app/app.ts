@@ -48,19 +48,19 @@ import {ToastComponent} from './shared/components/toast.component';
                   Chia chương
                 </button>
                 <div class="w-3 h-0.5 rounded-full bg-zinc-200" [class.bg-indigo-600]="store.phase() > 2"></div>
-                <button (click)="goToPhase(3)" [disabled]="store.chapters().length === 0 || store.isBusy()" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() >= 3">
+                <button (click)="goToPhase(3)" [disabled]="store.chapters().length === 0 || store.isBusy() || store.phase() === 2" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() >= 3">
                   <span class="w-5 h-5 text-xs rounded-full border-2 flex items-center justify-center mr-1.5"
                         [class.border-indigo-600]="store.phase() >= 3" [class.bg-indigo-600]="store.phase() > 3" [class.text-white]="store.phase() > 3">3</span>
                   Đại từ
                 </button>
                 <div class="w-3 h-0.5 rounded-full bg-zinc-200" [class.bg-indigo-600]="store.phase() > 3"></div>
-                <button (click)="goToPhase(4)" [disabled]="store.chapters().length === 0 || store.isBusy()" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() >= 4">
+                <button (click)="goToPhase(4)" [disabled]="store.chapters().length === 0 || store.isBusy() || store.phase() === 2" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() >= 4">
                   <span class="w-5 h-5 text-xs rounded-full border-2 flex items-center justify-center mr-1.5"
                         [class.border-indigo-600]="store.phase() >= 4" [class.bg-indigo-600]="store.phase() > 4" [class.text-white]="store.phase() > 4">4</span>
                   Từ khó
                 </button>
                 <div class="w-3 h-0.5 rounded-full bg-zinc-200" [class.bg-indigo-600]="store.phase() > 4"></div>
-                <button (click)="goToPhase(5)" [disabled]="store.chapters().length === 0 || store.isBusy()" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() === 5">
+                <button (click)="goToPhase(5)" [disabled]="store.chapters().length === 0 || store.isBusy() || store.phase() === 2" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() === 5">
                   <span class="w-5 h-5 text-xs rounded-full border-2 flex items-center justify-center mr-1.5"
                         [class.border-indigo-600]="store.phase() === 5">5</span>
                   Dịch thuật
@@ -98,7 +98,7 @@ import {ToastComponent} from './shared/components/toast.component';
 
       <footer class="shrink-0 bg-white border-t border-zinc-200 py-2.5 px-6 text-xs text-zinc-500 flex justify-center items-center">
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-zinc-600">v1.0.19</span>
+          <span class="font-medium text-zinc-600">v1.0.20</span>
           <span class="text-zinc-300">•</span>
           <a href="https://github.com/kiencang/Book-silaTranslator" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition-colors">GitHub</a>
           <span class="text-zinc-300">•</span>
