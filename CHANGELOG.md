@@ -15,6 +15,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Cải thiện tốc độ của hàm đếm số lượng từ mỗi chương để nó nhanh hơn.
 - Đẩy khối cuối cùng có số lượng từ vụn lên khối liền kế, tránh phải dịch một khối có số lượng từ quá ít, ảnh hưởng đến ngữ cảnh (ví dụ dưới 1000 từ).
 - Loại trừ các khối Gutenberg khỏi phần dịch và trích xuất đại từ và từ khó.
+- Phần trước, phần sau ở chế độ toàn màn hình phải là các block liền kề, không được phép nhảy cóc.
 
 ## [v1.0.20]- 2026-05-11
 ### Fixed
