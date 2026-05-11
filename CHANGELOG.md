@@ -8,10 +8,12 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
-## [v1.0.21]- 2026-05-11
+## [v1.0.21]- 2026-05-12
 ### Fixed
 - Thêm nút áp dụng điều chỉnh số từ tiện dùng vào phase chia tách sách.
 - Thay đổi số từ mặc định của phần `Số từ tối thiểu mỗi phần` từ 1000 lên 5000.
+- Cải thiện tốc độ của hàm đếm số lượng từ mỗi chương để nó nhanh hơn.
+- Đẩy khối cuối cùng có số lượng từ vụn lên khối liền kế, tránh phải dịch một khối có số lượng từ quá ít, ảnh hưởng đến ngữ cảnh (ví dụ dưới 1000 từ).
 
 ## [v1.0.20]- 2026-05-11
 ### Fixed
