@@ -209,7 +209,17 @@ export class MarkdownTableEditorComponent {
   }
 
   removeRow(rowIndex: number) {
-    this.confirmDelete.set({ type: 'row', index: rowIndex });
+    const row = this.tableData()[rowIndex];
+    const hasContent = row && row.some(cell => cell.trim().length > 0);
+    
+    if (hasContent) {
+      this.confirmDelete.set({ type: 'row', index: rowIndex });
+    } else {
+      const currentData = [...this.tableData()];
+      currentData.splice(rowIndex, 1);
+      this.tableData.set(currentData);
+      this.syncTableToMarkdown();
+    }
   }
 
   addColumn() {
@@ -223,7 +233,30 @@ export class MarkdownTableEditorComponent {
   }
 
   removeColumn(colIndex: number) {
-    this.confirmDelete.set({ type: 'col', index: colIndex });
+    const currentData = this.tableData();
+    let hasContent = false;
+    for (let i = 1; i < currentData.length; i++) {
+      if (currentData[i][colIndex] && currentData[i][colIndex].trim().length > 0) {
+        hasContent = true;
+        break;
+      }
+    }
+
+    if (hasContent) {
+      this.confirmDelete.set({ type: 'col', index: colIndex });
+    } else {
+      const newData = currentData.map(row => {
+        const newRow = [...row];
+        newRow.splice(colIndex, 1);
+        return newRow;
+      });
+      if (newData.length > 0 && newData[0].length === 0) {
+        this.tableData.set([]);
+      } else {
+        this.tableData.set(newData);
+      }
+      this.syncTableToMarkdown();
+    }
   }
 
   executeDelete() {

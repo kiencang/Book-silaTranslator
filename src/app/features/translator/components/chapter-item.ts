@@ -2,8 +2,8 @@ import { Component, input, model, output, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { BookStore, Chapter } from '../../../core/book.store';
-import { marked } from 'marked';
 import { ToastService } from '../../../core/toast.service';
+import { getConfiguredMarked } from '../../../core/marked-setup';
 import { ReaderStore } from '../../../core/reader.store';
 import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HTML } from '../../../core/html-export.util';
 
@@ -178,6 +178,28 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
                  [style.font-size.px]="readerStore.prefs().fontSize"
                  [style.font-family]="getFontFamily(readerStore.prefs().fontFamily)"
                  [innerHTML]="parseMarkdown(chapter().translatedText)"></div>
+
+            <div class="mt-24 pt-8 border-t border-zinc-200/50 flex flex-col sm:flex-row items-center justify-between gap-4 max-w-2xl mx-auto pb-12">
+              @if (prevTranslatedChapterIndex() !== -1) {
+                <button (click)="navigateTo(prevTranslatedChapterIndex())"
+                        class="flex items-center gap-2 px-6 py-3 rounded-full bg-white/50 hover:bg-white/80 dark:bg-zinc-800/50 dark:hover:bg-zinc-800/80 transition-colors shadow-sm text-sm font-medium text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 w-full sm:w-auto justify-center">
+                  <mat-icon class="!w-5 !h-5 !text-[20px] leading-none">arrow_back</mat-icon>
+                  Phần trước
+                </button>
+              } @else {
+                <div class="hidden sm:block"></div>
+              }
+              
+              @if (nextTranslatedChapterIndex() !== -1) {
+                <button (click)="navigateTo(nextTranslatedChapterIndex())"
+                        class="flex items-center gap-2 px-6 py-3 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 transition-colors shadow-sm text-sm font-medium text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 w-full sm:w-auto justify-center">
+                  Phần sau
+                  <mat-icon class="!w-5 !h-5 !text-[20px] leading-none">arrow_forward</mat-icon>
+                </button>
+              } @else {
+                <div class="hidden sm:block"></div>
+              }
+            </div>
           </div>
         </div>
       }
@@ -195,6 +217,7 @@ export class ChapterItemComponent {
   isFullscreen = signal(false);
 
   translateSingle = output<void>();
+  requestNavigate = output<number>();
 
   toggleExpand() {
     this.isExpanded.set(!this.isExpanded());
@@ -208,6 +231,27 @@ export class ChapterItemComponent {
   closeFullscreen() {
     this.isFullscreen.set(false);
     document.body.style.overflow = '';
+  }
+
+  prevTranslatedChapterIndex(): number {
+    const chapters = this.store.chapters();
+    for (let i = this.index() - 1; i >= 0; i--) {
+      if (chapters[i].translatedText) return i;
+    }
+    return -1;
+  }
+
+  nextTranslatedChapterIndex(): number {
+    const chapters = this.store.chapters();
+    for (let i = this.index() + 1; i < chapters.length; i++) {
+      if (chapters[i].translatedText) return i;
+    }
+    return -1;
+  }
+
+  navigateTo(index: number) {
+    this.closeFullscreen();
+    this.requestNavigate.emit(index);
   }
 
   changeFontSize(delta: number) {
@@ -272,7 +316,7 @@ export class ChapterItemComponent {
     if (!text) return;
 
     try {
-      const htmlBody = marked.parse(text);
+      const htmlBody = getConfiguredMarked().parse(text);
       const title = this.chapter().title || `Phần ${this.index() + 1}`;
       const htmlDoc = `<!DOCTYPE html>
 <html lang="vi">
@@ -312,7 +356,7 @@ ${OFFLINE_READER_SCRIPT}
 
   parseMarkdown(text: string | undefined) {
     if (!text) return '';
-    return marked.parse(text) as string;
+    return getConfiguredMarked().parse(text) as string;
   }
 
   getActiveVersion(chapter: Chapter) {

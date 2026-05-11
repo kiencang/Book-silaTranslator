@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ViewChildren, QueryList } from '@angular/core';
 import { BookStore, Chapter } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
 import { GeminiClient, parseGeminiError } from '../../core/gemini';
@@ -124,6 +124,7 @@ import { ChapterItemComponent } from './components/chapter-item';
             [index]="i" 
             [(isExpanded)]="expanded[chapter.id]"
             (translateSingle)="translateSingle(chapter)" 
+            (requestNavigate)="handleNavigate($event)"
           />
         }
       </div>
@@ -135,6 +136,8 @@ export class Translator {
   gemini = inject(GeminiClient);
   toast = inject(ToastService);
   
+  @ViewChildren(ChapterItemComponent) chapterItems!: QueryList<ChapterItemComponent>;
+
   expanded: Record<string, boolean> = {};
 
   confirmAction = signal<'none' | 'retranslate' | 'all' | 'untranslated'>('none');
@@ -149,6 +152,13 @@ export class Translator {
     if (doneCount === chapters.length) return 'all';
     return 'partial';
   });
+
+  handleNavigate(index: number) {
+    const items = this.chapterItems.toArray();
+    if (items[index]) {
+      items[index].openFullscreen();
+    }
+  }
 
   async translateSingle(chapter: Chapter) {
     this.store.updateChapter(chapter.id, { status: 'translating' });

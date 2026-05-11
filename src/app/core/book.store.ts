@@ -2,7 +2,7 @@ import { Injectable, signal, effect, PLATFORM_ID, inject, untracked, computed } 
 import { isPlatformBrowser } from '@angular/common';
 import { DbService, Project, ProjectMeta } from './db';
 import { ToastService } from './toast.service';
-import { marked } from 'marked';
+import { getConfiguredMarked } from './marked-setup';
 import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HTML } from './html-export.util';
 
 export interface TranslationVersion {
@@ -316,7 +316,7 @@ export class BookStore {
     }
 
     try {
-      const htmlBody = await marked.parse(combinedMarkdown);
+      const htmlBody = await getConfiguredMarked().parse(combinedMarkdown);
       const htmlDoc = `<!DOCTYPE html>
 <html lang="vi">
 <head>
