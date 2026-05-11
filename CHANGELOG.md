@@ -7,7 +7,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
-- Cấu hình cách phân chia cuốn sách theo cách tốt hơn.
+- Cấu hình cách phân chia cuốn sách theo cách tốt hơn (áp dụng được cho nhiều trường hợp khác nhau).
 
 ## [v1.0.19]- 2026-05-11
 ### Fixed
