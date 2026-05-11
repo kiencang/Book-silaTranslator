@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.22]- 2026-05-12
+### Fixed
+- Refactoring phần chia chương sách để nó gọn gàng và rõ ràng hơn,
+
 ## [v1.0.21]- 2026-05-12
 ### Fixed
 - Thêm nút áp dụng điều chỉnh số từ tiện dùng vào phase chia tách sách.
