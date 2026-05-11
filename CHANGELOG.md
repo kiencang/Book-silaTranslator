@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.19]- 2026-05-11
+### Fixed
+- Cho phép xóa ngay lập tức hàng hoặc cột rỗng ở phần Đại từ nhân xưng và Từ khó.
+
 ## [v1.0.18]- 2026-05-11
 ### Fixed
 - Dọn dẹp một số file trung gian đã hoàn thành nhiệm vụ, và do vậy không còn cần thiết nữa.
