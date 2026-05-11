@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.21]- 2026-05-11
 ### Fixed
 - Thêm nút áp dụng điều chỉnh số từ tiện dùng.
+- Thay đổi số từ mặc định của phần `Số từ tối thiểu mỗi phần` từ 1000 lên 5000.
 
 ## [v1.0.20]- 2026-05-11
 ### Fixed
