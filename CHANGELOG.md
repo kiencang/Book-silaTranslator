@@ -12,7 +12,8 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Vô hiệu hóa header khi `Bắt đầu phân tích bằng AI` được kích hoạt nhằm chặn các thao tác không mong muốn (ví dụ khi click nhầm).
 - Tính năng lưu version cho bảng Đại từ và Từ khó.
-- Thay đổi temperature phù hợp hơn cho phần Đại từ và Từ khó.
+- Thay đổi temperature phù hợp hơn cho phần Đại từ (0.1) và Từ khó (0.2).
+- Thiết kế lại nút ở phần `Phân tích toàn diện bằng AI (Đề xuất)` để nó thay đổi theo việc có dữ liệu ở bảng ĐT & TK hay chưa, mục đích là để tránh tạo lại dữ liệu do hiểu nhầm.
 
 ## [v1.0.25]- 2026-05-12
 ### Fixed
