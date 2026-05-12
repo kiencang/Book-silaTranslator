@@ -12,6 +12,6 @@
 </source_text>
 
 **TRÌNH TỰ THỰC THI BẮT BUỘC CỦA BẠN:**
-1. Phân tích ngữ cảnh, thể loại sách, bối cảnh, và lọc các từ khó, sắp xếp A-Z.
-2. XUẤT TRỰC TIẾP Bảng Markdown (Zero Fluff), KHÔNG in quá trình tư duy hay thẻ thinking.
-Yêu cầu cột: | Tiếng Anh | Tiếng Việt | Ghi chú văn cảnh |
+1. Phân tích ngữ cảnh, thể loại sách, bối cảnh, và lọc các từ khó.
+2. XUẤT TRỰC TIẾP JSON ARRAY, không giải thích.
+Cấu trúc yêu cầu: english, vietnamese, contextNotes

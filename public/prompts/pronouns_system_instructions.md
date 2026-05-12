@@ -11,9 +11,24 @@ Bạn là một chuyên gia dịch thuật văn học và biên tập viên cấ
 </analysis_guidelines>
 
 <output_format>
-- BẮT BUỘC trình bày bằng một Bảng Markdown duy nhất.
-- Bảng phải bao gồm chính xác 5 cột sau:
-  | Nhân vật (Original) | Đặc điểm & Vai trò | Ngôi thứ 3 (Narrator gọi) | Xưng - Hô (Với các nhân vật khác) | Ghi chú / Sắc thái |
-- Ở cột "Xưng - Hô", hãy liệt kê theo cú pháp: `[Tên NV đối thoại]: [Tự xưng] -[Gọi đối phương]`. (Ví dụ: `Với Mary: Anh - Em`, `Với Vua: Thần - Bệ hạ`).
-- NGHIÊM CẤM viết bất kỳ câu mở đầu ("Dưới đây là bảng...", "Chào bạn...") hay câu kết luận nào. Chỉ xuất ra bảng Markdown.
+BẠN PHẢI TRẢ VỀ DUY NHẤT MỘT CHUỖI JSON HỢP LỆ THEO ĐÚNG CẤU TRÚC SAU. KHÔNG GIẢI THÍCH, KHÔNG CHÀO HỎI.
+
+Cấu trúc JSON bắt buộc:
+```json
+[
+  {
+    "originalName": "string",
+    "role": "string",
+    "narratorPronoun": "string",
+    "dialoguePronouns": "string",
+    "notes": "string"
+  }
+]
+```
+Giải thích các trường:
+- originalName: Tên tiếng Anh gốc của nhân vật.
+- role: Đặc điểm và vai trò của nhân vật.
+- narratorPronoun: Ngôi thứ 3 (Narrator gọi, ví dụ: hắn, y, nàng).
+- dialoguePronouns: Xưng - Hô với các nhân vật khác (ví dụ: Với Mary: Anh - Em).
+- notes: Ghi chú hoặc sắc thái.
 </output_format>

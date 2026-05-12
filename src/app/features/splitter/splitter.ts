@@ -585,7 +585,7 @@ export class Splitter {
       if (data.glossaryTable && Array.isArray(data.glossaryTable) && data.glossaryTable.length > 0) {
         let md = '| Tiếng Anh | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|\n';
         for (const gt of data.glossaryTable) {
-          md += `| ${gt.englishTerm || ''} | ${gt.vietnameseTranslation || ''} | ${gt.contextNote || ''} |\n`;
+          md += `| ${gt.english || ''} | ${gt.vietnamese || ''} | ${gt.contextNotes || ''} |\n`;
         }
         this.store.glossaryTable.set(md);
         this.store.useGlossary.set(true);

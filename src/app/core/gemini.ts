@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Type } from '@google/genai';
 
 export function parseGeminiError(e: unknown): string {
   const msg = (e as Error)?.message || e?.toString() || '';
@@ -41,7 +41,14 @@ export class GeminiClient {
   private ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
   private async loadPromptText(url: string): Promise<string | null> {
-    const defaultOpts = { cache: 'no-store' as RequestCache };
+    const defaultOpts: RequestInit = { 
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    };
     try {
       const res = await fetch(`${url}?t=${Date.now()}`, defaultOpts);
       if (res.ok) return await res.text();
@@ -173,7 +180,8 @@ export class GeminiClient {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
       temperature: 0.3,
-      thinkingConfig: { thinkingLevel: 'HIGH' }
+      thinkingConfig: { thinkingLevel: 'HIGH' },
+      responseMimeType: 'application/json'
     };
     if (psi) {
        configArgs.systemInstruction = psi;
@@ -185,7 +193,27 @@ export class GeminiClient {
       config: configArgs
     });
 
-    return response.text || '';
+    let result = response.text || '';
+    if (result.startsWith('```json')) {
+      result = result.replace(/^```json\n/, '').replace(/\n```$/, '');
+    } else if (result.startsWith('```')) {
+      result = result.replace(/^```\n/, '').replace(/\n```$/, '');
+    }
+
+    try {
+      const arr = JSON.parse(result);
+      if (Array.isArray(arr) && arr.length > 0) {
+        let md = '| Nhân vật (Original) | Đặc điểm & Vai trò | Ngôi thứ 3 (Narrator gọi) | Xưng - Hô (Với các nhân vật khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|\n';
+        for (const pt of arr) {
+          md += `| ${pt.originalName || ''} | ${pt.role || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
+        }
+        return md;
+      }
+    } catch (e) {
+      console.warn('Failed to parse generatePronouns JSON fallback to raw', e);
+    }
+
+    return result;
   }
 
   async generateGlossary(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
@@ -201,11 +229,9 @@ export class GeminiClient {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
       temperature: 0.3,
+      thinkingConfig: { thinkingLevel: 'HIGH' },
+      responseMimeType: 'application/json'
     };
-    
-    if (model.includes('pro')) {
-       configArgs.thinkingConfig = { thinkingLevel: 'HIGH' };
-    }
 
     if (gsi) {
        configArgs.systemInstruction = gsi;
@@ -217,7 +243,27 @@ export class GeminiClient {
       config: configArgs
     });
 
-    return response.text || '';
+    let result = response.text || '';
+    if (result.startsWith('```json')) {
+      result = result.replace(/^```json\n/, '').replace(/\n```$/, '');
+    } else if (result.startsWith('```')) {
+      result = result.replace(/^```\n/, '').replace(/\n```$/, '');
+    }
+
+    try {
+      const arr = JSON.parse(result);
+      if (Array.isArray(arr) && arr.length > 0) {
+        let md = '| Tiếng Anh | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|\n';
+        for (const pt of arr) {
+          md += `| ${pt.english || ''} | ${pt.vietnamese || ''} | ${pt.contextNotes || ''} |\n`;
+        }
+        return md;
+      }
+    } catch (e) {
+      console.warn('Failed to parse generateGlossary JSON fallback to raw', e);
+    }
+
+    return result;
   }
 
   async analyzeAllInOne(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
@@ -233,11 +279,9 @@ export class GeminiClient {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
       temperature: 0.1, // Low temp for more reliable JSON structure
+      thinkingConfig: { thinkingLevel: 'HIGH' },
+      responseMimeType: 'application/json'
     };
-    
-    if (model.includes('pro')) {
-       configArgs.thinkingConfig = { thinkingLevel: 'HIGH' };
-    }
 
     if (si) {
        configArgs.systemInstruction = si;
