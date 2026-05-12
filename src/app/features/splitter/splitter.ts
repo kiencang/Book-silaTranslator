@@ -558,7 +558,10 @@ export class Splitter {
           }
         } else if (option === 'regex' && data.splitOptions.recommendedRegex) {
           const rx = data.splitOptions.recommendedRegex;
-          if (rx.includes('h3') || rx.includes('###')) {
+          const rxLower = String(rx).toLowerCase();
+          if (rxLower.includes('h2') || (rx.includes('##') && !rx.includes('###'))) {
+            this.draftHeadingLevel.set('h2');
+          } else if (rxLower.includes('h3') || rx.includes('###')) {
             this.draftHeadingLevel.set('h3');
           } else {
             this.draftHeadingLevel.set('h2');
