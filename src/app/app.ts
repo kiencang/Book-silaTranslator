@@ -7,30 +7,40 @@ import {GlossarySetup} from './features/setup/glossary-setup';
 import {Translator} from './features/translator/translator';
 import {Home} from './features/home/home';
 import {ProjectModal} from './shared/components/project-modal';
+import {EditProjectModal} from './shared/components/edit-project-modal';
 import {MatIconModule} from '@angular/material/icon';
 import {ToastComponent} from './shared/components/toast.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
-  imports: [Uploader, Splitter, PronounSetup, GlossarySetup, Translator, Home, ProjectModal, ToastComponent, MatIconModule],
+  imports: [Uploader, Splitter, PronounSetup, GlossarySetup, Translator, Home, ProjectModal, EditProjectModal, ToastComponent, MatIconModule],
   template: `
     <div class="h-screen bg-zinc-50 flex flex-col font-sans overflow-hidden">
       <header class="bg-white border-b border-zinc-200 shrink-0 w-full py-4 px-6 flex items-center justify-between shadow-sm">
-        <button class="flex items-center space-x-2 bg-transparent border-none p-0 focus:outline-none" 
-             [class.cursor-pointer]="!store.isBusy()" 
-             [class.cursor-default]="store.isBusy()"
-             title="Quay lại danh sách dự án" 
-             (click)="!store.isBusy() && store.closeProject()">
-          <div class="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center text-white font-bold text-xl">B</div>
-          <div class="text-xl font-semibold text-zinc-900 tracking-tight flex items-center">
-            <span class="hidden sm:inline">Book silaTranslator</span>
-            @if (store.currentProjectName()) {
+        <div class="flex items-center">
+          <button class="flex items-center space-x-2 bg-transparent border-none p-0 focus:outline-none" 
+               [class.cursor-pointer]="!store.isBusy()" 
+               [class.cursor-default]="store.isBusy()"
+               title="Quay về trang chủ" 
+               (click)="!store.isBusy() && store.closeProject()">
+            <div class="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center text-white font-bold text-xl">B</div>
+            <div class="text-xl font-semibold text-zinc-900 tracking-tight flex items-center">
+              <span class="hidden sm:inline">Book silaTranslator</span>
+            </div>
+          </button>
+          @if (store.currentProjectName()) {
+            <div class="text-xl font-semibold tracking-tight flex items-center">
               <span class="text-zinc-400 font-normal mx-2">/</span>
-              <span class="text-indigo-700 truncate max-w-[150px] sm:max-w-xs" [title]="store.currentProjectName()">{{store.currentProjectName()}}</span>
-            }
-          </div>
-        </button>
+              <button 
+                  class="text-indigo-700 truncate max-w-[150px] sm:max-w-xs hover:underline focus:outline-none focus:underline bg-transparent border-none p-0 cursor-pointer" 
+                  [title]="'Sửa tên dự án: ' + store.currentProjectName()"
+                  (click)="showEditProjectModal.set(true)">
+                {{store.currentProjectName()}}
+              </button>
+            </div>
+          }
+        </div>
         
         <div class="flex items-center justify-end space-x-6">
           @if (store.phase() > 0) {
@@ -98,7 +108,7 @@ import {ToastComponent} from './shared/components/toast.component';
 
       <footer class="shrink-0 bg-white border-t border-zinc-200 py-2.5 px-6 text-xs text-zinc-500 flex justify-center items-center">
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-zinc-600">v1.0.21</span>
+          <span class="font-medium text-zinc-600">v1.0.23</span>
           <span class="text-zinc-300">•</span>
           <a href="https://github.com/kiencang/Book-silaTranslator" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition-colors">GitHub</a>
           <span class="text-zinc-300">•</span>
@@ -116,6 +126,10 @@ import {ToastComponent} from './shared/components/toast.component';
          <app-project-modal (closeModal)="showProjectModal.set(false)" />
       }
 
+      @if (showEditProjectModal()) {
+         <app-edit-project-modal (closeModal)="showEditProjectModal.set(false)" />
+      }
+
       <app-toast />
     </div>
   `
@@ -123,6 +137,7 @@ import {ToastComponent} from './shared/components/toast.component';
 export class App {
   store = inject(BookStore);
   showProjectModal = signal<boolean>(false);
+  showEditProjectModal = signal<boolean>(false);
 
   goToPhase(phase: number) {
     if (phase === 1 && this.store.phase() === 1) {

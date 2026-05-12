@@ -20,10 +20,11 @@ export interface PdfConversionTask {
 }
 
 export interface SplitSettings {
-  activeSplitMode: 'keyword' | 'heading';
+  activeSplitMode: 'keyword' | 'heading' | 'standalone';
   activeKeywords: string[];
   activeHeadingLevel: 'h2' | 'h3';
   activeMinWords: number;
+  activeMaxWords?: number;
   selectedMethod?: string | null;
 }
 

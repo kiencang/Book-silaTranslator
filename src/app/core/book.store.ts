@@ -162,6 +162,13 @@ export class BookStore {
     }
   }
 
+  updateProjectInfo(title: string, author: string) {
+    this.bookTitle.set(title);
+    this.author.set(author);
+    const name = [title, author].filter(Boolean).join(' - ');
+    this.currentProjectName.set(name);
+  }
+
   async createNewProject(name: string, title = '', author = '') {
     const newId = Date.now().toString() + Math.random().toString(36).substring(2, 9);
     this.currentProjectId.set(newId);

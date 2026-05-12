@@ -2,6 +2,7 @@ import { Component, computed, inject, signal, effect } from '@angular/core';
 import { BookStore, Chapter } from '../../core/book.store';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../core/toast.service';
+import { analyzeAndSplitText, PreviewChapter } from './splitter.util';
 
 @Component({
   selector: 'app-splitter',
@@ -45,41 +46,58 @@ import { ToastService } from '../../core/toast.service';
       <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8 transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
         <h3 class="text-lg font-semibold text-zinc-900 mb-6">Điều chỉnh cách phân chia</h3>
         
-        <!-- Số từ tối thiểu cross-cutting -->
+        <!-- Các thông số Tối thiểu và Tối đa biên độ -->
         <div class="mb-6 pb-6 border-b border-zinc-200 border-dashed">
-          <div class="flex items-center gap-4">
-            <div class="w-1/3">
-              <label for="draftMinWords" class="block text-sm font-bold text-zinc-900 mb-1">Số từ tối thiểu mỗi phần</label>
-              <p class="text-xs text-zinc-500">Các phần nhỏ hơn sẽ được tự động gộp lại.</p>
+          <div class="flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+              <div class="w-1/3">
+                <label for="draftMinWords" class="block text-sm font-bold text-zinc-900 mb-1">Số từ tối thiểu</label>
+                <p class="text-xs text-zinc-500">Gộp các phần nhỏ hơn mức này.</p>
+              </div>
+              <div class="w-2/3 flex items-center">
+                <input type="number" 
+                      id="draftMinWords"
+                      [value]="draftMinWords()" 
+                      (input)="draftMinWords.set(+$any($event.target).value)" 
+                      (keydown.enter)="applyWordsRange()"
+                      min="1000" max="7000" step="500" 
+                      class="w-32 px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
+              </div>
             </div>
-            <div class="w-2/3 flex items-center gap-3">
-              <input type="number" 
-                    id="draftMinWords"
-                    [value]="draftMinWords()" 
-                    (input)="draftMinWords.set(+$any($event.target).value)" 
-                    (keydown.enter)="applyMinWords()"
-                    min="1000" max="20000" step="500" 
-                    class="w-32 px-4 py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
-              <div class="w-40 flex-shrink-0">
-                <button 
-                  (click)="applyMinWords()"
-                  class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm text-sm"
-                  [class.bg-indigo-600]="draftMinWords() === activeMinWords()"
-                  [class.text-white]="draftMinWords() === activeMinWords()"
-                  [class.border-indigo-600]="draftMinWords() === activeMinWords()"
-                  [class.hover:bg-indigo-700]="draftMinWords() === activeMinWords()"
-                  [class.bg-indigo-50]="draftMinWords() !== activeMinWords()"
-                  [class.text-indigo-700]="draftMinWords() !== activeMinWords()"
-                  [class.border-indigo-200]="draftMinWords() !== activeMinWords()"
-                  [class.hover:bg-indigo-100]="draftMinWords() !== activeMinWords()"
-                >
-                  @if (draftMinWords() === activeMinWords()) {
-                    <mat-icon class="!w-4 !h-4 !text-sm">check</mat-icon>
-                    <span>Đang áp dụng</span>
-                  } @else {
-                    <span>Áp dụng ngay</span>
-                  }
-                </button>
+            <div class="flex items-center gap-4">
+              <div class="w-1/3">
+                <label for="draftMaxWords" class="block text-sm font-bold text-zinc-900 mb-1">Số từ tối đa</label>
+                <p class="text-xs text-zinc-500">Chia các phần lớn hơn mức này.</p>
+              </div>
+              <div class="w-2/3 flex items-center gap-3">
+                <input type="number" 
+                      id="draftMaxWords"
+                      [value]="draftMaxWords()" 
+                      (input)="draftMaxWords.set(+$any($event.target).value)" 
+                      (keydown.enter)="applyWordsRange()"
+                      min="10000" max="25000" step="1000" 
+                      class="w-32 px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
+                <div class="w-40 flex-shrink-0">
+                  <button 
+                    (click)="applyWordsRange()"
+                    class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm text-sm"
+                    [class.bg-indigo-600]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
+                    [class.text-white]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
+                    [class.border-indigo-600]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
+                    [class.hover:bg-indigo-700]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
+                    [class.bg-indigo-50]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
+                    [class.text-indigo-700]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
+                    [class.border-indigo-200]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
+                    [class.hover:bg-indigo-100]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
+                  >
+                    @if (draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()) {
+                      <mat-icon class="!w-4 !h-4 !text-sm">check</mat-icon>
+                      <span>Đang áp dụng</span>
+                    } @else {
+                      <span>Áp dụng ngay</span>
+                    }
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -111,7 +129,7 @@ import { ToastService } from '../../core/toast.service';
                       class="flex-1 min-w-[120px] border-0 bg-transparent p-1 text-sm text-zinc-900 focus:ring-0 placeholder:text-zinc-400 outline-none" 
                       placeholder="Thêm từ khóa... (Enter để lưu)">
               </div>
-              <p class="text-xs text-zinc-500 mt-2">Dùng khi các chương bắt đầu bằng chữ "Chương", "Part", "Phần", v.v.</p>
+              <p class="text-xs text-zinc-500 mt-2">Dùng khi các phần trong sách gốc bắt đầu bằng chữ như "Chapter", "Part", "Section", v.v.. Các khối vượt trần sẽ tự động được chia nhỏ bằng cách chia đôi.</p>
             </div>
             <div class="w-full md:w-32 flex-shrink-0">
               <button 
@@ -168,7 +186,7 @@ import { ToastService } from '../../core/toast.service';
                   <span class="text-sm font-medium text-zinc-900">Thẻ H3</span>
                 </label>
               </div>
-              <p class="text-xs text-zinc-500 mt-3">Dùng khi sách gốc không có từ "Chapter", "Section" nhưng có thẻ <code>##</code> (H2) hoặc <code>###</code> (H3) phân định rõ ràng.</p>
+              <p class="text-xs text-zinc-500 mt-3">Dùng khi sách gốc không có từ "Chapter", "Section" nhưng có thẻ <code>##</code> (H2) hoặc <code>###</code> (H3) phân định rõ ràng. Các khối vượt trần sẽ tự động được chia nhỏ bằng cách chia đôi.</p>
             </div>
             <div class="w-full md:w-32 flex-shrink-0">
               <button 
@@ -184,6 +202,47 @@ import { ToastService } from '../../core/toast.service';
                 [class.hover:bg-zinc-50]="activeSplitMode() !== 'heading'"
               >
                 @if (activeSplitMode() === 'heading') {
+                  <mat-icon class="!w-5 !h-5 !text-base">check</mat-icon>
+                  <span>Đang dùng</span>
+                } @else {
+                  <span>Sử dụng</span>
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-center my-2 opacity-60">
+          <div class="h-px bg-zinc-300 w-full max-w-[100px]"></div>
+          <span class="mx-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Hoặc</span>
+          <div class="h-px bg-zinc-300 w-full max-w-[100px]"></div>
+        </div>
+
+        <!-- Tùy chọn 3: Standalone -->
+        <div class="p-5 rounded-xl border-2 transition-colors relative"
+             [class.border-indigo-500]="activeSplitMode() === 'standalone'"
+             [class.bg-indigo-50]="activeSplitMode() === 'standalone'"
+             [class.bg-opacity-20]="activeSplitMode() === 'standalone'"
+             [class.border-transparent]="activeSplitMode() !== 'standalone'">
+          <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
+            <div class="flex-1 w-full">
+              <h4 class="block text-sm font-bold text-zinc-900 mb-1">Tùy chọn 3: Chia đều tự động (Hard-Split)</h4>
+              <p class="text-xs text-zinc-500 mt-2">Dùng khi sách không có cấu trúc chuẩn nào. Ứng dụng sẽ tự động chia đều sách thành các khối theo chuẩn giới hạn tối đa bên trên dựa vào các khoảng nghỉ (xuống dòng, ngắt câu...)</p>
+            </div>
+            <div class="w-full md:w-32 flex-shrink-0">
+              <button 
+                (click)="applyStandaloneMode()"
+                class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm"
+                [class.bg-indigo-600]="activeSplitMode() === 'standalone'"
+                [class.text-white]="activeSplitMode() === 'standalone'"
+                [class.border-indigo-600]="activeSplitMode() === 'standalone'"
+                [class.hover:bg-indigo-700]="activeSplitMode() === 'standalone'"
+                [class.bg-white]="activeSplitMode() !== 'standalone'"
+                [class.text-zinc-700]="activeSplitMode() !== 'standalone'"
+                [class.border-zinc-300]="activeSplitMode() !== 'standalone'"
+                [class.hover:bg-zinc-50]="activeSplitMode() !== 'standalone'"
+              >
+                @if (activeSplitMode() === 'standalone') {
                   <mat-icon class="!w-5 !h-5 !text-base">check</mat-icon>
                   <span>Đang dùng</span>
                 } @else {
@@ -290,16 +349,18 @@ export class Splitter {
 
   draftKeywords = signal<string[]>(['Chapter', 'Part', 'Section']);
   draftMinWords = signal(5000);
+  draftMaxWords = signal(15000);
   
   activeKeywords = signal<string[]>(['Chapter', 'Part', 'Section']);
   activeMinWords = signal(5000);
+  activeMaxWords = signal(15000);
   
-  activeSplitMode = signal<'keyword' | 'heading'>('keyword');
+  activeSplitMode = signal<'keyword' | 'heading' | 'standalone'>('keyword');
   draftHeadingLevel = signal<'h2' | 'h3'>('h2');
   activeHeadingLevel = signal<'h2' | 'h3'>('h2');
   
   selectedMethod = signal<string | null>(null);
-  previewBlock = signal<{title: string, previewText: string, wordCount: number, originalText: string, excludeFromTranslation?: boolean} | null>(null);
+  previewBlock = signal<PreviewChapter | null>(null);
 
   constructor() {
     const settings = this.store.splitSettings();
@@ -307,13 +368,17 @@ export class Splitter {
       this.draftKeywords.set(settings.activeKeywords);
       this.activeKeywords.set(settings.activeKeywords);
       
-      this.draftMinWords.set(settings.activeMinWords);
-      this.activeMinWords.set(settings.activeMinWords);
+      this.draftMinWords.set(settings.activeMinWords || 5000);
+      this.activeMinWords.set(settings.activeMinWords || 5000);
+      
+      const mx = (settings as any).activeMaxWords || 15000;
+      this.draftMaxWords.set(mx);
+      this.activeMaxWords.set(mx);
       
       this.draftHeadingLevel.set(settings.activeHeadingLevel);
       this.activeHeadingLevel.set(settings.activeHeadingLevel);
       
-      this.activeSplitMode.set(settings.activeSplitMode);
+      this.activeSplitMode.set(settings.activeSplitMode as any);
       if (settings.selectedMethod !== undefined) {
         this.selectedMethod.set(settings.selectedMethod);
       }
@@ -325,8 +390,9 @@ export class Splitter {
         activeKeywords: this.activeKeywords(),
         activeHeadingLevel: this.activeHeadingLevel(),
         activeMinWords: this.activeMinWords(),
+        activeMaxWords: this.activeMaxWords(),
         selectedMethod: this.selectedMethod()
-      });
+      } as any);
     }, { allowSignalWrites: true });
   }
 
@@ -370,6 +436,7 @@ export class Splitter {
       }
       if (hasChanges) {
         this.draftKeywords.set(currentKws);
+        this.applyKeywordMode();
       }
       inputElement.value = '';
     }
@@ -377,88 +444,49 @@ export class Splitter {
 
   removeKeyword(kwToRemove: string) {
     this.draftKeywords.update(kws => kws.filter(k => k !== kwToRemove));
+    this.applyKeywordMode();
   }
 
-  applyMinWords() {
-    const minW = Math.max(1000, Math.min(20000, this.draftMinWords()));
+  applyWordsRange() {
+    const minW = Math.max(1000, Math.min(7000, this.draftMinWords()));
+    const maxW = Math.max(10000, Math.min(25000, this.draftMaxWords()));
     this.draftMinWords.set(minW);
     this.activeMinWords.set(minW);
+    this.draftMaxWords.set(maxW);
+    this.activeMaxWords.set(maxW);
   }
 
   applyKeywordMode() {
     const kwArray = this.draftKeywords();
     this.activeKeywords.set(kwArray.length > 0 ? kwArray : ['Chapter']);
     
-    const minW = Math.max(1000, Math.min(20000, this.draftMinWords()));
-    this.draftMinWords.set(minW);
-    this.activeMinWords.set(minW);
+    this.applyWordsRange();
     
     this.activeSplitMode.set('keyword');
   }
 
   applyHeadingMode() {
-    const minW = Math.max(1000, Math.min(20000, this.draftMinWords()));
-    this.draftMinWords.set(minW);
-    this.activeMinWords.set(minW);
+    this.applyWordsRange();
     
     this.activeHeadingLevel.set(this.draftHeadingLevel());
     
     this.activeSplitMode.set('heading');
   }
 
-  escapeRegExp(string: string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  applyStandaloneMode() {
+    this.applyWordsRange();
+    this.activeSplitMode.set('standalone');
   }
 
   splitMethods = computed(() => {
-    const text = this.store.rawMarkdown() || '';
-    const minW = this.activeMinWords();
-    const mode = this.activeSplitMode();
-    
-    // First, add default "No split / Entire Book" method just in case
-    const methods = [{
-      keyword: 'Toàn bộ file',
-      count: 1,
-      previewChapters: this.generatePreview(text, 'Toàn bộ file', minW, null)
-    }];
-
-    if (mode === 'keyword') {
-      const activeKw = this.activeKeywords();
-      for (const kw of activeKw) {
-        const escapedKw = this.escapeRegExp(kw);
-        // Regex to find headings (optional #s) that start with keyword (case insensitive)
-        const regex = new RegExp(`^(#*\\s*${escapedKw}\\s+.*)$`, 'gim');
-        const matches = text.match(regex);
-        
-        if (matches && matches.length > 0) {
-          const previewChapters = this.generatePreview(text, kw, minW, regex);
-          methods.push({
-            keyword: kw,
-            count: previewChapters.length,
-            previewChapters
-          });
-        }
-      }
-    } else if (mode === 'heading') {
-      const level = this.activeHeadingLevel();
-      const regexStr = level === 'h2' 
-        ? '^((?:##\\s+.*)|(?:.+\\r?\\n[-=]{3,}\\s*))$' 
-        : '^(###\\s+.*)$';
-      const regex = new RegExp(regexStr, 'gim');
-      const matches = text.match(regex);
-      
-      if (matches && matches.length > 0) {
-        const kw = `Thẻ ${level.toUpperCase()}`;
-        const previewChapters = this.generatePreview(text, kw, minW, regex);
-        methods.push({
-          keyword: kw,
-          count: previewChapters.length,
-          previewChapters
-        });
-      }
-    }
-    
-    return methods.sort((a,b) => b.count - a.count);
+    return analyzeAndSplitText(
+      this.store.rawMarkdown() || '',
+      this.activeMinWords(),
+      this.activeMaxWords(),
+      this.activeSplitMode(),
+      this.activeKeywords(),
+      this.activeHeadingLevel()
+    );
   });
 
   selectedMethodData = computed(() => {
@@ -472,8 +500,6 @@ export class Splitter {
     }
     return methods[0];
   });
-
-
 
   selectMethod(kw: string) {
     this.selectedMethod.set(kw);
@@ -491,7 +517,6 @@ export class Splitter {
       const a = document.createElement('a');
       a.href = url;
       
-      // Generate safe filename from store.fileName
       let safeName = (this.store.fileName() || 'book_content').replace(/\.[^/.]+$/, "");
       if (!safeName) safeName = 'book_content';
       a.download = `${safeName}.md`;
@@ -505,172 +530,6 @@ export class Splitter {
     } catch {
       this.toast.error(this.toast.Messages.DOWNLOAD_MARKDOWN_ERROR);
     }
-  }
-
-  countWords(text: string): number {
-    let count = 0;
-    let inWord = false;
-    for (let i = 0; i < text.length; i++) {
-      const c = text.charCodeAt(i);
-      // Check for common whitespace characters
-      const isWhitespace = c <= 32 || c === 160 || (c >= 8192 && c <= 8202) || c === 12288;
-      
-      if (isWhitespace) {
-        inWord = false;
-      } else {
-        if (!inWord) {
-          count++;
-          inWord = true;
-        }
-      }
-    }
-    return count;
-  }
-
-  generatePreview(text: string, kw: string, minWords: number, splitRegex: RegExp | null): {title: string, previewText: string, wordCount: number, originalText: string, excludeFromTranslation?: boolean}[] {
-    let textToSplit = text;
-    let gutenbergHeader: {title: string, previewText: string, wordCount: number, originalText: string, excludeFromTranslation?: boolean} | null = null;
-    let gutenbergFooter: {title: string, previewText: string, wordCount: number, originalText: string, excludeFromTranslation?: boolean} | null = null;
-
-    const startMatch = textToSplit.match(/START OF THE PROJECT GUTENBERG/i);
-    if (startMatch && startMatch.index !== undefined) {
-      let endOfLineIdx = textToSplit.indexOf('\n', startMatch.index);
-      if (endOfLineIdx === -1) endOfLineIdx = textToSplit.length;
-      
-      const headerText = textToSplit.substring(0, endOfLineIdx).trim();
-      if (headerText) {
-        gutenbergHeader = {
-          title: 'Thông tin Project Gutenberg',
-          previewText: headerText.substring(0, 100).trim() + '...',
-          wordCount: this.countWords(headerText),
-          originalText: headerText,
-          excludeFromTranslation: true
-        };
-      }
-      textToSplit = textToSplit.substring(endOfLineIdx).trim();
-    }
-
-    const endMatch = textToSplit.match(/END OF THE PROJECT GUTENBERG/i);
-    if (endMatch && endMatch.index !== undefined) {
-      let startOfLineIdx = textToSplit.lastIndexOf('\n', endMatch.index);
-      if (startOfLineIdx === -1 || startOfLineIdx > endMatch.index) startOfLineIdx = endMatch.index;
-      
-      const footerText = textToSplit.substring(startOfLineIdx).trim();
-      if (footerText) {
-        gutenbergFooter = {
-          title: 'Giấy phép Project Gutenberg',
-          previewText: footerText.substring(0, 100).trim() + '...',
-          wordCount: this.countWords(footerText),
-          originalText: footerText,
-          excludeFromTranslation: true
-        };
-      }
-      textToSplit = textToSplit.substring(0, startOfLineIdx).trim();
-    }
-
-    if (kw === 'Toàn bộ file' || !splitRegex) {
-      const mainChapter = {
-        title: 'Nội dung sách',
-        previewText: textToSplit.substring(0, 150) + '...',
-        wordCount: this.countWords(textToSplit),
-        originalText: textToSplit
-      };
-      
-      const result = [];
-      if (gutenbergHeader) result.push(gutenbergHeader);
-      result.push(mainChapter);
-      if (gutenbergFooter) result.push(gutenbergFooter);
-      return result;
-    }
-
-    const splits = textToSplit.split(splitRegex);
-    
-    const rawChunks: {title: string, originalText: string}[] = [];
-    
-    const isHeadingMode = kw.startsWith('Thẻ H');
-
-    // The split array will be: [textBeforeFirstMatch, match1, text1, match2, text2, ...]
-    if (splits[0].trim().length > 0) {
-      rawChunks.push({
-        title: isHeadingMode ? 'Phần đầu' : 'Mở đầu / Giới thiệu',
-        originalText: splits[0].trim()
-      });
-    }
-
-    for (let i = 1; i < splits.length; i += 2) {
-      const rawTitle = splits[i];
-      const title = rawTitle.replace(/^#+\s*/, '').replace(/\r?\n[-=]+\s*$/, '').trim();
-      const content = splits[i + 1] ? splits[i + 1].trim() : '';
-      const fullContent = splits[i] + '\n' + content;
-      
-      rawChunks.push({
-        title,
-        originalText: fullContent
-      });
-    }
-
-    const MIN_WORDS = minWords;
-    const mergedChapters: {titles: string[], originalText: string}[] = [];
-    let currentAcc: {titles: string[], originalText: string} | null = null;
-
-    for (const chunk of rawChunks) {
-      if (!currentAcc) {
-        currentAcc = { titles: [chunk.title], originalText: chunk.originalText };
-      } else {
-        const currentWords = this.countWords(currentAcc.originalText);
-        if (currentWords < MIN_WORDS) {
-          currentAcc.titles.push(chunk.title);
-          currentAcc.originalText += '\n\n' + chunk.originalText;
-        } else {
-          mergedChapters.push(currentAcc);
-          currentAcc = { titles: [chunk.title], originalText: chunk.originalText };
-        }
-      }
-    }
-    
-    if (currentAcc) {
-      const currentWords = this.countWords(currentAcc.originalText);
-      const trailingThreshold = Math.min(2000, MIN_WORDS);
-
-      if (currentWords < trailingThreshold && mergedChapters.length > 0) {
-        const lastMerged = mergedChapters[mergedChapters.length - 1];
-        lastMerged.titles.push(...currentAcc.titles);
-        lastMerged.originalText += '\n\n' + currentAcc.originalText;
-      } else {
-        mergedChapters.push(currentAcc);
-      }
-    }
-
-    const processedMain = mergedChapters.map(c => {
-      const wordCount = this.countWords(c.originalText);
-      
-      let finalTitle = c.titles[0];
-      if (c.titles.length === 2) {
-        finalTitle = `${c.titles[0]} & ${c.titles[1]}`;
-      } else if (c.titles.length > 2) {
-        finalTitle = `${c.titles[0]} ... ${c.titles[c.titles.length - 1]}`;
-      }
-
-      // Skip headings for preview text to give a better glimpse of content
-      const lines = c.originalText.split('\n');
-      const nonHeadingLines = lines.filter(l => !l.trim().startsWith('#') && l.trim().length > 0);
-      const previewContent = nonHeadingLines.length > 0 ? nonHeadingLines.join(' ') : c.originalText;
-      const previewText = previewContent.substring(0, 100).trim() + '...';
-
-      return {
-        title: finalTitle,
-        previewText,
-        wordCount,
-        originalText: c.originalText
-      };
-    });
-
-    const finalResult = [];
-    if (gutenbergHeader) finalResult.push(gutenbergHeader);
-    finalResult.push(...processedMain);
-    if (gutenbergFooter) finalResult.push(gutenbergFooter);
-
-    return finalResult;
   }
 
   applySplit() {
@@ -696,3 +555,4 @@ export class Splitter {
     this.store.setChapters(chapters);
   }
 }
+
