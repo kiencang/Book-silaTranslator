@@ -2,7 +2,8 @@ import { Component, computed, inject, signal, effect } from '@angular/core';
 import { BookStore, Chapter } from '../../core/book.store';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../core/toast.service';
-import { analyzeAndSplitText, PreviewChapter } from './splitter.util';
+import { analyzeAndSplitText, PreviewChapter, countWords } from './splitter.util';
+import { GeminiClient, parseGeminiError } from '../../core/gemini';
 
 @Component({
   selector: 'app-splitter',
@@ -46,62 +47,114 @@ import { analyzeAndSplitText, PreviewChapter } from './splitter.util';
       <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8 transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
         <h3 class="text-lg font-semibold text-zinc-900 mb-6">Điều chỉnh cách phân chia</h3>
         
-        <!-- Các thông số Tối thiểu và Tối đa biên độ -->
-        <div class="mb-6 pb-6 border-b border-zinc-200 border-dashed">
-          <div class="flex flex-col gap-4">
-            <div class="flex items-center gap-4">
-              <div class="w-1/3">
-                <label for="draftMinWords" class="block text-sm font-bold text-zinc-900 mb-1">Số từ tối thiểu</label>
-                <p class="text-xs text-zinc-500">Gộp các phần nhỏ hơn mức này.</p>
+        <!-- AI Auto Analyze -->
+        <div class="mb-6 p-5 rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-white shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h4 class="text-sm font-bold text-indigo-900 mb-1 flex items-center space-x-2">
+              <mat-icon class="!text-base !w-5 !h-5 text-indigo-600">auto_awesome</mat-icon>
+              <span>Phân tích toàn diện bằng AI (Đề xuất)</span>
+            </h4>
+            <p class="text-xs text-indigo-700 leading-relaxed mb-3">
+              AI sẽ quét mã nguồn sách để chọn phương án chia khối chuẩn nhất, đồng thời trích xuất sẵn Bảng Đại từ và Thuật ngữ chuyên ngành dùng cho bước sau.
+            </p>
+            <div class="flex items-center gap-4 text-xs font-medium text-indigo-800">
+              <div class="flex items-center gap-1.5 bg-white/60 px-2.5 py-1 rounded-md border border-indigo-100">
+                <mat-icon class="!text-[14px] !w-3.5 !h-3.5 text-indigo-500">article</mat-icon>
+                <span>~{{ formatNumber(totalWords()) }} từ</span>
               </div>
-              <div class="w-2/3 flex items-center">
+              <div class="flex items-center gap-1.5 bg-white/60 px-2.5 py-1 rounded-md border border-indigo-100">
+                <mat-icon class="!text-[14px] !w-3.5 !h-3.5 text-indigo-500">token</mat-icon>
+                <span>~{{ formatNumber(estimatedTokens()) }} token</span>
+              </div>
+            </div>
+            
+            <div class="mt-3 max-w-[250px]">
+              <select [value]="analysisModel()" (change)="analysisModel.set($any($event.target).value)" [disabled]="isAnalyzing()" class="w-full pl-3 pr-8 py-1.5 text-xs text-indigo-900 bg-white/80 border-indigo-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg border disabled:cursor-not-allowed">
+                <option value="gemini-flash-latest">Flash (Nhanh & Tiết kiệm)</option>
+                <option value="gemini-pro-latest">Pro (Tư duy sâu & Chuẩn xác)</option>
+              </select>
+            </div>
+          </div>
+          <button 
+            (click)="runAllInOneAnalysis()"
+            [disabled]="isAnalyzing()"
+            class="flex-shrink-0 w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-wait">
+            @if (isAnalyzing()) {
+              <mat-icon class="animate-spin !text-base !w-5 !h-5 hidden sm:block">autorenew</mat-icon>
+              <span>Đang phân tích...</span>
+            } @else {
+              <mat-icon class="!text-base !w-5 !h-5 hidden sm:block">memory</mat-icon>
+              <span>Bắt đầu phân tích bằng AI</span>
+            }
+          </button>
+        </div>
+
+        <!-- Các thông số Tối thiểu và Tối đa biên độ -->
+        <fieldset class="transition-opacity duration-300" [disabled]="isAnalyzing() || store.hasAnyTranslation()" [class.opacity-50]="isAnalyzing() || store.hasAnyTranslation()" [class.pointer-events-none]="isAnalyzing() || store.hasAnyTranslation()">
+          <div class="mb-6 pb-6 border-b border-zinc-200 border-dashed">
+            
+            <div class="flex flex-col xl:flex-row items-center justify-between gap-6 xl:gap-4 w-full">
+              
+              <!-- Tối thiểu -->
+              <div class="flex items-center gap-4 w-full xl:w-[45%] justify-between xl:justify-start">
+                <div>
+                  <label for="draftMinWords" class="block text-sm font-bold text-zinc-900 mb-1">Số từ tối thiểu</label>
+                  <p class="text-xs text-zinc-500">Gộp các phần nhỏ hơn mức này.</p>
+                </div>
                 <input type="number" 
                       id="draftMinWords"
                       [value]="draftMinWords()" 
                       (input)="draftMinWords.set(+$any($event.target).value)" 
                       (keydown.enter)="applyWordsRange()"
                       min="1000" max="7000" step="500" 
-                      class="w-32 px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
+                      class="w-28 flex-shrink-0 px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
               </div>
-            </div>
-            <div class="flex items-center gap-4">
-              <div class="w-1/3">
-                <label for="draftMaxWords" class="block text-sm font-bold text-zinc-900 mb-1">Số từ tối đa</label>
-                <p class="text-xs text-zinc-500">Chia các phần lớn hơn mức này.</p>
-              </div>
-              <div class="w-2/3 flex items-center gap-3">
+
+              <!-- Divider -->
+              <div class="hidden xl:block w-px h-12 bg-zinc-200"></div>
+              <div class="block xl:hidden h-px w-full bg-zinc-200"></div>
+
+              <!-- Tối đa -->
+              <div class="flex items-center gap-4 w-full xl:w-[45%] justify-between xl:justify-end">
+                <div>
+                  <label for="draftMaxWords" class="block text-sm font-bold text-zinc-900 mb-1">Số từ tối đa</label>
+                  <p class="text-xs text-zinc-500">Chia các phần lớn hơn mức này.</p>
+                </div>
                 <input type="number" 
                       id="draftMaxWords"
                       [value]="draftMaxWords()" 
                       (input)="draftMaxWords.set(+$any($event.target).value)" 
                       (keydown.enter)="applyWordsRange()"
                       min="10000" max="25000" step="1000" 
-                      class="w-32 px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
-                <div class="w-40 flex-shrink-0">
-                  <button 
-                    (click)="applyWordsRange()"
-                    class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm text-sm"
-                    [class.bg-indigo-600]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
-                    [class.text-white]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
-                    [class.border-indigo-600]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
-                    [class.hover:bg-indigo-700]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
-                    [class.bg-indigo-50]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
-                    [class.text-indigo-700]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
-                    [class.border-indigo-200]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
-                    [class.hover:bg-indigo-100]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
-                  >
-                    @if (draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()) {
-                      <mat-icon class="!w-4 !h-4 !text-sm">check</mat-icon>
-                      <span>Đang áp dụng</span>
-                    } @else {
-                      <span>Áp dụng ngay</span>
-                    }
-                  </button>
-                </div>
+                      class="w-28 flex-shrink-0 px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
               </div>
+
             </div>
+
+            <!-- Nút áp dụng -->
+            <div class="mt-6 flex justify-center">
+              <button 
+                (click)="applyWordsRange()"
+                class="w-48 h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm text-sm"
+                [class.bg-indigo-600]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
+                [class.text-white]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
+                [class.border-indigo-600]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
+                [class.hover:bg-indigo-700]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
+                [class.bg-indigo-50]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
+                [class.text-indigo-700]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
+                [class.border-indigo-200]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
+                [class.hover:bg-indigo-100]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
+              >
+                @if (draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()) {
+                  <mat-icon class="!w-4 !h-4 !text-sm">check</mat-icon>
+                  <span>Đang áp dụng</span>
+                } @else {
+                  <span>Áp dụng ngay</span>
+                }
+              </button>
+            </div>
+            
           </div>
-        </div>
 
         <!-- Tùy chọn 1: Chia theo từ khóa -->
         <div class="mb-4 p-5 rounded-xl border-2 transition-colors relative"
@@ -252,9 +305,12 @@ import { analyzeAndSplitText, PreviewChapter } from './splitter.util';
             </div>
           </div>
         </div>
+        </fieldset>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 transition-opacity duration-300"
+           [class.opacity-50]="isAnalyzing() || store.hasAnyTranslation()"
+           [class.pointer-events-none]="isAnalyzing() || store.hasAnyTranslation()">
         @for (method of splitMethods(); track method.keyword) {
           <div 
             role="button"
@@ -308,10 +364,12 @@ import { analyzeAndSplitText, PreviewChapter } from './splitter.util';
           </div>
         </div>
 
-        <div class="flex justify-end">
+        <div class="flex justify-end transition-opacity duration-300"
+             [class.opacity-50]="isAnalyzing()"
+             [class.pointer-events-none]="isAnalyzing()">
           <button 
             (click)="applySplit()"
-            [disabled]="selectedMethodData()?.count === 0"
+            [disabled]="selectedMethodData()?.count === 0 || isAnalyzing()"
             class="flex items-center space-x-2 bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span>Tiếp tục</span>
@@ -346,6 +404,10 @@ import { analyzeAndSplitText, PreviewChapter } from './splitter.util';
 export class Splitter {
   store = inject(BookStore);
   toast = inject(ToastService);
+  gemini = inject(GeminiClient);
+
+  isAnalyzing = signal<boolean>(false);
+  analysisModel = signal<string>(this.store.config().analysisModel ?? 'gemini-pro-latest');
 
   draftKeywords = signal<string[]>(['Chapter', 'Part', 'Section']);
   draftMinWords = signal(5000);
@@ -361,6 +423,21 @@ export class Splitter {
   
   selectedMethod = signal<string | null>(null);
   previewBlock = signal<PreviewChapter | null>(null);
+
+  totalWords = computed(() => {
+    const text = this.store.rawMarkdown() || '';
+    return countWords(text);
+  });
+
+  estimatedTokens = computed(() => {
+    return Math.round(this.totalWords() * 1.4);
+  });
+
+  formatNumber(val: number): string {
+    if (val === 0) return '0';
+    if (val < 1000) return Math.round(val).toString();
+    return (val / 1000).toFixed(1) + 'K';
+  }
 
   constructor() {
     const settings = this.store.splitSettings();
@@ -393,7 +470,7 @@ export class Splitter {
         activeMaxWords: this.activeMaxWords(),
         selectedMethod: this.selectedMethod()
       } as any);
-    }, { allowSignalWrites: true });
+    });
   }
 
   focusInput(input: HTMLInputElement) {
@@ -445,6 +522,83 @@ export class Splitter {
   removeKeyword(kwToRemove: string) {
     this.draftKeywords.update(kws => kws.filter(k => k !== kwToRemove));
     this.applyKeywordMode();
+  }
+
+  async runAllInOneAnalysis() {
+    try {
+      const text = this.store.rawMarkdown();
+      if (!text) {
+        this.toast.error('Không tìm thấy nội dung sách để phân tích.');
+        return;
+      }
+
+      // Update the model config
+      this.store.updateConfig({ analysisModel: this.analysisModel() });
+
+      this.isAnalyzing.set(true);
+      const jsonString = await this.gemini.analyzeAllInOne(
+        text, 
+        this.analysisModel(),
+        this.store.bookTitle(), 
+        this.store.author()
+      );
+
+      const data = JSON.parse(jsonString);
+
+      // 1. Áp dụng Split Option
+      if (data.splitOptions) {
+        const option = data.splitOptions.recommendedOption;
+        if (option === 'keyword' && data.splitOptions.recommendedKeywords) {
+          const kws = data.splitOptions.recommendedKeywords;
+          if (Array.isArray(kws) && kws.length > 0) {
+            this.draftKeywords.set(kws);
+            this.applyKeywordMode();
+            this.toast.success(`AI phân tích: Theo Từ khóa. Lý do: ${data.splitOptions.reason || 'Sách có cấu trúc từ khóa rõ ràng.'}`);
+          }
+        } else if (option === 'regex' && data.splitOptions.recommendedRegex) {
+          const rx = data.splitOptions.recommendedRegex;
+          if (rx.includes('h3') || rx.includes('###')) {
+            this.draftHeadingLevel.set('h3');
+          } else {
+            this.draftHeadingLevel.set('h2');
+          }
+          this.applyHeadingMode();
+          this.toast.success(`AI phân tích: Theo Thẻ Heading. Lý do: ${data.splitOptions.reason}`);
+        } else {
+          this.applyStandaloneMode();
+          this.toast.success(`AI phân tích: Chia tự động. Lý do: ${data.splitOptions.reason}`);
+        }
+      }
+
+      // 2. Tạo Markdown Đại Từ
+      if (data.pronounsTable && Array.isArray(data.pronounsTable) && data.pronounsTable.length > 0) {
+        let md = '| Nhân vật (Original) | Đặc điểm & Vai trò | Ngôi thứ 3 (Narrator gọi) | Xưng - Hô (Với các nhân vật khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|\n';
+        for (const pt of data.pronounsTable) {
+          md += `| ${pt.originalName || ''} | ${pt.role || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
+        }
+        // Gọi update trực tiếp store (bạn có thể set qua method nếu store support)
+        this.store.pronounTable.set(md);
+        this.store.usePronouns.set(true);
+      }
+
+      // 3. Tạo Markdown Thuật ngữ
+      if (data.glossaryTable && Array.isArray(data.glossaryTable) && data.glossaryTable.length > 0) {
+        let md = '| Tiếng Anh | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|\n';
+        for (const gt of data.glossaryTable) {
+          md += `| ${gt.englishTerm || ''} | ${gt.vietnameseTranslation || ''} | ${gt.contextNote || ''} |\n`;
+        }
+        this.store.glossaryTable.set(md);
+        this.store.useGlossary.set(true);
+      }
+
+      this.toast.success('Đã áp dụng các cài đặt được AI phân tích.');
+
+    } catch (e) {
+      console.error('All-in-One Analysis failed:', e);
+      this.toast.error(parseGeminiError(e));
+    } finally {
+      this.isAnalyzing.set(false);
+    }
   }
 
   applyWordsRange() {

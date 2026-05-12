@@ -34,6 +34,7 @@ export interface TranslationConfig {
   pronounGenModel?: string;
   glossaryGenRatio?: number;
   glossaryGenModel?: string;
+  analysisModel?: string;
 }
 
 @Injectable({ providedIn: 'root' })

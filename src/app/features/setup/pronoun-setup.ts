@@ -27,9 +27,7 @@ import { MarkdownTableEditorComponent } from '../../shared/components/markdown-t
             <div class="flex flex-col sm:flex-row gap-4">
               <div class="flex-1">
                 <label for="pronounExtractRatio" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2">Trích xuất nội dung từ bản text đã lọc</label>
-                <select id="pronounExtractRatio" [value]="pronounExtractRatio()" (change)="pronounExtractRatio.set(+$any($event.target).value)" [disabled]="isGeneratingPronouns()" class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border disabled:cursor-not-allowed">
-                  <option value="0.25">25% nội dung sách</option>
-                  <option value="0.5">50% nội dung sách</option>
+                <select id="pronounExtractRatio" [value]="pronounExtractRatio()" (change)="pronounExtractRatio.set(+$any($event.target).value)" disabled class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:opacity-75">
                   <option value="1">100% nội dung sách</option>
                 </select>
               </div>
@@ -99,7 +97,7 @@ export class PronounSetup implements OnInit, OnDestroy {
 
   isGeneratingPronouns = signal<boolean>(false);
   draftPronounTable = signal<string>(this.store.pronounTable() || '');
-  pronounExtractRatio = signal<number>(this.store.config().pronounGenRatio ?? 0.5);
+  pronounExtractRatio = signal<number>(1);
   pronounModel = signal<string>(this.store.config().pronounGenModel ?? 'gemini-pro-latest');
   isManuallyEdited = signal<boolean>(false);
   private autoSaveSubject = new Subject<string>();

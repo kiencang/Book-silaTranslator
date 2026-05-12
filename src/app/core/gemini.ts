@@ -188,7 +188,7 @@ export class GeminiClient {
     return response.text || '';
   }
 
-  async generateGlossary(text: string, bookTitle = '', author = ''): Promise<string> {
+  async generateGlossary(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
     const gsi = await this.loadPromptText('/prompts/glossary_system_instructions.md');
     const gp = await this.loadPromptText('/prompts/glossary_prompt.md');
 
@@ -201,18 +201,60 @@ export class GeminiClient {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
       temperature: 0.3,
-      thinkingConfig: { thinkingLevel: 'HIGH' }
     };
+    
+    if (model.includes('pro')) {
+       configArgs.thinkingConfig = { thinkingLevel: 'HIGH' };
+    }
+
     if (gsi) {
        configArgs.systemInstruction = gsi;
     }
 
     const response = await this.ai.models.generateContent({
-      model: 'gemini-pro-latest',
+      model: model,
       contents: [{ text: finalPrompt }],
       config: configArgs
     });
 
     return response.text || '';
+  }
+
+  async analyzeAllInOne(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
+    const si = await this.loadPromptText('/prompts/all_in_one_system_instructions.md');
+    const p = await this.loadPromptText('/prompts/all_in_one_prompt.md');
+
+    let finalPrompt = p || `Phân tích văn bản và trả về JSON cấu hình theo yêu cầu.\n\n<source_text>\n[nội dung]\n</source_text>`;
+    
+    finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
+    finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
+    finalPrompt = finalPrompt.replace('[nội dung]', text);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const configArgs: any = {
+      temperature: 0.1, // Low temp for more reliable JSON structure
+    };
+    
+    if (model.includes('pro')) {
+       configArgs.thinkingConfig = { thinkingLevel: 'HIGH' };
+    }
+
+    if (si) {
+       configArgs.systemInstruction = si;
+    }
+
+    const response = await this.ai.models.generateContent({
+      model: model,
+      contents: [{ text: finalPrompt }],
+      config: configArgs
+    });
+
+    let result = response.text || '';
+    if (result.startsWith('```json')) {
+      result = result.replace(/^```json\n/, '').replace(/\n```$/, '');
+    } else if (result.startsWith('```')) {
+      result = result.replace(/^```\n/, '').replace(/\n```$/, '');
+    }
+    return result.trim();
   }
 }

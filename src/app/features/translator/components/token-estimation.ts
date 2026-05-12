@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { BookStore } from '../../../core/book.store';
 
@@ -35,6 +35,9 @@ import { BookStore } from '../../../core/book.store';
               <div class="font-bold text-indigo-700 py-1">{{ formatNumber(store.estimatedVietnameseTokens()) }}</div>
           </div>
           <div class="text-[11px] text-indigo-500 italic mt-2">* Đây là dự đoán, con số thực tế có thể cao hoặc thấp hơn.</div>
+          @if (hasGutenbergSkipped()) {
+            <div class="text-[11px] text-zinc-500 italic mt-1">Đã loại bỏ phần thông tin bản quyền Gutenberg vào tính toán, do phần này được giữ nguyên, không cần dịch.</div>
+          }
         </div>
       }
     </div>
@@ -43,6 +46,8 @@ import { BookStore } from '../../../core/book.store';
 export class TokenEstimationComponent {
   store = inject(BookStore);
   isExpanded = signal(false);
+
+  hasGutenbergSkipped = computed(() => this.store.chapters().some(c => c.excludeFromTranslation));
 
   formatNumber(val: number): string {
     if (val === 0) return '0';
