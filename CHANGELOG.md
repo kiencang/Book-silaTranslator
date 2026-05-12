@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.25]- 2026-05-13
+### Fixed
+- Thêm `thinkingLevel: 'HIGH'` vào tất cả các model AI đem ra phân tích.
+
 ## [v1.0.24]- 2026-05-12
 ### Fixed
 - Bổ sung một bước để AI phân tích toàn diện trước khi dịch, giảm các thao tác thủ công.
