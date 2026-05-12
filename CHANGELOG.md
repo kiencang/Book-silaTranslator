@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.27]- 2026-05-13
+### Fixed
+- Điều chỉnh SI `all_in_one_system_instructions.md` để nó nhận ra heading h2 dạng gạch dưới chân.
+
 ## [v1.0.26]- 2026-05-12
 ### Fixed
 - Vô hiệu hóa header khi `Bắt đầu phân tích bằng AI` được kích hoạt nhằm chặn các thao tác không mong muốn (ví dụ khi click nhầm).
