@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.27]- 2026-05-13
 ### Fixed
 - Điều chỉnh SI `all_in_one_system_instructions.md` để nó nhận ra heading h2 dạng gạch dưới chân.
+- Chỉnh lại SI tổng cho việc dịch từ Anh sang Việt.
 
 ## [v1.0.26]- 2026-05-12
 ### Fixed
