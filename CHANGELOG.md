@@ -8,7 +8,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
-## [v1.0.25]- 2026-05-13
+## [v1.0.25]- 2026-05-12
 ### Fixed
 - Thêm `thinkingLevel: 'HIGH'` vào tất cả các model AI đem ra phân tích.
 - Đồng bộ hóa việc trả về định dạng JSON khi phân tích riêng lẻ ở phase Đại từ & phase Từ khó.
