@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.24]- 2026-05-12
 ### Fixed
 - Bổ sung một bước để AI phân tích toàn diện trước khi dịch, giảm các thao tác thủ công.
+- Điều chỉnh một chút ở phase Đại từ & Từ khó. Luôn phân tích 100% dữ liệu để đảm bảo chất lượng cao nhất có thể.
 
 ## [v1.0.23]- 2026-05-12
 ### Fixed
