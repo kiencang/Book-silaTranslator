@@ -11,6 +11,8 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.25]- 2026-05-13
 ### Fixed
 - Thêm `thinkingLevel: 'HIGH'` vào tất cả các model AI đem ra phân tích.
+- Đồng bộ hóa việc trả về định dạng JSON khi phân tích riêng lẻ ở phase Đại từ & phase Từ khó.
+- Chỉnh lại SI của phase phân tích toàn diện để nó chi tiết hơn.
 
 ## [v1.0.24]- 2026-05-12
 ### Fixed
