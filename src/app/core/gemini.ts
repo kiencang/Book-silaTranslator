@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 
 export function parseGeminiError(e: unknown): string {
   const msg = (e as Error)?.message || e?.toString() || '';
@@ -167,7 +167,7 @@ export class GeminiClient {
     return result;
   }
 
-  async generatePronouns(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
+  async generatePronouns(text: string, model: string, bookTitle = '', author = '', temperature = 0.1): Promise<string> {
     const psi = await this.loadPromptText('/prompts/pronouns_system_instructions.md');
     const pp = await this.loadPromptText('/prompts/pronouns_prompt.md');
 
@@ -179,7 +179,7 @@ export class GeminiClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
-      temperature: 0.3,
+      temperature: temperature,
       thinkingConfig: { thinkingLevel: 'HIGH' },
       responseMimeType: 'application/json'
     };
@@ -216,7 +216,7 @@ export class GeminiClient {
     return result;
   }
 
-  async generateGlossary(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
+  async generateGlossary(text: string, model: string, bookTitle = '', author = '', temperature = 0.2): Promise<string> {
     const gsi = await this.loadPromptText('/prompts/glossary_system_instructions.md');
     const gp = await this.loadPromptText('/prompts/glossary_prompt.md');
 
@@ -228,7 +228,7 @@ export class GeminiClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
-      temperature: 0.3,
+      temperature: temperature,
       thinkingConfig: { thinkingLevel: 'HIGH' },
       responseMimeType: 'application/json'
     };

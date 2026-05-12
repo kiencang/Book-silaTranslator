@@ -1,6 +1,5 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { Component, inject, signal, effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { BookStore } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
 import { GeminiClient, parseGeminiError } from '../../core/gemini';
@@ -11,7 +10,7 @@ import { MarkdownTableEditorComponent } from '../../shared/components/markdown-t
 @Component({
   selector: 'app-glossary-setup',
   standalone: true,
-  imports: [MatIconModule, FormsModule, MarkdownTableEditorComponent],
+  imports: [CommonModule, MatIconModule, FormsModule, MarkdownTableEditorComponent],
   template: `
     <div class="max-w-7xl mx-auto py-8 lg:px-8 px-4">
       <div class="flex items-center justify-between mb-8">
@@ -63,7 +62,35 @@ import { MarkdownTableEditorComponent } from '../../shared/components/markdown-t
               [value]="draftTable()"
               (valueChange)="onTableChange($event)"
               [disabled]="isGenerating()"
-            ></app-markdown-table-editor>
+            >
+              @if (store.glossaryVersions().length > 0) {
+                <div class="flex items-center justify-between py-2 border-b border-zinc-100 mb-2">
+                  <div class="flex items-center space-x-2">
+                    @for (v of store.glossaryVersions(); track v.id; let i = $index) {
+                      <button 
+                        (click)="selectVersion(v)"
+                        [class.bg-indigo-50]="store.activeGlossaryVersionId() === v.id"
+                        [class.text-indigo-700]="store.activeGlossaryVersionId() === v.id"
+                        [class.border-indigo-200]="store.activeGlossaryVersionId() === v.id"
+                        [class.bg-white]="store.activeGlossaryVersionId() !== v.id"
+                        [class.text-zinc-600]="store.activeGlossaryVersionId() !== v.id"
+                        [class.border-zinc-200]="store.activeGlossaryVersionId() !== v.id"
+                        class="px-3 py-1 text-xs font-medium border rounded-md transition-colors hover:bg-indigo-50 hover:text-indigo-700"
+                      >
+                        V{{ v.versionNumber }}
+                      </button>
+                    }
+                  </div>
+                  @if (activeVersion()) {
+                    <div class="flex items-center space-x-3 text-xs text-zinc-500">
+                      <span class="flex items-center" title="Model"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">model_training</mat-icon> {{ activeVersion()?.model === 'gemini-pro-latest' ? 'Pro' : 'Flash' }}</span>
+                      <span class="flex items-center" title="Temperature"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">thermostat</mat-icon> {{ activeVersion()?.temperature }}</span>
+                      <span class="flex items-center" title="Thời gian"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">schedule</mat-icon> {{ activeVersion()?.timestamp | date:'HH:mm:ss dd/MM' }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </app-markdown-table-editor>
           </div>
         </div>
       </div>
@@ -79,45 +106,61 @@ import { MarkdownTableEditorComponent } from '../../shared/components/markdown-t
         </button>
 
         <button 
-          (click)="saveAndContinue()"
-          [disabled]="isGenerating() || draftTable().trim().length === 0"
-          class="flex items-center space-x-2 bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          (click)="saveChanges()"
+          [disabled]="isGenerating() || !isManuallyEdited()"
+          class="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed mx-4"
         >
-          <span>{{ isManuallyEdited() ? 'Lưu và Tiếp tục' : 'Tiếp tục' }}</span>
+          <span>Lưu thay đổi</span>
+          <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center">save</mat-icon>
+        </button>
+
+        <button 
+          (click)="saveAndContinue()"
+          [disabled]="isGenerating() || store.glossaryVersions().length === 0"
+          class="flex items-center space-x-2 bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
+        >
+          <span>Tiếp tục</span>
           <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center">arrow_forward</mat-icon>
         </button>
       </div>
     </div>
   `
 })
-export class GlossarySetup implements OnInit, OnDestroy {
+export class GlossarySetup {
   store = inject(BookStore);
   gemini = inject(GeminiClient);
   toast = inject(ToastService);
 
   isGenerating = signal<boolean>(false);
-  draftTable = signal<string>(this.store.glossaryTable() || '');
-  glossaryExtractRatio = signal<number>(1); // Default 100%
+  draftTable = signal<string>('');
+  glossaryExtractRatio = signal<number>(1);
   glossaryModel = signal<string>(this.store.config().glossaryGenModel ?? 'gemini-pro-latest');
   isManuallyEdited = signal<boolean>(false);
-  private autoSaveSubject = new Subject<string>();
 
-  ngOnInit() {
-    this.autoSaveSubject.pipe(debounceTime(3000)).subscribe(val => {
-      if (val.trim().length > 0) {
-        this.store.saveGlossaryConf(val, true);
+  constructor() {
+    effect(() => {
+      const activeContent = this.store.glossaryTable();
+      if (!this.isManuallyEdited()) {
+        this.draftTable.set(activeContent);
       }
     });
   }
 
-  ngOnDestroy() {
-    this.autoSaveSubject.complete();
+  activeVersion() {
+    const id = this.store.activeGlossaryVersionId();
+    if (!id) return null;
+    return this.store.glossaryVersions().find(v => v.id === id);
+  }
+
+  selectVersion(v: import('../../core/db').ContentVersion) {
+    this.store.selectGlossaryVersion(v.id);
+    this.draftTable.set(v.content);
+    this.isManuallyEdited.set(false);
   }
 
   onTableChange(val: string) {
     this.draftTable.set(val);
     this.isManuallyEdited.set(true);
-    this.autoSaveSubject.next(val);
   }
 
   async generateGlossary() {
@@ -147,10 +190,11 @@ export class GlossarySetup implements OnInit, OnDestroy {
       const lengthToTake = Math.floor(fullText.length * ratio);
       const textToAnalyze = fullText.substring(0, lengthToTake);
 
-      const result = await this.gemini.generateGlossary(textToAnalyze, this.glossaryModel(), this.store.bookTitle(), this.store.author());
+      const result = await this.gemini.generateGlossary(textToAnalyze, this.glossaryModel(), this.store.bookTitle(), this.store.author(), 0.2);
       this.draftTable.set(result);
       this.isManuallyEdited.set(false);
-      this.store.saveGlossaryConf(result, true);
+      this.store.addGlossaryVersion(result, this.glossaryModel(), 0.2);
+      this.store.saveGlossaryConf(true);
       this.toast.success(this.toast.Messages.GLOSSARY_SUCCESS);
     } catch (e: unknown) {
       console.error(e);
@@ -161,17 +205,28 @@ export class GlossarySetup implements OnInit, OnDestroy {
     }
   }
 
+  saveChanges() {
+    if (this.isManuallyEdited()) {
+      const active = this.activeVersion();
+      const model = active ? active.model : this.glossaryModel();
+      const temp = active ? active.temperature : 0.2;
+      this.store.addGlossaryVersion(this.draftTable(), model, temp);
+      this.store.saveGlossaryConf(true);
+      this.isManuallyEdited.set(false);
+      this.toast.success('Đã lưu version mới');
+    }
+  }
+
   saveAndContinue() {
-    this.store.saveGlossaryConf(this.draftTable(), true);
+    if (this.isManuallyEdited()) {
+      this.saveChanges();
+    }
+    this.store.saveGlossaryConf(true);
     this.store.phase.set(5);
   }
 
   skipAndContinue() {
-    if (this.draftTable().trim().length > 0) {
-      this.store.saveGlossaryConf(this.draftTable(), false);
-    } else {
-      this.store.saveGlossaryConf('', false);
-    }
+    this.store.saveGlossaryConf(false);
     this.store.phase.set(5);
   }
 }

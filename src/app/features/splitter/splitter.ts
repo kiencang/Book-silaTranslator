@@ -84,7 +84,7 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
               <span>Đang phân tích...</span>
             } @else {
               <mat-icon class="!text-base !w-5 !h-5 hidden sm:block">memory</mat-icon>
-              <span>Bắt đầu phân tích bằng AI</span>
+              <span>{{ hasExistingAnalysisData ? 'Phân tích lại bằng AI' : 'Bắt đầu phân tích bằng AI' }}</span>
             }
           </button>
         </div>
@@ -406,7 +406,8 @@ export class Splitter {
   toast = inject(ToastService);
   gemini = inject(GeminiClient);
 
-  isAnalyzing = signal<boolean>(false);
+  get isAnalyzing() { return this.store.isAnalyzingSplits; }
+  get hasExistingAnalysisData() { return this.store.pronounVersions().length > 0 || this.store.glossaryVersions().length > 0; }
   analysisModel = signal<string>(this.store.config().analysisModel ?? 'gemini-pro-latest');
 
   draftKeywords = signal<string[]>(['Chapter', 'Part', 'Section']);
@@ -448,14 +449,14 @@ export class Splitter {
       this.draftMinWords.set(settings.activeMinWords || 5000);
       this.activeMinWords.set(settings.activeMinWords || 5000);
       
-      const mx = (settings as any).activeMaxWords || 15000;
+      const mx = settings.activeMaxWords || 15000;
       this.draftMaxWords.set(mx);
       this.activeMaxWords.set(mx);
       
       this.draftHeadingLevel.set(settings.activeHeadingLevel);
       this.activeHeadingLevel.set(settings.activeHeadingLevel);
       
-      this.activeSplitMode.set(settings.activeSplitMode as any);
+      this.activeSplitMode.set(settings.activeSplitMode);
       if (settings.selectedMethod !== undefined) {
         this.selectedMethod.set(settings.selectedMethod);
       }
@@ -469,7 +470,7 @@ export class Splitter {
         activeMinWords: this.activeMinWords(),
         activeMaxWords: this.activeMaxWords(),
         selectedMethod: this.selectedMethod()
-      } as any);
+      });
     });
   }
 
@@ -576,8 +577,7 @@ export class Splitter {
         for (const pt of data.pronounsTable) {
           md += `| ${pt.originalName || ''} | ${pt.role || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
         }
-        // Gọi update trực tiếp store (bạn có thể set qua method nếu store support)
-        this.store.pronounTable.set(md);
+        this.store.addPronounVersion(md, this.analysisModel(), 0.1);
         this.store.usePronouns.set(true);
       }
 
@@ -587,7 +587,7 @@ export class Splitter {
         for (const gt of data.glossaryTable) {
           md += `| ${gt.english || ''} | ${gt.vietnamese || ''} | ${gt.contextNotes || ''} |\n`;
         }
-        this.store.glossaryTable.set(md);
+        this.store.addGlossaryVersion(md, this.analysisModel(), 0.1);
         this.store.useGlossary.set(true);
       }
 

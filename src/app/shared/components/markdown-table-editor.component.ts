@@ -64,6 +64,8 @@ import { MatIconModule } from '@angular/material/icon';
           </button>
         </div>
       </div>
+      
+      <ng-content></ng-content>
 
       <div class="w-full">
         @if (mode() === 'raw') {

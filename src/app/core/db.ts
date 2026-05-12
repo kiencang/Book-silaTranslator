@@ -28,6 +28,15 @@ export interface SplitSettings {
   selectedMethod?: string | null;
 }
 
+export interface ContentVersion {
+  id: string;
+  versionNumber: number;
+  content: string;
+  model: string;
+  temperature: number;
+  timestamp: number;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -44,14 +53,18 @@ export interface Project {
   usePronouns?: boolean;
   glossaryTable?: string;
   useGlossary?: boolean;
+  pronounVersions?: ContentVersion[];
+  activePronounVersionId?: string;
+  glossaryVersions?: ContentVersion[];
+  activeGlossaryVersionId?: string;
   pdfTask?: PdfConversionTask;
   totalWords?: number;
   translatedWords?: number;
   splitSettings?: SplitSettings;
 }
 
-export type ProjectMeta = Omit<Project, 'chapters' | 'rawMarkdown' | 'pronounTable' | 'glossaryTable' | 'pdfTask'>;
-export type ProjectAsset = Pick<Project, 'rawMarkdown' | 'pronounTable' | 'glossaryTable' | 'pdfTask'>;
+export type ProjectMeta = Omit<Project, 'chapters' | 'rawMarkdown' | 'pronounTable' | 'glossaryTable' | 'pdfTask' | 'pronounVersions' | 'glossaryVersions'>;
+export type ProjectAsset = Pick<Project, 'rawMarkdown' | 'pronounTable' | 'glossaryTable' | 'pdfTask' | 'pronounVersions' | 'glossaryVersions'>;
 
 @Injectable({ providedIn: 'root' })
 export class DbService {
@@ -146,6 +159,8 @@ export class DbService {
         const rawMdReq = assetStore.get(`${id}_rawMarkdown`);
         const pronounsReq = assetStore.get(`${id}_pronounTable`);
         const glossaryReq = assetStore.get(`${id}_glossaryTable`);
+        const pVersReq = assetStore.get(`${id}_pronounVersions`);
+        const gVersReq = assetStore.get(`${id}_glossaryVersions`);
         const pdfReq = assetStore.get(`${id}_pdfTask`);
         
         const chapReq = tx.objectStore('project_chapters').index('projectId').getAll(id);
@@ -158,6 +173,8 @@ export class DbService {
           if (rawMdReq.result) asset.rawMarkdown = rawMdReq.result.data;
           if (pronounsReq.result) asset.pronounTable = pronounsReq.result.data;
           if (glossaryReq.result) asset.glossaryTable = glossaryReq.result.data;
+          if (pVersReq.result) asset.pronounVersions = pVersReq.result.data;
+          if (gVersReq.result) asset.glossaryVersions = gVersReq.result.data;
           if (pdfReq.result) asset.pdfTask = pdfReq.result.data;
 
           const chapters = chapReq.result || [];
@@ -169,6 +186,8 @@ export class DbService {
             pdfTask: asset.pdfTask,
             pronounTable: asset.pronounTable || '',
             glossaryTable: asset.glossaryTable || '',
+            pronounVersions: asset.pronounVersions || [],
+            glossaryVersions: asset.glossaryVersions || [],
             chapters
           });
         };
@@ -334,6 +353,8 @@ export class DbService {
           config: project.config,
           usePronouns: project.usePronouns,
           useGlossary: project.useGlossary,
+          activePronounVersionId: project.activePronounVersionId,
+          activeGlossaryVersionId: project.activeGlossaryVersionId,
           splitSettings: project.splitSettings,
           totalWords,
           translatedWords,
@@ -345,6 +366,8 @@ export class DbService {
         assetStore.put({ id: `${project.id}_rawMarkdown`, data: project.rawMarkdown });
         assetStore.put({ id: `${project.id}_pronounTable`, data: project.pronounTable });
         assetStore.put({ id: `${project.id}_glossaryTable`, data: project.glossaryTable });
+        assetStore.put({ id: `${project.id}_pronounVersions`, data: project.pronounVersions });
+        assetStore.put({ id: `${project.id}_glossaryVersions`, data: project.glossaryVersions });
         assetStore.put({ id: `${project.id}_pdfTask`, data: project.pdfTask });
 
         const chapStore = tx.objectStore('project_chapters');
@@ -379,6 +402,8 @@ export class DbService {
         assetStore.delete(`${id}_rawMarkdown`);
         assetStore.delete(`${id}_pronounTable`);
         assetStore.delete(`${id}_glossaryTable`);
+        assetStore.delete(`${id}_pronounVersions`);
+        assetStore.delete(`${id}_glossaryVersions`);
         assetStore.delete(`${id}_pdfTask`);
         
         // Remove chapters manually since we don't have cascade

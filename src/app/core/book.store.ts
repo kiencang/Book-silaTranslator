@@ -47,9 +47,32 @@ export class BookStore {
   readonly currentProjectName = signal<string>('');
   readonly bookTitle = signal<string>('');
   readonly author = signal<string>('');
-  readonly pronounTable = signal<string>('');
+  readonly pronounVersions = signal<import('./db').ContentVersion[]>([]);
+  readonly activePronounVersionId = signal<string | undefined>(undefined);
+  readonly pronounTable = computed(() => {
+    const versions = this.pronounVersions();
+    if (!versions.length) return '';
+    const activeId = this.activePronounVersionId();
+    if (activeId) {
+      const v = versions.find(v => v.id === activeId);
+      if (v) return v.content;
+    }
+    return versions[versions.length - 1].content;
+  });
   readonly usePronouns = signal<boolean>(false);
-  readonly glossaryTable = signal<string>('');
+  
+  readonly glossaryVersions = signal<import('./db').ContentVersion[]>([]);
+  readonly activeGlossaryVersionId = signal<string | undefined>(undefined);
+  readonly glossaryTable = computed(() => {
+    const versions = this.glossaryVersions();
+    if (!versions.length) return '';
+    const activeId = this.activeGlossaryVersionId();
+    if (activeId) {
+      const v = versions.find(v => v.id === activeId);
+      if (v) return v.content;
+    }
+    return versions[versions.length - 1].content;
+  });
   readonly useGlossary = signal<boolean>(false);
   private currentProjectCreatedAt = signal<number>(Date.now());
 
@@ -59,6 +82,7 @@ export class BookStore {
   readonly pdfTask = signal<import('./db').PdfConversionTask | undefined>(undefined);
   readonly isConverting = signal<boolean>(false);
   readonly isGeneratingMetadata = signal<boolean>(false);
+  readonly isAnalyzingSplits = signal<boolean>(false);
   readonly chapters = signal<Chapter[]>([]);
   readonly estimatedEnglishWords = computed(() => this.chapters().filter(c => !c.excludeFromTranslation).reduce((sum, c) => sum + (c.wordCount || 0), 0));
   readonly estimatedEnglishTokens = computed(() => this.estimatedEnglishWords() * 1.4);
@@ -66,7 +90,7 @@ export class BookStore {
   readonly estimatedVietnameseTokens = computed(() => this.estimatedVietnameseWords() * 1.5);
   readonly hasAnyTranslation = computed(() => this.chapters().filter(c => !c.excludeFromTranslation).some(c => !!c.translatedText));
   readonly isTranslatingAny = computed(() => this.chapters().some(c => c.status === 'translating'));
-  readonly isBusy = computed(() => this.isConverting() || this.isGeneratingMetadata() || this.isTranslatingAny());
+  readonly isBusy = computed(() => this.isConverting() || this.isGeneratingMetadata() || this.isTranslatingAny() || this.isAnalyzingSplits());
   readonly config = signal<TranslationConfig>({
     model: 'gemini-pro-latest',
     temperature: 0.5
@@ -97,6 +121,8 @@ export class BookStore {
         author: this.author(),
         usePronouns: this.usePronouns(),
         useGlossary: this.useGlossary(),
+        activePronounVersionId: this.activePronounVersionId(),
+        activeGlossaryVersionId: this.activeGlossaryVersionId(),
         splitSettings: this.splitSettings()
       };
       
@@ -121,10 +147,10 @@ export class BookStore {
       const projectId = this.currentProjectId();
       if (!projectId) return;
 
-      const pronounTable = this.pronounTable();
+      const pronounVersions = this.pronounVersions();
       untracked(() => {
         if (isPlatformBrowser(this.platformId)) {
-          this.db.saveProjectAsset(projectId, 'pronounTable', pronounTable);
+          this.db.saveProjectAsset(projectId, 'pronounVersions', pronounVersions);
         }
       });
     });
@@ -133,10 +159,10 @@ export class BookStore {
       const projectId = this.currentProjectId();
       if (!projectId) return;
 
-      const glossaryTable = this.glossaryTable();
+      const glossaryVersions = this.glossaryVersions();
       untracked(() => {
         if (isPlatformBrowser(this.platformId)) {
-          this.db.saveProjectAsset(projectId, 'glossaryTable', glossaryTable);
+          this.db.saveProjectAsset(projectId, 'glossaryVersions', glossaryVersions);
         }
       });
     });
@@ -176,9 +202,11 @@ export class BookStore {
     this.currentProjectName.set(name);
     this.bookTitle.set(title);
     this.author.set(author);
-    this.pronounTable.set('');
+    this.pronounVersions.set([]);
+    this.activePronounVersionId.set(undefined);
     this.usePronouns.set(false);
-    this.glossaryTable.set('');
+    this.glossaryVersions.set([]);
+    this.activeGlossaryVersionId.set(undefined);
     this.useGlossary.set(false);
     this.currentProjectCreatedAt.set(Date.now());
     
@@ -197,10 +225,15 @@ export class BookStore {
       this.currentProjectName.set(proj.name);
       this.bookTitle.set(proj.bookTitle || '');
       this.author.set(proj.author || '');
-      this.pronounTable.set(proj.pronounTable || '');
+      
+      this.pronounVersions.set(proj.pronounVersions || []);
+      this.activePronounVersionId.set(proj.activePronounVersionId);
       this.usePronouns.set(!!proj.usePronouns);
-      this.glossaryTable.set(proj.glossaryTable || '');
+      
+      this.glossaryVersions.set(proj.glossaryVersions || []);
+      this.activeGlossaryVersionId.set(proj.activeGlossaryVersionId);
       this.useGlossary.set(!!proj.useGlossary);
+      
       this.currentProjectCreatedAt.set(proj.createdAt || Date.now());
       
       this.fileName.set(proj.fileName);
@@ -226,9 +259,11 @@ export class BookStore {
     this.currentProjectName.set('');
     this.bookTitle.set('');
     this.author.set('');
-    this.pronounTable.set('');
+    this.pronounVersions.set([]);
+    this.activePronounVersionId.set(undefined);
     this.usePronouns.set(false);
-    this.glossaryTable.set('');
+    this.glossaryVersions.set([]);
+    this.activeGlossaryVersionId.set(undefined);
     this.useGlossary.set(false);
     this.pdfTask.set(undefined);
     this.splitSettings.set(undefined);
@@ -265,14 +300,60 @@ export class BookStore {
     }
   }
 
-  savePronounsConf(table: string, use: boolean) {
-    this.pronounTable.set(table);
+  savePronounsConf(use: boolean) {
     this.usePronouns.set(use);
   }
 
-  saveGlossaryConf(table: string, use: boolean) {
-    this.glossaryTable.set(table);
+  saveGlossaryConf(use: boolean) {
     this.useGlossary.set(use);
+  }
+
+  addPronounVersion(content: string, model: string, temperature: number) {
+    if (!content.trim()) return;
+    const versions = [...this.pronounVersions()];
+    const lastVersion = versions.length > 0 ? (versions[versions.length - 1].versionNumber ?? versions.length) : 0;
+    const newVersion: import('./db').ContentVersion = {
+      id: Date.now().toString() + Math.random().toString(36).substring(2, 6),
+      versionNumber: lastVersion + 1,
+      content,
+      model,
+      temperature,
+      timestamp: Date.now()
+    };
+    versions.push(newVersion);
+    if (versions.length > 3) {
+      versions.shift(); // remove oldest
+    }
+    this.pronounVersions.set(versions);
+    this.activePronounVersionId.set(newVersion.id);
+  }
+
+  selectPronounVersion(id: string) {
+    this.activePronounVersionId.set(id);
+  }
+
+  addGlossaryVersion(content: string, model: string, temperature: number) {
+    if (!content.trim()) return;
+    const versions = [...this.glossaryVersions()];
+    const lastVersion = versions.length > 0 ? (versions[versions.length - 1].versionNumber ?? versions.length) : 0;
+    const newVersion: import('./db').ContentVersion = {
+      id: Date.now().toString() + Math.random().toString(36).substring(2, 6),
+      versionNumber: lastVersion + 1,
+      content,
+      model,
+      temperature,
+      timestamp: Date.now()
+    };
+    versions.push(newVersion);
+    if (versions.length > 3) {
+      versions.shift(); // remove oldest
+    }
+    this.glossaryVersions.set(versions);
+    this.activeGlossaryVersionId.set(newVersion.id);
+  }
+
+  selectGlossaryVersion(id: string) {
+    this.activeGlossaryVersionId.set(id);
   }
 
   updateConfig(partial: Partial<TranslationConfig>) {
