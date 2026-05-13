@@ -1,4 +1,6 @@
-import { Component, ElementRef, inject, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, viewChild, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { BookStore } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
 import { GeminiClient, parseGeminiError } from '../../core/gemini';
@@ -9,7 +11,7 @@ import { PDFDocument } from 'pdf-lib';
 @Component({
   selector: 'app-uploader',
   standalone: true,
-  imports: [MatIconModule],
+  imports: [MatIconModule, FormsModule, CommonModule],
   host: {
     class: 'flex-1 flex flex-col'
   },
@@ -17,7 +19,40 @@ import { PDFDocument } from 'pdf-lib';
     <div class="flex-1 flex items-center justify-center min-h-[50vh] p-4">
       <div class="w-full max-w-2xl">
         
-        @if (store.pdfTask(); as task) {
+        @if (pendingPdfFile(); as pFile) {
+          <div class="bg-white border text-center border-zinc-200 rounded-2xl p-8 shadow-sm">
+            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <mat-icon class="!text-3xl !w-8 !h-8 !flex !items-center !justify-center">picture_as_pdf</mat-icon>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Chuyển đổi tài liệu PDF</h3>
+            <p class="text-sm text-zinc-500 mb-6 w-[350px] mx-auto truncate" [title]="pFile.name">{{pFile.name}}</p>
+            
+            <div class="text-left max-w-md mx-auto mb-8 relative">
+              <label class="block text-sm font-medium text-zinc-700 mb-2">Chọn model xử lý</label>
+              <select [(ngModel)]="pdfModel" class="w-full px-4 pr-10 py-3 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors appearance-none">
+                <option value="gemini-flash-lite-latest">Lite (rẻ & nhanh nhất)</option>
+                <option value="gemini-flash-latest">Flash (cho nội dung trình bày phức tạp)</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 top-[28px] pl-2 pr-4 flex items-center text-zinc-500">
+                <mat-icon class="!w-5 !h-5 !text-[20px]">expand_more</mat-icon>
+              </div>
+            </div>
+            
+            <div class="flex justify-center gap-4 border-t border-zinc-100 pt-6">
+              <button (click)="cancelPdfPending()" class="px-6 py-2.5 rounded-lg border border-zinc-200 font-medium text-zinc-600 hover:bg-zinc-100 transition-colors">
+                Hủy
+              </button>
+              <button (click)="startPdfConversion(pFile)" [disabled]="store.isConverting()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50">
+                <mat-icon class="!w-[20px] !h-[20px] !text-[20px] flex items-center justify-center">{{ store.isConverting() ? 'autorenew' : 'play_arrow' }}</mat-icon>
+                <span>Bắt đầu xử lý</span>
+              </button>
+            </div>
+            
+            <p class="mt-6 text-[13px] text-zinc-400 italic text-left leading-relaxed">
+              Tài liệu PDF trước khi dịch sẽ được <strong class="font-medium text-zinc-500">chuyển sang định dạng thân thiện với AI hơn</strong>. Việc này có thể dễ dàng thực hiện với các model thấp để có tốc độ cao và tiết kiệm ngưỡng miễn phí (giúp bạn dùng miễn phí được nhiều hơn). Khi tiến hành dịch thuật chính thức bạn có tùy chọn với các model AI cao nhất để có chất lượng dịch tốt nhất.
+            </p>
+          </div>
+        } @else if (store.pdfTask(); as task) {
           <div class="bg-white border text-center border-zinc-200 rounded-2xl p-8 shadow-sm">
             <h3 class="text-xl font-semibold mb-2">Đang chuyển đổi PDF</h3>
             <p class="text-sm text-zinc-500 mb-6">Tài liệu: {{task.fileName}}</p>
@@ -130,6 +165,16 @@ export class Uploader {
   isDragging = false;
   turndownService = new TurndownService().remove(['style', 'script', 'head', 'meta', 'title', 'noscript']);
 
+  pendingPdfFile = signal<File | null>(null);
+  pdfModel = signal<string>('gemini-flash-lite-latest');
+
+  cancelPdfPending() {
+     this.pendingPdfFile.set(null);
+     if (this.fileInput()) {
+       this.fileInput().nativeElement.value = '';
+     }
+  }
+
   onDragOver(event: DragEvent) {
     event.preventDefault();
     this.isDragging = true;
@@ -206,7 +251,7 @@ export class Uploader {
           let b64Data = chunk.base64Pdf;
           if (b64Data.includes(',')) b64Data = b64Data.split(',')[1];
           
-          const markdown = await this.gemini.convertPdfToMarkdown(b64Data);
+          const markdown = await this.gemini.convertPdfToMarkdown(b64Data, this.pdfModel());
           
           const successTaskState = this.store.pdfTask();
           if (successTaskState) {
@@ -256,8 +301,15 @@ export class Uploader {
        }
     }
     
+    if (ext === 'pdf') {
+       this.pendingPdfFile.set(file);
+       if (this.fileInput()) {
+         this.fileInput().nativeElement.value = '';
+       }
+       return;
+    }
+
     this.store.setConverting(true);
-    let shouldResumePdf = false;
     
     try {
       if (!this.store.currentProjectId()) {
@@ -271,44 +323,6 @@ export class Uploader {
         const text = await file.text();
         const markdown = this.turndownService.turndown(text);
         this.store.setMarkdown(markdown, file.name);
-      } else if (file.name.toLowerCase().endsWith('.pdf')) {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(arrayBuffer);
-        const pageCount = pdfDoc.getPageCount();
-
-        if (pageCount <= 50) {
-          const base64 = await this.fileToBase64(file);
-          const b64Data = base64.split(',')[1];
-          const markdown = await this.gemini.convertPdfToMarkdown(b64Data);
-          this.store.setMarkdown(markdown, file.name);
-          this.toast.success(this.toast.Messages.FILE_PROCESS_SUCCESS);
-        } else {
-          // Large PDF -> chunk
-          const CHUNK_SIZE = 50;
-          const chunks: import('../../core/db').PdfConversionChunk[] = [];
-          
-          for (let i = 0; i < pageCount; i += CHUNK_SIZE) {
-            const endPage = Math.min(i + CHUNK_SIZE, pageCount) - 1;
-            const newPdf = await PDFDocument.create();
-            const pageIndices = Array.from({ length: endPage - i + 1 }, (_, k) => k + i);
-            const copiedPages = await newPdf.copyPages(pdfDoc, pageIndices);
-            copiedPages.forEach((page) => newPdf.addPage(page));
-            const chunkBase64 = await newPdf.saveAsBase64({ dataUri: true });
-            
-            chunks.push({
-               index: i / CHUNK_SIZE,
-               base64Pdf: chunkBase64,
-               status: 'pending'
-            });
-          }
-          
-          this.store.setPdfTask({
-             fileName: file.name,
-             chunks
-          });
-          
-          shouldResumePdf = true;
-        }
       } else {
         this.toast.error(this.toast.Messages.FILE_INVALID_FORMAT);
       }
@@ -321,6 +335,63 @@ export class Uploader {
       if (this.fileInput()) {
         this.fileInput().nativeElement.value = '';
       }
+    }
+  }
+
+  async startPdfConversion(file: File) {
+    if (this.store.isConverting()) return;
+    this.store.setConverting(true);
+    let shouldResumePdf = false;
+    
+    try {
+      if (!this.store.currentProjectId()) {
+        await this.store.createNewProject(file.name.replace(/\.[^/.]+$/, ''));
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const pageCount = pdfDoc.getPageCount();
+
+      if (pageCount <= 50) {
+        const base64 = await this.fileToBase64(file);
+        const b64Data = base64.split(',')[1];
+        const markdown = await this.gemini.convertPdfToMarkdown(b64Data, this.pdfModel());
+        this.store.setMarkdown(markdown, file.name);
+        this.toast.success(this.toast.Messages.FILE_PROCESS_SUCCESS);
+      } else {
+        // Large PDF -> chunk
+        const CHUNK_SIZE = 50;
+        const chunks: import('../../core/db').PdfConversionChunk[] = [];
+        
+        for (let i = 0; i < pageCount; i += CHUNK_SIZE) {
+          const endPage = Math.min(i + CHUNK_SIZE, pageCount) - 1;
+          const newPdf = await PDFDocument.create();
+          const pageIndices = Array.from({ length: endPage - i + 1 }, (_, k) => k + i);
+          const copiedPages = await newPdf.copyPages(pdfDoc, pageIndices);
+          copiedPages.forEach((page) => newPdf.addPage(page));
+          const chunkBase64 = await newPdf.saveAsBase64({ dataUri: true });
+          
+          chunks.push({
+             index: i / CHUNK_SIZE,
+             base64Pdf: chunkBase64,
+             status: 'pending'
+          });
+        }
+        
+        this.store.setPdfTask({
+           fileName: file.name,
+           chunks
+        });
+        
+        shouldResumePdf = true;
+      }
+    } catch (e: unknown) {
+      console.error(e);
+      const msg = parseGeminiError(e);
+      this.toast.error(this.toast.Messages.FILE_PROCESS_ERROR(msg));
+    } finally {
+      this.pendingPdfFile.set(null);
+      this.store.setConverting(false);
       if (shouldResumePdf) {
          this.resumePdfTask();
       }

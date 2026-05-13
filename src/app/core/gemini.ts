@@ -58,7 +58,7 @@ export class GeminiClient {
     return null;
   }
 
-  async convertPdfToMarkdown(base64Data: string): Promise<string> {
+  async convertPdfToMarkdown(base64Data: string, model: string = 'gemini-flash-lite-latest'): Promise<string> {
     const pdfSI = await this.loadPromptText('/prompts/pdf_to_md_system_instruction.md');
     const pdfP = await this.loadPromptText('/prompts/pdf_to_md_prompt.md');
 
@@ -75,7 +75,7 @@ export class GeminiClient {
     }
 
     const response = await this.ai.models.generateContent({
-      model: 'gemini-flash-latest',
+      model: model,
       config: configArgs,
       contents: [
         { text: textPrompt },
@@ -280,9 +280,9 @@ export class GeminiClient {
     return '';
   }
 
-  async analyzeAllInOne(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
-    const si = await this.loadPromptText('/prompts/all_in_one_system_instructions.md');
-    const p = await this.loadPromptText('/prompts/all_in_one_prompt.md');
+  async analyzeBook(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
+    const si = await this.loadPromptText('/prompts/book_analysis_system_instructions.md');
+    const p = await this.loadPromptText('/prompts/book_analysis_prompt.md');
 
     let finalPrompt = p || `Phân tích văn bản và trả về JSON cấu hình theo yêu cầu.\n\n<source_text>\n[nội dung]\n</source_text>`;
     

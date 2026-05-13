@@ -52,10 +52,10 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
           <div>
             <h4 class="text-sm font-bold text-indigo-900 mb-1 flex items-center space-x-2">
               <mat-icon class="!text-base !w-5 !h-5 text-indigo-600">auto_awesome</mat-icon>
-              <span>Phân tích toàn diện bằng AI (Đề xuất)</span>
+              <span>Quét mã nguồn sách để chia khối (Đề xuất)</span>
             </h4>
             <p class="text-xs text-indigo-700 leading-relaxed mb-3">
-              AI sẽ quét mã nguồn sách để chọn phương án chia khối chuẩn nhất, đồng thời trích xuất sẵn Bảng Đại từ và Thuật ngữ chuyên ngành dùng cho bước sau.
+              AI sẽ quét mã nguồn sách để chọn phương án chia khối chuẩn nhất, giúp việc dịch thuật sau này được liền mạch và không bị gián đoạn.
             </p>
             <div class="flex items-center gap-4 text-xs font-medium text-indigo-800">
               <div class="flex items-center gap-1.5 bg-white/60 px-2.5 py-1 rounded-md border border-indigo-100">
@@ -68,15 +68,24 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
               </div>
             </div>
             
-            <div class="mt-3 max-w-[250px]">
-              <select [value]="analysisModel()" (change)="analysisModel.set($any($event.target).value)" [disabled]="isAnalyzing()" class="w-full pl-3 pr-8 py-1.5 text-xs text-indigo-900 bg-white/80 border-indigo-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg border disabled:cursor-not-allowed">
-                <option value="gemini-flash-latest">Flash (Nhanh & Tiết kiệm)</option>
-                <option value="gemini-pro-latest">Pro (Tư duy sâu & Chuẩn xác)</option>
-              </select>
+            <div class="mt-3 flex items-center gap-3">
+              <div class="max-w-[250px] flex-1">
+                <select [value]="analysisModel()" (change)="analysisModel.set($any($event.target).value)" [disabled]="isAnalyzing()" class="w-full pl-3 pr-8 py-1.5 text-xs text-indigo-900 bg-white/80 border-indigo-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg border disabled:cursor-not-allowed">
+                  <option value="gemini-flash-lite-latest">Lite (Rẻ & Nhanh nhất)</option>
+                  <option value="gemini-flash-latest">Flash (Cân bằng & Tinh tế)</option>
+                </select>
+              </div>
+              <div class="max-w-[150px] flex-1">
+                <select [value]="samplePercentage()" (change)="samplePercentage.set(+$any($event.target).value)" [disabled]="isAnalyzing()" class="w-full pl-3 pr-8 py-1.5 text-xs text-indigo-900 bg-white/80 border-indigo-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg border disabled:cursor-not-allowed">
+                  <option value="25">Lấy mẫu 25%</option>
+                  <option value="50">Lấy mẫu 50%</option>
+                  <option value="100">Lấy mẫu 100%</option>
+                </select>
+              </div>
             </div>
           </div>
           <button 
-            (click)="runAllInOneAnalysis()"
+            (click)="runBookAnalysis()"
             [disabled]="isAnalyzing()"
             class="flex-shrink-0 w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-wait">
             @if (isAnalyzing()) {
@@ -84,7 +93,7 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
               <span>Đang phân tích...</span>
             } @else {
               <mat-icon class="!text-base !w-5 !h-5 hidden sm:block">memory</mat-icon>
-              <span>{{ hasExistingAnalysisData ? 'Phân tích lại bằng AI' : 'Bắt đầu phân tích bằng AI' }}</span>
+              <span>Bắt đầu phân tích bằng AI</span>
             }
           </button>
         </div>
@@ -162,27 +171,10 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
              [class.bg-indigo-50]="activeSplitMode() === 'keyword'"
              [class.bg-opacity-20]="activeSplitMode() === 'keyword'"
              [class.border-transparent]="activeSplitMode() !== 'keyword'">
-          <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
+          <div class="flex flex-col md:flex-row gap-4 md:items-start justify-between mb-4">
             <div class="flex-1 w-full">
-              <label for="keywordInput" class="block text-sm font-bold text-zinc-900 mb-2">Tùy chọn 1: Chia theo Từ khóa Tiêu đề</label>
-              <div class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-shadow bg-white flex flex-wrap gap-2 items-center min-h-[50px] cursor-text" tabindex="0" (click)="focusInput(keywordInput)" (keydown.enter)="focusInput(keywordInput)">
-                @for (kw of draftKeywords(); track kw) {
-                  <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
-                    {{ kw }}
-                    <button type="button" class="ml-1.5 flex-shrink-0 inline-flex rounded-full text-indigo-500 hover:text-indigo-800 hover:bg-indigo-100 transition-colors" (click)="removeKeyword(kw); $event.stopPropagation()">
-                      <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">close</mat-icon>
-                    </button>
-                  </span>
-                }
-                <input type="text" 
-                      id="keywordInput"
-                      #keywordInput
-                      (keydown)="handleKeywordKeydown($event, keywordInput)"
-                      (blur)="addKeyword(keywordInput)"
-                      class="flex-1 min-w-[120px] border-0 bg-transparent p-1 text-sm text-zinc-900 focus:ring-0 placeholder:text-zinc-400 outline-none" 
-                      placeholder="Thêm từ khóa... (Enter để lưu)">
-              </div>
-              <p class="text-xs text-zinc-500 mt-2">Dùng khi các phần trong sách gốc bắt đầu bằng chữ như "Chapter", "Part", "Section", v.v.. Các khối vượt trần sẽ tự động được chia nhỏ bằng cách chia đôi.</p>
+              <label for="keywordInput" class="block text-sm font-bold text-zinc-900 mb-1">Tùy chọn 1: Chia theo Từ khóa Tiêu đề</label>
+              <p class="text-xs text-zinc-500">Dùng khi các phần trong sách gốc bắt đầu bằng chữ như "Chapter", "Part", "Section", v.v.. Các khối vượt trần sẽ tự động được chia nhỏ bằng cách chia đôi.</p>
             </div>
             <div class="w-full md:w-32 flex-shrink-0">
               <button 
@@ -206,6 +198,23 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
               </button>
             </div>
           </div>
+          <div class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-shadow bg-white flex flex-wrap gap-2 items-center min-h-[50px] cursor-text" tabindex="0" (click)="focusInput(keywordInput)" (keydown.enter)="focusInput(keywordInput)">
+            @for (kw of draftKeywords(); track kw) {
+              <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+                {{ kw }}
+                <button type="button" class="ml-1.5 flex-shrink-0 inline-flex rounded-full text-indigo-500 hover:text-indigo-800 hover:bg-indigo-100 transition-colors" (click)="removeKeyword(kw); $event.stopPropagation()">
+                  <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">close</mat-icon>
+                </button>
+              </span>
+            }
+            <input type="text" 
+                  id="keywordInput"
+                  #keywordInput
+                  (keydown)="handleKeywordKeydown($event, keywordInput)"
+                  (blur)="addKeyword(keywordInput)"
+                  class="flex-1 min-w-[120px] border-0 bg-transparent p-1 text-sm text-zinc-900 focus:ring-0 placeholder:text-zinc-400 outline-none" 
+                  placeholder="Thêm từ khóa... (Enter để lưu)">
+          </div>
         </div>
 
         <div class="flex items-center justify-center my-2 opacity-60">
@@ -220,26 +229,10 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
              [class.bg-indigo-50]="activeSplitMode() === 'heading'"
              [class.bg-opacity-20]="activeSplitMode() === 'heading'"
              [class.border-transparent]="activeSplitMode() !== 'heading'">
-          <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
+          <div class="flex flex-col md:flex-row gap-4 md:items-start justify-between mb-4">
             <div class="flex-1 w-full">
-              <h4 class="block text-sm font-bold text-zinc-900 mb-3">Tùy chọn 2: Chia theo cấu trúc Thẻ Heading (H2, H3)</h4>
-              <div class="flex flex-wrap gap-6 items-center">
-                <label class="flex items-center gap-2 cursor-pointer p-2 -m-2 rounded-lg hover:bg-zinc-50 transition-colors">
-                  <input type="radio" name="headingLvl" value="h2" 
-                         [checked]="activeSplitMode() === 'heading' && draftHeadingLevel() === 'h2'" 
-                         (change)="onHeadingLevelChange('h2')"
-                         class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500">
-                  <span class="text-sm font-medium text-zinc-900">Thẻ H2</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer p-2 -m-2 rounded-lg hover:bg-zinc-50 transition-colors">
-                  <input type="radio" name="headingLvl" value="h3" 
-                         [checked]="activeSplitMode() === 'heading' && draftHeadingLevel() === 'h3'" 
-                         (change)="onHeadingLevelChange('h3')"
-                         class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500">
-                  <span class="text-sm font-medium text-zinc-900">Thẻ H3</span>
-                </label>
-              </div>
-              <p class="text-xs text-zinc-500 mt-3">Dùng khi sách gốc không có từ "Chapter", "Section" nhưng có thẻ <code>##</code> (H2) hoặc <code>###</code> (H3) phân định rõ ràng. Các khối vượt trần sẽ tự động được chia nhỏ bằng cách chia đôi.</p>
+              <h4 class="block text-sm font-bold text-zinc-900 mb-1">Tùy chọn 2: Chia theo cấu trúc Thẻ Heading (H2, H3)</h4>
+              <p class="text-xs text-zinc-500">Dùng khi sách gốc không có từ "Chapter", "Section" nhưng có thẻ <code>##</code> (H2) hoặc <code>###</code> (H3) phân định rõ ràng. Các khối vượt trần sẽ tự động được chia nhỏ bằng cách chia đôi.</p>
             </div>
             <div class="w-full md:w-32 flex-shrink-0">
               <button 
@@ -263,6 +256,22 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
               </button>
             </div>
           </div>
+          <div class="flex flex-wrap gap-6 items-center">
+            <label class="flex items-center gap-2 cursor-pointer p-2 -m-2 rounded-lg hover:bg-zinc-50 transition-colors">
+              <input type="radio" name="headingLvl" value="h2" 
+                     [checked]="activeSplitMode() === 'heading' && draftHeadingLevel() === 'h2'" 
+                     (change)="onHeadingLevelChange('h2')"
+                     class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500">
+              <span class="text-sm font-medium text-zinc-900">Thẻ H2</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer p-2 -m-2 rounded-lg hover:bg-zinc-50 transition-colors">
+              <input type="radio" name="headingLvl" value="h3" 
+                     [checked]="activeSplitMode() === 'heading' && draftHeadingLevel() === 'h3'" 
+                     (change)="onHeadingLevelChange('h3')"
+                     class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500">
+              <span class="text-sm font-medium text-zinc-900">Thẻ H3</span>
+            </label>
+          </div>
         </div>
 
         <div class="flex items-center justify-center my-2 opacity-60">
@@ -277,10 +286,10 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
              [class.bg-indigo-50]="activeSplitMode() === 'standalone'"
              [class.bg-opacity-20]="activeSplitMode() === 'standalone'"
              [class.border-transparent]="activeSplitMode() !== 'standalone'">
-          <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
+          <div class="flex flex-col md:flex-row gap-4 md:items-start justify-between">
             <div class="flex-1 w-full">
               <h4 class="block text-sm font-bold text-zinc-900 mb-1">Tùy chọn 3: Chia đều tự động (Hard-Split)</h4>
-              <p class="text-xs text-zinc-500 mt-2">Dùng khi sách không có cấu trúc chuẩn nào. Ứng dụng sẽ tự động chia đều sách thành các khối theo chuẩn giới hạn tối đa bên trên dựa vào các khoảng nghỉ (xuống dòng, ngắt câu...)</p>
+              <p class="text-xs text-zinc-500">Dùng khi sách không có cấu trúc chuẩn nào. Ứng dụng sẽ tự động chia đều sách thành các khối theo chuẩn giới hạn tối đa bên trên dựa vào các khoảng nghỉ (xuống dòng, ngắt câu...)</p>
             </div>
             <div class="w-full md:w-32 flex-shrink-0">
               <button 
@@ -407,8 +416,8 @@ export class Splitter {
   gemini = inject(GeminiClient);
 
   get isAnalyzing() { return this.store.isAnalyzingSplits; }
-  get hasExistingAnalysisData() { return this.store.pronounVersions().length > 0 || this.store.glossaryVersions().length > 0; }
-  analysisModel = signal<string>(this.store.config().analysisModel ?? 'gemini-pro-latest');
+  analysisModel = signal<string>(this.store.config().analysisModel ?? 'gemini-flash-lite-latest');
+  samplePercentage = signal<number>(50);
 
   draftKeywords = signal<string[]>(['Chapter', 'Part', 'Section']);
   draftMinWords = signal(5000);
@@ -525,19 +534,25 @@ export class Splitter {
     this.applyKeywordMode();
   }
 
-  async runAllInOneAnalysis() {
+  async runBookAnalysis() {
     try {
-      const text = this.store.rawMarkdown();
+      let text = this.store.rawMarkdown();
       if (!text) {
         this.toast.error('Không tìm thấy nội dung sách để phân tích.');
         return;
+      }
+
+      const pct = this.samplePercentage();
+      if (pct < 100) {
+        const charCount = Math.floor(text.length * (pct / 100));
+        text = text.substring(0, charCount);
       }
 
       // Update the model config
       this.store.updateConfig({ analysisModel: this.analysisModel() });
 
       this.isAnalyzing.set(true);
-      const jsonString = await this.gemini.analyzeAllInOne(
+      const jsonString = await this.gemini.analyzeBook(
         text, 
         this.analysisModel(),
         this.store.bookTitle(), 
@@ -574,30 +589,10 @@ export class Splitter {
         }
       }
 
-      // 2. Tạo Markdown Đại Từ
-      if (data.pronounsTable && Array.isArray(data.pronounsTable) && data.pronounsTable.length > 0) {
-        let md = '| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|---|---|\n';
-        for (const pt of data.pronounsTable) {
-          md += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
-        }
-        this.store.addPronounVersion(md, this.analysisModel(), 0.1);
-        this.store.usePronouns.set(true);
-      }
-
-      // 3. Tạo Markdown Thuật ngữ
-      if (data.glossaryTable && Array.isArray(data.glossaryTable) && data.glossaryTable.length > 0) {
-        let md = '| Tiếng Anh | Từ loại | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|---|\n';
-        for (const gt of data.glossaryTable) {
-          md += `| ${gt.english || ''} | ${gt.pos || ''} | ${gt.vietnamese || ''} | ${gt.contextNotes || ''} |\n`;
-        }
-        this.store.addGlossaryVersion(md, this.analysisModel(), 0.1);
-        this.store.useGlossary.set(true);
-      }
-
       this.toast.success('Đã áp dụng các cài đặt được AI phân tích.');
 
     } catch (e) {
-      console.error('All-in-One Analysis failed:', e);
+      console.error('Analysis failed:', e);
       this.toast.error(parseGeminiError(e));
     } finally {
       this.isAnalyzing.set(false);
