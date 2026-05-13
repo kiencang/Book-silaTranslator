@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.31]- 2026-05-14
+### Fixed
+- Chia tách mã nguồn phase2 (chia chương sách) thành các phần nhỏ hơn cho dễ quản lý.
+
 ## [v1.0.30]- 2026-05-14
 ### Fixed
 - Chuyển mặc định chuyển đổi PDF thành markdown bằng model `gemini-flash-lite-latest` cho tốc độ cao và rẻ hơn.
