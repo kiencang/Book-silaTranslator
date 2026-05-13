@@ -243,6 +243,7 @@ export class PronounSetup {
       }
 
       const deduplicatedPronouns = Array.from(uniqueItems.values());
+      deduplicatedPronouns.sort((a, b) => String(a.originalName).localeCompare(String(b.originalName)));
 
       let result = '';
       if (deduplicatedPronouns.length > 0) {

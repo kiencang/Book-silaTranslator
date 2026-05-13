@@ -42,9 +42,14 @@ import { PDFDocument } from 'pdf-lib';
               <button (click)="cancelPdfPending()" class="px-6 py-2.5 rounded-lg border border-zinc-200 font-medium text-zinc-600 hover:bg-zinc-100 transition-colors">
                 Hủy
               </button>
-              <button (click)="startPdfConversion(pFile)" [disabled]="store.isConverting()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50">
-                <mat-icon class="!w-[20px] !h-[20px] !text-[20px] flex items-center justify-center">{{ store.isConverting() ? 'autorenew' : 'play_arrow' }}</mat-icon>
-                <span>Bắt đầu xử lý</span>
+              <button (click)="startPdfConversion(pFile)" [disabled]="store.isConverting()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                @if (store.isConverting()) {
+                  <mat-icon class="!w-[20px] !h-[20px] !text-[20px] flex items-center justify-center animate-spin">autorenew</mat-icon>
+                  <span>Đang xử lý...</span>
+                } @else {
+                  <mat-icon class="!w-[20px] !h-[20px] !text-[20px] flex items-center justify-center">play_arrow</mat-icon>
+                  <span>Bắt đầu xử lý</span>
+                }
               </button>
             </div>
             
@@ -342,6 +347,9 @@ export class Uploader {
     if (this.store.isConverting()) return;
     this.store.setConverting(true);
     let shouldResumePdf = false;
+    
+    // Nhường quyền cho UI render trạng thái loading trước khi thực hiện tác vụ nặng
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     try {
       if (!this.store.currentProjectId()) {

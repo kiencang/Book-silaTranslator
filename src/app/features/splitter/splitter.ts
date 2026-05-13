@@ -4,11 +4,21 @@ import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../core/toast.service';
 import { analyzeAndSplitText, PreviewChapter, countWords } from './splitter.util';
 import { GeminiClient, parseGeminiError } from '../../core/gemini';
+import { AiAnalysisComponent } from './components/ai-analysis.component';
+import { SplitLimitsComponent } from './components/split-limits.component';
+import { SplitOptionsComponent } from './components/split-options.component';
+import { SplitPreviewComponent } from './components/split-preview.component';
 
 @Component({
   selector: 'app-splitter',
   standalone: true,
-  imports: [MatIconModule],
+  imports: [
+    MatIconModule,
+    AiAnalysisComponent,
+    SplitLimitsComponent,
+    SplitOptionsComponent,
+    SplitPreviewComponent
+  ],
   template: `
     <div class="max-w-4xl mx-auto py-8">
       <div class="flex items-center justify-between mb-8">
@@ -47,345 +57,44 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
       <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8 transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
         <h3 class="text-lg font-semibold text-zinc-900 mb-6">Điều chỉnh cách phân chia</h3>
         
-        <!-- AI Auto Analyze -->
-        <div class="mb-6 p-5 rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-white shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <h4 class="text-sm font-bold text-indigo-900 mb-1 flex items-center space-x-2">
-              <mat-icon class="!text-base !w-5 !h-5 text-indigo-600">auto_awesome</mat-icon>
-              <span>Quét mã nguồn sách để chia khối (Đề xuất)</span>
-            </h4>
-            <p class="text-xs text-indigo-700 leading-relaxed mb-3">
-              AI sẽ quét mã nguồn sách để chọn phương án chia khối chuẩn nhất, giúp việc dịch thuật sau này được liền mạch và không bị gián đoạn.
-            </p>
-            <div class="flex items-center gap-4 text-xs font-medium text-indigo-800">
-              <div class="flex items-center gap-1.5 bg-white/60 px-2.5 py-1 rounded-md border border-indigo-100">
-                <mat-icon class="!text-[14px] !w-3.5 !h-3.5 text-indigo-500">article</mat-icon>
-                <span>~{{ formatNumber(totalWords()) }} từ</span>
-              </div>
-              <div class="flex items-center gap-1.5 bg-white/60 px-2.5 py-1 rounded-md border border-indigo-100">
-                <mat-icon class="!text-[14px] !w-3.5 !h-3.5 text-indigo-500">token</mat-icon>
-                <span>~{{ formatNumber(estimatedTokens()) }} token</span>
-              </div>
-            </div>
-            
-            <div class="mt-3 flex items-center gap-3">
-              <div class="max-w-[250px] flex-1">
-                <select [value]="analysisModel()" (change)="analysisModel.set($any($event.target).value)" [disabled]="isAnalyzing()" class="w-full pl-3 pr-8 py-1.5 text-xs text-indigo-900 bg-white/80 border-indigo-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg border disabled:cursor-not-allowed">
-                  <option value="gemini-flash-lite-latest">Lite (Rẻ & Nhanh nhất)</option>
-                  <option value="gemini-flash-latest">Flash (Cân bằng & Tinh tế)</option>
-                </select>
-              </div>
-              <div class="max-w-[150px] flex-1">
-                <select [value]="samplePercentage()" (change)="samplePercentage.set(+$any($event.target).value)" [disabled]="isAnalyzing()" class="w-full pl-3 pr-8 py-1.5 text-xs text-indigo-900 bg-white/80 border-indigo-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg border disabled:cursor-not-allowed">
-                  <option value="25">Lấy mẫu 25%</option>
-                  <option value="50">Lấy mẫu 50%</option>
-                  <option value="100">Lấy mẫu 100%</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <button 
-            (click)="runBookAnalysis()"
-            [disabled]="isAnalyzing()"
-            class="flex-shrink-0 w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-wait">
-            @if (isAnalyzing()) {
-              <mat-icon class="animate-spin !text-base !w-5 !h-5 hidden sm:block">autorenew</mat-icon>
-              <span>Đang phân tích...</span>
-            } @else {
-              <mat-icon class="!text-base !w-5 !h-5 hidden sm:block">memory</mat-icon>
-              <span>Bắt đầu phân tích bằng AI</span>
-            }
-          </button>
-        </div>
+        <app-ai-analysis
+          [isAnalyzing]="isAnalyzing()"
+          [totalWords]="totalWords()"
+          [estimatedTokens]="estimatedTokens()"
+          [(analysisModel)]="analysisModel"
+          [(samplePercentage)]="samplePercentage"
+          (onAnalyze)="runBookAnalysis()" />
 
         <!-- Các thông số Tối thiểu và Tối đa biên độ -->
         <fieldset class="transition-opacity duration-300" [disabled]="isAnalyzing() || store.hasAnyTranslation()" [class.opacity-50]="isAnalyzing() || store.hasAnyTranslation()" [class.pointer-events-none]="isAnalyzing() || store.hasAnyTranslation()">
-          <div class="mb-6 pb-6 border-b border-zinc-200 border-dashed">
-            
-            <div class="flex flex-col xl:flex-row items-center justify-between gap-6 xl:gap-4 w-full">
-              
-              <!-- Tối thiểu -->
-              <div class="flex items-center gap-4 w-full xl:w-[45%] justify-between xl:justify-start">
-                <div>
-                  <label for="draftMinWords" class="block text-sm font-bold text-zinc-900 mb-1">Số từ tối thiểu</label>
-                  <p class="text-xs text-zinc-500">Gộp các phần nhỏ hơn mức này.</p>
-                </div>
-                <input type="number" 
-                      id="draftMinWords"
-                      [value]="draftMinWords()" 
-                      (input)="draftMinWords.set(+$any($event.target).value)" 
-                      (keydown.enter)="applyWordsRange()"
-                      min="1000" max="7000" step="500" 
-                      class="w-28 flex-shrink-0 px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
-              </div>
+          <app-split-limits
+            [(draftMinWords)]="draftMinWords"
+            [(draftMaxWords)]="draftMaxWords"
+            [activeMinWords]="activeMinWords()"
+            [activeMaxWords]="activeMaxWords()"
+            (onApply)="applyWordsRange()" />
 
-              <!-- Divider -->
-              <div class="hidden xl:block w-px h-12 bg-zinc-200"></div>
-              <div class="block xl:hidden h-px w-full bg-zinc-200"></div>
-
-              <!-- Tối đa -->
-              <div class="flex items-center gap-4 w-full xl:w-[45%] justify-between xl:justify-end">
-                <div>
-                  <label for="draftMaxWords" class="block text-sm font-bold text-zinc-900 mb-1">Số từ tối đa</label>
-                  <p class="text-xs text-zinc-500">Chia các phần lớn hơn mức này.</p>
-                </div>
-                <input type="number" 
-                      id="draftMaxWords"
-                      [value]="draftMaxWords()" 
-                      (input)="draftMaxWords.set(+$any($event.target).value)" 
-                      (keydown.enter)="applyWordsRange()"
-                      min="10000" max="25000" step="1000" 
-                      class="w-28 flex-shrink-0 px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
-              </div>
-
-            </div>
-
-            <!-- Nút áp dụng -->
-            <div class="mt-6 flex justify-center">
-              <button 
-                (click)="applyWordsRange()"
-                class="w-48 h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm text-sm"
-                [class.bg-indigo-600]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
-                [class.text-white]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
-                [class.border-indigo-600]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
-                [class.hover:bg-indigo-700]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
-                [class.bg-indigo-50]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
-                [class.text-indigo-700]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
-                [class.border-indigo-200]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
-                [class.hover:bg-indigo-100]="draftMinWords() !== activeMinWords() || draftMaxWords() !== activeMaxWords()"
-              >
-                @if (draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()) {
-                  <mat-icon class="!w-4 !h-4 !text-sm">check</mat-icon>
-                  <span>Đang áp dụng</span>
-                } @else {
-                  <span>Áp dụng ngay</span>
-                }
-              </button>
-            </div>
-            
-          </div>
-
-        <!-- Tùy chọn 1: Chia theo từ khóa -->
-        <div class="mb-4 p-5 rounded-xl border-2 transition-colors relative"
-             [class.border-indigo-500]="activeSplitMode() === 'keyword'"
-             [class.bg-indigo-50]="activeSplitMode() === 'keyword'"
-             [class.bg-opacity-20]="activeSplitMode() === 'keyword'"
-             [class.border-transparent]="activeSplitMode() !== 'keyword'">
-          <div class="flex flex-col md:flex-row gap-4 md:items-start justify-between mb-4">
-            <div class="flex-1 w-full">
-              <label for="keywordInput" class="block text-sm font-bold text-zinc-900 mb-1">Tùy chọn 1: Chia theo Từ khóa Tiêu đề</label>
-              <p class="text-xs text-zinc-500">Dùng khi các phần trong sách gốc bắt đầu bằng chữ như "Chapter", "Part", "Section", v.v.. Các khối vượt trần sẽ tự động được chia nhỏ bằng cách chia đôi.</p>
-            </div>
-            <div class="w-full md:w-32 flex-shrink-0">
-              <button 
-                (click)="applyKeywordMode()"
-                class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm"
-                [class.bg-indigo-600]="activeSplitMode() === 'keyword'"
-                [class.text-white]="activeSplitMode() === 'keyword'"
-                [class.border-indigo-600]="activeSplitMode() === 'keyword'"
-                [class.hover:bg-indigo-700]="activeSplitMode() === 'keyword'"
-                [class.bg-white]="activeSplitMode() !== 'keyword'"
-                [class.text-zinc-700]="activeSplitMode() !== 'keyword'"
-                [class.border-zinc-300]="activeSplitMode() !== 'keyword'"
-                [class.hover:bg-zinc-50]="activeSplitMode() !== 'keyword'"
-              >
-                @if (activeSplitMode() === 'keyword') {
-                  <mat-icon class="!w-5 !h-5 !text-base">check</mat-icon>
-                  <span>Đang dùng</span>
-                } @else {
-                  <span>Sử dụng</span>
-                }
-              </button>
-            </div>
-          </div>
-          <div class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-shadow bg-white flex flex-wrap gap-2 items-center min-h-[50px] cursor-text" tabindex="0" (click)="focusInput(keywordInput)" (keydown.enter)="focusInput(keywordInput)">
-            @for (kw of draftKeywords(); track kw) {
-              <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
-                {{ kw }}
-                <button type="button" class="ml-1.5 flex-shrink-0 inline-flex rounded-full text-indigo-500 hover:text-indigo-800 hover:bg-indigo-100 transition-colors" (click)="removeKeyword(kw); $event.stopPropagation()">
-                  <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">close</mat-icon>
-                </button>
-              </span>
-            }
-            <input type="text" 
-                  id="keywordInput"
-                  #keywordInput
-                  (keydown)="handleKeywordKeydown($event, keywordInput)"
-                  (blur)="addKeyword(keywordInput)"
-                  class="flex-1 min-w-[120px] border-0 bg-transparent p-1 text-sm text-zinc-900 focus:ring-0 placeholder:text-zinc-400 outline-none" 
-                  placeholder="Thêm từ khóa... (Enter để lưu)">
-          </div>
-        </div>
-
-        <div class="flex items-center justify-center my-2 opacity-60">
-          <div class="h-px bg-zinc-300 w-full max-w-[100px]"></div>
-          <span class="mx-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Hoặc</span>
-          <div class="h-px bg-zinc-300 w-full max-w-[100px]"></div>
-        </div>
-
-        <!-- Tùy chọn 2: Chia theo Tiêu đề Heading -->
-        <div class="p-5 rounded-xl border-2 transition-colors relative"
-             [class.border-indigo-500]="activeSplitMode() === 'heading'"
-             [class.bg-indigo-50]="activeSplitMode() === 'heading'"
-             [class.bg-opacity-20]="activeSplitMode() === 'heading'"
-             [class.border-transparent]="activeSplitMode() !== 'heading'">
-          <div class="flex flex-col md:flex-row gap-4 md:items-start justify-between mb-4">
-            <div class="flex-1 w-full">
-              <h4 class="block text-sm font-bold text-zinc-900 mb-1">Tùy chọn 2: Chia theo cấu trúc Thẻ Heading (H2, H3)</h4>
-              <p class="text-xs text-zinc-500">Dùng khi sách gốc không có từ "Chapter", "Section" nhưng có thẻ <code>##</code> (H2) hoặc <code>###</code> (H3) phân định rõ ràng. Các khối vượt trần sẽ tự động được chia nhỏ bằng cách chia đôi.</p>
-            </div>
-            <div class="w-full md:w-32 flex-shrink-0">
-              <button 
-                (click)="applyHeadingModeDefault()"
-                class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm"
-                [class.bg-indigo-600]="activeSplitMode() === 'heading'"
-                [class.text-white]="activeSplitMode() === 'heading'"
-                [class.border-indigo-600]="activeSplitMode() === 'heading'"
-                [class.hover:bg-indigo-700]="activeSplitMode() === 'heading'"
-                [class.bg-white]="activeSplitMode() !== 'heading'"
-                [class.text-zinc-700]="activeSplitMode() !== 'heading'"
-                [class.border-zinc-300]="activeSplitMode() !== 'heading'"
-                [class.hover:bg-zinc-50]="activeSplitMode() !== 'heading'"
-              >
-                @if (activeSplitMode() === 'heading') {
-                  <mat-icon class="!w-5 !h-5 !text-base">check</mat-icon>
-                  <span>Đang dùng</span>
-                } @else {
-                  <span>Sử dụng</span>
-                }
-              </button>
-            </div>
-          </div>
-          <div class="flex flex-wrap gap-6 items-center">
-            <label class="flex items-center gap-2 cursor-pointer p-2 -m-2 rounded-lg hover:bg-zinc-50 transition-colors">
-              <input type="radio" name="headingLvl" value="h2" 
-                     [checked]="activeSplitMode() === 'heading' && draftHeadingLevel() === 'h2'" 
-                     (change)="onHeadingLevelChange('h2')"
-                     class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500">
-              <span class="text-sm font-medium text-zinc-900">Thẻ H2</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer p-2 -m-2 rounded-lg hover:bg-zinc-50 transition-colors">
-              <input type="radio" name="headingLvl" value="h3" 
-                     [checked]="activeSplitMode() === 'heading' && draftHeadingLevel() === 'h3'" 
-                     (change)="onHeadingLevelChange('h3')"
-                     class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500">
-              <span class="text-sm font-medium text-zinc-900">Thẻ H3</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-center my-2 opacity-60">
-          <div class="h-px bg-zinc-300 w-full max-w-[100px]"></div>
-          <span class="mx-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Hoặc</span>
-          <div class="h-px bg-zinc-300 w-full max-w-[100px]"></div>
-        </div>
-
-        <!-- Tùy chọn 3: Standalone -->
-        <div class="p-5 rounded-xl border-2 transition-colors relative"
-             [class.border-indigo-500]="activeSplitMode() === 'standalone'"
-             [class.bg-indigo-50]="activeSplitMode() === 'standalone'"
-             [class.bg-opacity-20]="activeSplitMode() === 'standalone'"
-             [class.border-transparent]="activeSplitMode() !== 'standalone'">
-          <div class="flex flex-col md:flex-row gap-4 md:items-start justify-between">
-            <div class="flex-1 w-full">
-              <h4 class="block text-sm font-bold text-zinc-900 mb-1">Tùy chọn 3: Chia đều tự động (Hard-Split)</h4>
-              <p class="text-xs text-zinc-500">Dùng khi sách không có cấu trúc chuẩn nào. Ứng dụng sẽ tự động chia đều sách thành các khối theo chuẩn giới hạn tối đa bên trên dựa vào các khoảng nghỉ (xuống dòng, ngắt câu...)</p>
-            </div>
-            <div class="w-full md:w-32 flex-shrink-0">
-              <button 
-                (click)="applyStandaloneMode()"
-                class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm"
-                [class.bg-indigo-600]="activeSplitMode() === 'standalone'"
-                [class.text-white]="activeSplitMode() === 'standalone'"
-                [class.border-indigo-600]="activeSplitMode() === 'standalone'"
-                [class.hover:bg-indigo-700]="activeSplitMode() === 'standalone'"
-                [class.bg-white]="activeSplitMode() !== 'standalone'"
-                [class.text-zinc-700]="activeSplitMode() !== 'standalone'"
-                [class.border-zinc-300]="activeSplitMode() !== 'standalone'"
-                [class.hover:bg-zinc-50]="activeSplitMode() !== 'standalone'"
-              >
-                @if (activeSplitMode() === 'standalone') {
-                  <mat-icon class="!w-5 !h-5 !text-base">check</mat-icon>
-                  <span>Đang dùng</span>
-                } @else {
-                  <span>Sử dụng</span>
-                }
-              </button>
-            </div>
-          </div>
-        </div>
+          <app-split-options
+            [activeSplitMode]="activeSplitMode()"
+            [draftKeywords]="draftKeywords()"
+            [draftHeadingLevel]="draftHeadingLevel()"
+            (onAddKeyword)="addKeyword($event)"
+            (onRemoveKeyword)="removeKeyword($event)"
+            (onSelectKeywordMode)="applyKeywordMode()"
+            (onSelectHeadingMode)="applyHeadingModeDefault()"
+            (onHeadingLevelChange)="onHeadingLevelChange($event)"
+            (onSelectStandaloneMode)="applyStandaloneMode()" />
         </fieldset>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 transition-opacity duration-300"
-           [class.opacity-50]="isAnalyzing() || store.hasAnyTranslation()"
-           [class.pointer-events-none]="isAnalyzing() || store.hasAnyTranslation()">
-        @for (method of splitMethods(); track method.keyword) {
-          <div 
-            role="button"
-            tabindex="0"
-            class="p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col"
-            [class.border-indigo-500]="selectedMethodData()?.keyword === method.keyword"
-            [class.bg-indigo-50]="selectedMethodData()?.keyword === method.keyword"
-            [class.border-zinc-200]="selectedMethodData()?.keyword !== method.keyword"
-            [class.hover:border-zinc-300]="selectedMethodData()?.keyword !== method.keyword"
-            (keydown.enter)="selectMethod(method.keyword)"
-            (click)="selectMethod(method.keyword)"
-          >
-            <div class="flex justify-between items-start mb-3">
-              <h3 class="font-semibold text-zinc-900">Theo {{ method.keyword }} / Khối</h3>
-              @if (selectedMethodData()?.keyword === method.keyword) {
-                <mat-icon class="text-indigo-500">check_circle</mat-icon>
-              }
-            </div>
-            
-            <div class="mt-auto flex items-end justify-between">
-              <div>
-                <div class="text-3xl font-light text-zinc-900">{{ method.count }}</div>
-                <div class="text-xs text-zinc-500 uppercase tracking-wider font-semibold mt-1">Khối được chia</div>
-              </div>
-            </div>
-          </div>
-        }
-      </div>
-
-      @if (selectedMethodData()) {
-        <div class="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden mb-8">
-          <div class="border-b border-zinc-200 bg-zinc-50 px-6 py-4 flex justify-between items-center">
-            <h3 class="font-semibold text-zinc-900">Xem trước: Phân chia theo {{ selectedMethodData()?.keyword }} / Khối</h3>
-            <div class="text-sm text-zinc-500">{{ selectedMethodData()?.count }} khối</div>
-          </div>
-          <div class="max-h-96 overflow-y-auto p-0">
-            @for (chap of selectedMethodData()?.previewChapters; track $index) {
-              <div role="button" tabindex="0" (keydown.enter)="previewBlock.set(chap)" class="px-6 py-4 border-b border-zinc-100 last:border-0 hover:bg-zinc-50 transition-colors flex items-center justify-between group cursor-pointer" (click)="previewBlock.set(chap)">
-                <div class="flex-1 min-w-0 pr-4">
-                  <div class="flex items-center mb-1">
-                    <h4 class="font-medium text-zinc-900 truncate pr-4">{{ chap.title }}</h4>
-                    <span class="text-xs font-mono text-zinc-500 whitespace-nowrap ml-auto">{{ chap.wordCount }} từ</span>
-                  </div>
-                  <p class="text-sm text-zinc-500 line-clamp-2">{{ chap.previewText }}</p>
-                </div>
-                <div class="text-zinc-300 group-hover:text-indigo-500 transition-colors ml-4 flex-shrink-0">
-                  <mat-icon class="!w-6 !h-6 !text-2xl">visibility</mat-icon>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-
-        <div class="flex justify-end transition-opacity duration-300"
-             [class.opacity-50]="isAnalyzing()"
-             [class.pointer-events-none]="isAnalyzing()">
-          <button 
-            (click)="applySplit()"
-            [disabled]="selectedMethodData()?.count === 0 || isAnalyzing()"
-            class="flex items-center space-x-2 bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <span>Tiếp tục</span>
-            <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center">arrow_forward</mat-icon>
-          </button>
-        </div>
-      }
+      <app-split-preview
+        [splitMethods]="splitMethods()"
+        [selectedMethodData]="selectedMethodData()"
+        [disabled]="isAnalyzing() || store.hasAnyTranslation()"
+        [isAnalyzing]="isAnalyzing()"
+        (onSelectMethod)="selectMethod($event)"
+        (onPreviewBlock)="previewBlock.set($event)"
+        (onApplySplit)="applySplit()" />
 
       @if (previewBlock()) {
         <div role="button" tabindex="0" (keydown.enter)="previewBlock.set(null)" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm p-4 sm:p-6" (click)="previewBlock.set(null)">
@@ -483,10 +192,6 @@ export class Splitter {
     });
   }
 
-  focusInput(input: HTMLInputElement) {
-    input.focus();
-  }
-
   onHeadingLevelChange(level: 'h2' | 'h3') {
     this.draftHeadingLevel.set(level);
     if (this.activeSplitMode() !== 'heading') {
@@ -502,15 +207,7 @@ export class Splitter {
     this.applyHeadingMode();
   }
 
-  handleKeywordKeydown(event: KeyboardEvent, inputElement: HTMLInputElement) {
-    if (event.key === 'Enter' || event.key === ',') {
-      event.preventDefault();
-      this.addKeyword(inputElement);
-    }
-  }
-
-  addKeyword(inputElement: HTMLInputElement) {
-    const value = inputElement.value.trim();
+  addKeyword(value: string) {
     if (value) {
       const newKws = value.split(',').map(s => s.trim()).filter(s => s.length > 0);
       let currentKws = this.draftKeywords();
@@ -525,7 +222,6 @@ export class Splitter {
         this.draftKeywords.set(currentKws);
         this.applyKeywordMode();
       }
-      inputElement.value = '';
     }
   }
 

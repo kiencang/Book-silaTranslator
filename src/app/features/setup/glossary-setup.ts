@@ -221,6 +221,7 @@ export class GlossarySetup {
       }
       
       const deduplicatedGlossary = Array.from(uniqueItems.values());
+      deduplicatedGlossary.sort((a, b) => String(a.english).localeCompare(String(b.english)));
 
       let result = '';
       if (deduplicatedGlossary.length > 0) {
