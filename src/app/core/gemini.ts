@@ -167,7 +167,7 @@ export class GeminiClient {
     return result;
   }
 
-  async generatePronouns(text: string, model: string, bookTitle = '', author = '', temperature = 0.1): Promise<string> {
+  async generatePronounsRaw(text: string, model: string, bookTitle = '', author = '', temperature = 0.1): Promise<any[]> {
     const psi = await this.loadPromptText('/prompts/pronouns_system_instructions.md');
     const pp = await this.loadPromptText('/prompts/pronouns_prompt.md');
 
@@ -202,21 +202,28 @@ export class GeminiClient {
 
     try {
       const arr = JSON.parse(result);
-      if (Array.isArray(arr) && arr.length > 0) {
-        let md = '| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|---|---|\n';
-        for (const pt of arr) {
-          md += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
-        }
-        return md;
+      if (Array.isArray(arr)) {
+        return arr;
       }
     } catch (e) {
-      console.warn('Failed to parse generatePronouns JSON fallback to raw', e);
+      console.warn('Failed to parse generatePronounsRaw JSON', e);
     }
-
-    return result;
+    return [];
   }
 
-  async generateGlossary(text: string, model: string, bookTitle = '', author = '', temperature = 0.2): Promise<string> {
+  async generatePronouns(text: string, model: string, bookTitle = '', author = '', temperature = 0.1): Promise<string> {
+    const arr = await this.generatePronounsRaw(text, model, bookTitle, author, temperature);
+    if (arr.length > 0) {
+      let md = '| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|---|---|\n';
+      for (const pt of arr) {
+        md += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
+      }
+      return md;
+    }
+    return '';
+  }
+
+  async generateGlossaryRaw(text: string, model: string, bookTitle = '', author = '', temperature = 0.2): Promise<any[]> {
     const gsi = await this.loadPromptText('/prompts/glossary_system_instructions.md');
     const gp = await this.loadPromptText('/prompts/glossary_prompt.md');
 
@@ -252,18 +259,25 @@ export class GeminiClient {
 
     try {
       const arr = JSON.parse(result);
-      if (Array.isArray(arr) && arr.length > 0) {
-        let md = '| Tiếng Anh | Từ loại | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|---|\n';
-        for (const pt of arr) {
-          md += `| ${pt.english || ''} | ${pt.pos || ''} | ${pt.vietnamese || ''} | ${pt.contextNotes || ''} |\n`;
-        }
-        return md;
+      if (Array.isArray(arr)) {
+        return arr;
       }
     } catch (e) {
-      console.warn('Failed to parse generateGlossary JSON fallback to raw', e);
+      console.warn('Failed to parse generateGlossaryRaw JSON', e);
     }
+    return [];
+  }
 
-    return result;
+  async generateGlossary(text: string, model: string, bookTitle = '', author = '', temperature = 0.2): Promise<string> {
+    const arr = await this.generateGlossaryRaw(text, model, bookTitle, author, temperature);
+    if (arr.length > 0) {
+      let md = '| Tiếng Anh | Từ loại | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|---|\n';
+      for (const pt of arr) {
+        md += `| ${pt.english || ''} | ${pt.pos || ''} | ${pt.vietnamese || ''} | ${pt.contextNotes || ''} |\n`;
+      }
+      return md;
+    }
+    return '';
   }
 
   async analyzeAllInOne(text: string, model: string, bookTitle = '', author = ''): Promise<string> {

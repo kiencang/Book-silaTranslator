@@ -6,6 +6,7 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { MarkdownTableEditorComponent } from '../../shared/components/markdown-table-editor.component';
+import { smartHardSplit } from '../splitter/splitter.util';
 
 @Component({
   selector: 'app-pronoun-setup',
@@ -49,10 +50,10 @@ import { MarkdownTableEditorComponent } from '../../shared/components/markdown-t
                 Đang phân tích và tạo bảng...
               } @else if (draftPronounTable().trim().length > 0) {
                 <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
-                Tạo lại bảng dữ liệu
+                Tạo lại bảng dữ liệu Đại từ
               } @else {
                 <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">auto_awesome</mat-icon>
-                Bắt đầu tạo bảng tự động
+                Bắt đầu tạo bảng Đại từ tự động
               }
             </button>
           </div>
@@ -190,7 +191,67 @@ export class PronounSetup {
       const lengthToTake = Math.floor(fullText.length * ratio);
       const textToAnalyze = fullText.substring(0, lengthToTake);
 
-      const result = await this.gemini.generatePronouns(textToAnalyze, this.pronounModel(), this.store.bookTitle(), this.store.author(), 0.1);
+      const maxWordsPerChunk = 30000;
+      const chunks = smartHardSplit(textToAnalyze, maxWordsPerChunk);
+      
+      let allPronounItems: any[] = [];
+      const maxConcurrent = 4;
+      
+      for (let i = 0; i < chunks.length; i += maxConcurrent) {
+        const batch = chunks.slice(i, i + maxConcurrent);
+        const promises = batch.map(chunk => 
+          this.gemini.generatePronounsRaw(chunk, this.pronounModel(), this.store.bookTitle(), this.store.author(), 0.1)
+        );
+        const results = await Promise.all(promises);
+        for (const res of results) {
+          if (Array.isArray(res)) {
+            allPronounItems.push(...res);
+          }
+        }
+      }
+
+      function getGenderScore(gender?: string): number {
+        if (!gender) return 0;
+        const g = String(gender).toLowerCase().trim();
+        if (g === 'male' || g === 'female') return 2;
+        if (g === 'non-binary' || g === 'unknown') return 1;
+        return 0;
+      }
+
+      const uniqueItems = new Map<string, any>();
+      for (const item of allPronounItems) {
+        if (!item.originalName) continue;
+        const key = String(item.originalName).toLowerCase().trim();
+        
+        const existing = uniqueItems.get(key);
+        if (!existing) {
+          uniqueItems.set(key, item);
+        } else {
+          const existingScore = getGenderScore(existing.gender);
+          const newScore = getGenderScore(item.gender);
+          
+          if (newScore > existingScore) {
+            uniqueItems.set(key, item);
+          } else if (newScore === existingScore) {
+            const existingNotesLen = existing.notes ? String(existing.notes).length : 0;
+            const newNotesLen = item.notes ? String(item.notes).length : 0;
+            if (newNotesLen > existingNotesLen) {
+              uniqueItems.set(key, item);
+            }
+          }
+        }
+      }
+
+      const deduplicatedPronouns = Array.from(uniqueItems.values());
+
+      let result = '';
+      if (deduplicatedPronouns.length > 0) {
+        result = '| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|---|---|\n';
+        for (const pt of deduplicatedPronouns) {
+          result += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
+        }
+      }
+
       this.draftPronounTable.set(result);
       this.isManuallyEdited.set(false);
       this.store.addPronounVersion(result, this.pronounModel(), 0.1);

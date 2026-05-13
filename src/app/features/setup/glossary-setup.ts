@@ -6,6 +6,7 @@ import { GeminiClient, parseGeminiError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { MarkdownTableEditorComponent } from '../../shared/components/markdown-table-editor.component';
+import { smartHardSplit } from '../splitter/splitter.util';
 
 @Component({
   selector: 'app-glossary-setup',
@@ -49,10 +50,10 @@ import { MarkdownTableEditorComponent } from '../../shared/components/markdown-t
                 Đang phân tích sách và tạo bảng thuật ngữ (có thể mất nhiều phút)...
               } @else if (draftTable().trim().length > 0) {
                 <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
-                Tạo lại bảng dữ liệu
+                Tạo lại bảng dữ liệu Thuật ngữ
               } @else {
                 <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">auto_awesome</mat-icon>
-                Bắt đầu tạo bảng tự động
+                Bắt đầu tạo bảng Thuật ngữ tự động
               }
             </button>
           </div>
@@ -190,7 +191,45 @@ export class GlossarySetup {
       const lengthToTake = Math.floor(fullText.length * ratio);
       const textToAnalyze = fullText.substring(0, lengthToTake);
 
-      const result = await this.gemini.generateGlossary(textToAnalyze, this.glossaryModel(), this.store.bookTitle(), this.store.author(), 0.2);
+      const maxWordsPerChunk = 30000;
+      const chunks = smartHardSplit(textToAnalyze, maxWordsPerChunk);
+      
+      let allGlossaryItems: any[] = [];
+      const maxConcurrent = 4;
+      
+      for (let i = 0; i < chunks.length; i += maxConcurrent) {
+        const batch = chunks.slice(i, i + maxConcurrent);
+        const promises = batch.map(chunk => 
+          this.gemini.generateGlossaryRaw(chunk, this.glossaryModel(), this.store.bookTitle(), this.store.author(), 0.2)
+        );
+        const results = await Promise.all(promises);
+        for (const res of results) {
+          if (Array.isArray(res)) {
+            allGlossaryItems.push(...res);
+          }
+        }
+      }
+
+      // Deduplicate by english + pos
+      const uniqueItems = new Map<string, any>();
+      for (const item of allGlossaryItems) {
+        if (!item.english) continue;
+        const key = `${String(item.english).toLowerCase().trim()}_${String(item.pos || '').toLowerCase().trim()}`;
+        if (!uniqueItems.has(key)) {
+          uniqueItems.set(key, item);
+        }
+      }
+      
+      const deduplicatedGlossary = Array.from(uniqueItems.values());
+
+      let result = '';
+      if (deduplicatedGlossary.length > 0) {
+        result = '| Tiếng Anh | Từ loại | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|---|\n';
+        for (const pt of deduplicatedGlossary) {
+          result += `| ${pt.english || ''} | ${pt.pos || ''} | ${pt.vietnamese || ''} | ${pt.contextNotes || ''} |\n`;
+        }
+      }
+
       this.draftTable.set(result);
       this.isManuallyEdited.set(false);
       this.store.addGlossaryVersion(result, this.glossaryModel(), 0.2);
