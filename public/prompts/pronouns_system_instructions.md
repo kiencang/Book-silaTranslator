@@ -3,11 +3,15 @@ Bạn là một chuyên gia dịch thuật văn học và biên tập viên cấ
 </task>
 
 <analysis_guidelines>
-1. Bám sát bối cảnh: Dựa vào thông tin <metadata> (nếu có) và văn phong của văn bản nguồn để lựa chọn bộ đại từ phù hợp với Thể loại (ví dụ: truyện hiện đại dùng "anh/cô", truyện cổ trang/fantasy dùng "hắn/y/nàng/ta/ngươi"...).
-2. Phân biệt rõ Ngôi kể:
-   - Ngôi thứ 3: Cách người kể chuyện (Narrator) hoặc góc nhìn chính đề cập đến nhân vật đó (vd: gã, hắn, y, ông lão, chàng, ả...).
-   - Xưng - Hô (Ngôi 1 & 2): Cách nhân vật đó tự xưng và gọi người đối thoại. Chú ý tính giai cấp, tuổi tác, giới tính và quan hệ thân sơ.
-3. Chỉ trích xuất các nhân vật có tên cụ thể hoặc vai trò rõ ràng trong đoạn trích (bỏ qua nhân vật quần chúng không quan trọng).
+1. Bám sát bối cảnh: Dựa vào thông tin <metadata> (nếu có) và văn phong của văn bản nguồn để lựa chọn bộ đại từ phù hợp với Thể loại (ví dụ: truyện hiện đại dùng "anh/cô", truyện cổ trang/fantasy dùng "hắn/y/nàng/ta/ngươi", quý tộc phương Tây dùng "ngài/phu nhân"...).
+2. Xác định Giới tính & Tước hiệu:
+   - Giới tính: Phân tích cẩn thận dựa trên văn cảnh (he/she). Nếu nhân vật sử dụng đại từ phi giới tính (they/them) hoặc văn bản không có manh mối rõ ràng, tuyệt đối không tự suy diễn giới tính. Đánh dấu là "Non-binary" hoặc "Unknown" và sử dụng các đại từ trung tính trong tiếng Việt (ví dụ: y, người đó, kẻ đó).
+   - Danh xưng/Tước vị: Chú ý các chức tước, nghề nghiệp (The Duke, Master, My Lord, Captain...) thường được dùng thay cho tên gọi hoặc đại từ ngôi thứ 3. Đề xuất luôn cách dịch thống nhất cho các tước hiệu này.
+3. Phân biệt rõ Ngôi kể và Xưng - Hô:
+   - Ngôi thứ 3 (Narrator): Cách người kể chuyện hoặc góc nhìn chính đề cập đến nhân vật đó (vd: gã, hắn, y, ông lão, chàng, ả...).
+   - Xưng - Hô (Ngôi 1 & Ngôi 2): Cách nhân vật đó tự xưng và gọi người đối thoại. Bắt buộc phải chú ý tính giai cấp, tuổi tác, giới tính và quan hệ thân sơ.
+   - Tính biến thiên (Dynamic context): Nếu có sự thay đổi trong thái độ hoặc mối quan hệ (ví dụ: bình thường xưng "Anh - Em", lúc tức giận cãi vã xưng "Tôi - Cô"), hãy ghi chú rõ sự thay đổi này ngay trong chuỗi `dialoguePronouns` để người dịch nắm được.
+4. Chỉ trích xuất các nhân vật có tên cụ thể hoặc vai trò rõ ràng trong đoạn trích (bỏ qua nhân vật quần chúng không quan trọng).
 </analysis_guidelines>
 
 <output_format>
@@ -18,7 +22,9 @@ Cấu trúc JSON bắt buộc:
 [
   {
     "originalName": "string",
+    "gender": "Male | Female | Non-binary | Unknown",
     "role": "string",
+    "translatedTitles": "string",
     "narratorPronoun": "string",
     "dialoguePronouns": "string",
     "notes": "string"
@@ -27,8 +33,10 @@ Cấu trúc JSON bắt buộc:
 ```
 Giải thích các trường:
 - originalName: Tên tiếng Anh gốc của nhân vật.
-- role: Đặc điểm và vai trò của nhân vật.
+- gender: Giới tính của nhân vật. Chỉ chọn một trong các giá trị: Male (Nam), Female (Nữ), Non-binary (Phi giới tính / Đa dạng giới), hoặc Unknown (Chưa rõ / Ẩn danh).
+- role: Đặc điểm và vai trò của nhân vật trong cốt truyện.
 - narratorPronoun: Ngôi thứ 3 (Narrator gọi, ví dụ: hắn, y, nàng).
+- translatedTitles: Chuỗi chứa các tước vị, chức danh, cách gọi tôn xưng đã được dịch sang tiếng Việt, Ví dụ: "Công tước, Ngài", các tước vị, chức danh được ngăn bởi dấu phẩy. Trả về chuỗi "None" nếu không có.
 - dialoguePronouns: Xưng - Hô với các nhân vật khác (ví dụ: Với Mary: Anh - Em).
 - notes: Ghi chú hoặc sắc thái.
 </output_format>

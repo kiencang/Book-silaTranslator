@@ -1,4 +1,65 @@
-import { Component, input, model, output, inject, signal } from '@angular/core';
+import { Component, input, model, output, inject, signal, OnInit, OnDestroy } from '@angular/core';
+
+@Component({
+  selector: 'app-translating-skeleton',
+  standalone: true,
+  imports: [MatIconModule],
+  template: `
+    <div class="flex flex-col items-center justify-start pt-12 min-h-[400px] h-full w-full relative overflow-hidden">
+        <div class="absolute inset-0 p-6 pointer-events-none opacity-[0.15]">
+            <div class="space-y-4 w-full mx-auto">
+                <div class="h-3 bg-zinc-400 rounded w-3/4 animate-pulse"></div>
+                <div class="h-3 bg-zinc-400 rounded animate-pulse" style="animation-delay: 200ms"></div>
+                <div class="h-3 bg-zinc-400 rounded animate-pulse" style="animation-delay: 400ms"></div>
+                <div class="h-3 bg-zinc-400 rounded w-5/6 animate-pulse" style="animation-delay: 600ms"></div>
+                <div class="h-3 bg-zinc-400 rounded w-full animate-pulse" style="animation-delay: 800ms"></div>
+                <div class="h-3 bg-zinc-400 rounded w-2/3 animate-pulse" style="animation-delay: 1000ms"></div>
+            </div>
+            <div class="space-y-4 w-full mx-auto mt-8">
+                <div class="h-3 bg-zinc-400 rounded animate-pulse" style="animation-delay: 300ms"></div>
+                <div class="h-3 bg-zinc-400 rounded w-4/5 animate-pulse" style="animation-delay: 500ms"></div>
+                <div class="h-3 bg-zinc-400 rounded w-full animate-pulse" style="animation-delay: 700ms"></div>
+                <div class="h-3 bg-zinc-400 rounded w-3/4 animate-pulse" style="animation-delay: 900ms"></div>
+            </div>
+            <div class="space-y-4 w-full mx-auto mt-8">
+                <div class="h-3 bg-zinc-400 rounded w-1/2 animate-pulse" style="animation-delay: 400ms"></div>
+            </div>
+        </div>
+        
+        <div class="relative z-10 flex flex-col items-center bg-white/90 p-8 rounded-2xl shadow-sm backdrop-blur-sm border border-indigo-100 min-w-[240px]">
+            <mat-icon class="animate-spin mb-4 text-indigo-600 !w-8 !h-8 !text-[32px] flex items-center justify-center">sync</mat-icon>
+            <div class="text-4xl font-mono font-medium text-zinc-800 mb-2 tracking-tight">
+                {{ formatTime(elapsedSeconds()) }}
+            </div>
+            <div class="text-xs font-semibold text-indigo-600 tracking-wider uppercase bg-indigo-50 px-3 py-1.5 rounded-full">
+                Gemini đang dịch...
+            </div>
+        </div>
+    </div>
+  `
+})
+export class TranslatingSkeletonComponent implements OnInit, OnDestroy {
+  elapsedSeconds = signal(0);
+  private intervalFn: ReturnType<typeof setInterval> | null = null;
+
+  ngOnInit() {
+    this.intervalFn = setInterval(() => {
+        this.elapsedSeconds.update(s => s + 1);
+    }, 1000);
+  }
+
+  ngOnDestroy() {
+    if (this.intervalFn) {
+        clearInterval(this.intervalFn);
+    }
+  }
+
+  formatTime(seconds: number): string {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+}
 import { DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { BookStore, Chapter } from '../../../core/book.store';
@@ -10,7 +71,7 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
 @Component({
   selector: 'app-chapter-item',
   standalone: true,
-  imports: [MatIconModule, DatePipe],
+  imports: [MatIconModule, DatePipe, TranslatingSkeletonComponent],
   template: `
     <div class="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
       <div class="px-6 py-4 border-b border-zinc-100 flex justify-between items-center bg-zinc-50 cursor-pointer" 
@@ -112,10 +173,7 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
               } @else if (chapter().translatedText) {
                 <div class="prose prose-sm max-w-none text-zinc-900" [innerHTML]="parseMarkdown(chapter().translatedText)"></div>
               } @else if (chapter().status === 'translating') {
-                <div class="flex flex-col items-center justify-center py-12 text-indigo-600">
-                  <mat-icon class="animate-spin mb-2">sync</mat-icon>
-                  <span class="text-sm">Gemini đang tiến hành dịch</span>
-                </div>
+                <app-translating-skeleton />
               } @else {
                 <div class="flex items-center justify-center py-12 text-zinc-400">
                   <span class="text-sm">Chưa được dịch.</span>

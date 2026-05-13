@@ -576,9 +576,9 @@ export class Splitter {
 
       // 2. Tạo Markdown Đại Từ
       if (data.pronounsTable && Array.isArray(data.pronounsTable) && data.pronounsTable.length > 0) {
-        let md = '| Nhân vật (Original) | Đặc điểm & Vai trò | Ngôi thứ 3 (Narrator gọi) | Xưng - Hô (Với các nhân vật khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|\n';
+        let md = '| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|---|---|\n';
         for (const pt of data.pronounsTable) {
-          md += `| ${pt.originalName || ''} | ${pt.role || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
+          md += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
         }
         this.store.addPronounVersion(md, this.analysisModel(), 0.1);
         this.store.usePronouns.set(true);
@@ -586,9 +586,9 @@ export class Splitter {
 
       // 3. Tạo Markdown Thuật ngữ
       if (data.glossaryTable && Array.isArray(data.glossaryTable) && data.glossaryTable.length > 0) {
-        let md = '| Tiếng Anh | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|\n';
+        let md = '| Tiếng Anh | Từ loại | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|---|\n';
         for (const gt of data.glossaryTable) {
-          md += `| ${gt.english || ''} | ${gt.vietnamese || ''} | ${gt.contextNotes || ''} |\n`;
+          md += `| ${gt.english || ''} | ${gt.pos || ''} | ${gt.vietnamese || ''} | ${gt.contextNotes || ''} |\n`;
         }
         this.store.addGlossaryVersion(md, this.analysisModel(), 0.1);
         this.store.useGlossary.set(true);

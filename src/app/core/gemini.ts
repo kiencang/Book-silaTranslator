@@ -118,7 +118,7 @@ export class GeminiClient {
        }
     } else if (usePronouns && pronounTable) {
        systemInstruction = await this.loadPromptText('/prompts/multi_system_instructions.md');
-       finalPrompt = await this.loadPromptText('/prompts/multi_personal_pronouns_prompt.md') || '';
+       finalPrompt = await this.loadPromptText('/prompts/multi_pronouns_prompt.md') || '';
        if (finalPrompt) {
          finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
          finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
@@ -203,9 +203,9 @@ export class GeminiClient {
     try {
       const arr = JSON.parse(result);
       if (Array.isArray(arr) && arr.length > 0) {
-        let md = '| Nhân vật (Original) | Đặc điểm & Vai trò | Ngôi thứ 3 (Narrator gọi) | Xưng - Hô (Với các nhân vật khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|\n';
+        let md = '| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|---|---|\n';
         for (const pt of arr) {
-          md += `| ${pt.originalName || ''} | ${pt.role || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
+          md += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
         }
         return md;
       }
@@ -253,9 +253,9 @@ export class GeminiClient {
     try {
       const arr = JSON.parse(result);
       if (Array.isArray(arr) && arr.length > 0) {
-        let md = '| Tiếng Anh | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|\n';
+        let md = '| Tiếng Anh | Từ loại | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|---|\n';
         for (const pt of arr) {
-          md += `| ${pt.english || ''} | ${pt.vietnamese || ''} | ${pt.contextNotes || ''} |\n`;
+          md += `| ${pt.english || ''} | ${pt.pos || ''} | ${pt.vietnamese || ''} | ${pt.contextNotes || ''} |\n`;
         }
         return md;
       }

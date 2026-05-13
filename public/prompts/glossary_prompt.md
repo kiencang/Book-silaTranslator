@@ -12,6 +12,5 @@
 </source_text>
 
 **TRÌNH TỰ THỰC THI BẮT BUỘC CỦA BẠN:**
-1. Phân tích ngữ cảnh, thể loại sách, bối cảnh, và lọc các từ khó.
-2. XUẤT TRỰC TIẾP JSON ARRAY, không giải thích.
-Cấu trúc yêu cầu: english, vietnamese, contextNotes
+1. Dựa vào thông tin tên sách, tác giả và nội dung cuốn sách, hãy phân tích ngữ cảnh, thể loại sách, bối cảnh, và lọc các từ khó.
+2. XUẤT TRỰC TIẾP KẾT QUẢ TRẢ VỀ Ở ĐỊNH DẠNG JSON ARRAY, không giải thích, không chào hỏi.
