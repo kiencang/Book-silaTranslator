@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.28]- 2026-05-13
+### Fixed
+- Thêm đồng hồ đếm giờ trong phần dịch để đỡ nhàm chán và phát tín hiệu ứng dụng đang hoạt động rõ ràng hơn cho người dùng.
+
 ## [v1.0.27]- 2026-05-13
 ### Fixed
 - Điều chỉnh SI `all_in_one_system_instructions.md` để nó nhận ra heading h2 dạng gạch dưới chân.
