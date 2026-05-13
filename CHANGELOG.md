@@ -11,6 +11,8 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.30]- 2026-05-14
 ### Fixed
 - Chuyển mặc định chuyển đổi PDF thành markdown bằng model `gemini-flash-lite-latest` cho tốc độ cao và rẻ hơn.
+- Loại bỏ tính năng xuất nhanh Đại từ/Từ khó ở trong phase2, vì hiện các phase chuyên đang làm nhiệm vụ này tốt hơn nhiều.
+- Điều chỉnh phần xác định cách chia sách bằng AI bằng các model rẻ hơn và lấy mẫu ít hơn do lúc này nhiệm vụ không còn phải gồng gánh phần Đại từ & Từ khó nữa.
 
 ## [v1.0.29]- 2026-05-14
 ### Fixed
