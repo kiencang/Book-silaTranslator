@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.30]- 2026-05-14
+### Fixed
+- Chuyển mặc định chuyển đổi PDF thành markdown bằng model `gemini-flash-lite-latest` cho tốc độ cao và rẻ hơn.
+
 ## [v1.0.29]- 2026-05-14
 ### Fixed
 - Đổi text ở button Đại từ và Từ khó để chúng rõ ràng hơn.
