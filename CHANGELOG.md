@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.31]- 2026-05-14
 ### Fixed
 - Chia tách mã nguồn phase2 (chia chương sách) thành các phần nhỏ hơn cho dễ quản lý.
+- Sắp xếp danh sách từ khó theo thứ tự ABC.
 
 ## [v1.0.30]- 2026-05-14
 ### Fixed
