@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.28]- 2026-05-13
 ### Fixed
 - Thêm đồng hồ đếm giờ trong phần dịch để đỡ nhàm chán và phát tín hiệu ứng dụng đang hoạt động rõ ràng hơn cho người dùng.
+- Bổ sung thêm thông tin trong phần Đại từ nhân xưng.
 
 ## [v1.0.27]- 2026-05-13
 ### Fixed
