@@ -17,7 +17,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
       <div class="flex items-center justify-between mb-8">
         <div>
           <h2 class="text-2xl font-bold text-zinc-900">Thiết lập Đại từ Nhân xưng (Tùy chọn)</h2>
-          <p class="text-zinc-500 mt-1">Sử dụng AI phân tích nội dung truyện và xây dựng bảng đại từ nhân xưng, đảm bảo nhất quán khi dịch. Phù hợp cho thể loại tiểu thuyết, truyện ngắn. Các loại sách khác có thể không cần thiết.</p>
+          <p class="text-zinc-500 mt-1">Sử dụng mô hình AI mạnh để phân tích nội dung truyện giúp xây dựng bảng đại từ nhân xưng hoàn chỉnh, nhằm đảm bảo nhất quán khi dịch & phù hợp hơn với văn hóa người Việt. Đặc biệt cần thiết cho thể loại tiểu thuyết, truyện ngắn. Các loại sách khác có thể không cần thiết.</p>
         </div>
       </div>
 
@@ -47,7 +47,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
             >
               @if (isGeneratingPronouns()) {
                 <mat-icon class="animate-spin mr-2 !w-5 !h-5 !text-[20px]">sync</mat-icon>
-                Đang phân tích và tạo bảng...
+                {{ generationStatus() || 'Đang phân tích và tạo bảng...' }}
               } @else if (draftPronounTable().trim().length > 0) {
                 <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
                 Tạo lại bảng dữ liệu Đại từ
@@ -133,6 +133,7 @@ export class PronounSetup {
   toast = inject(ToastService);
 
   isGeneratingPronouns = signal<boolean>(false);
+  generationStatus = signal<string>('');
   draftPronounTable = signal<string>('');
   pronounExtractRatio = signal<number>(1);
   pronounModel = signal<string>(this.store.config().pronounGenModel ?? 'gemini-pro-latest');
@@ -191,10 +192,10 @@ export class PronounSetup {
       const lengthToTake = Math.floor(fullText.length * ratio);
       const textToAnalyze = fullText.substring(0, lengthToTake);
 
-      const maxWordsPerChunk = 30000;
+      const maxWordsPerChunk = 20000;
       const chunks = smartHardSplit(textToAnalyze, maxWordsPerChunk);
       
-      let allPronounItems: any[] = [];
+      const allPronounItems: any[] = [];
       const maxConcurrent = 4;
       
       for (let i = 0; i < chunks.length; i += maxConcurrent) {
@@ -210,48 +211,16 @@ export class PronounSetup {
         }
       }
 
-      function getGenderScore(gender?: string): number {
-        if (!gender) return 0;
-        const g = String(gender).toLowerCase().trim();
-        if (g === 'male' || g === 'female') return 2;
-        if (g === 'non-binary' || g === 'unknown') return 1;
-        return 0;
-      }
-
-      const uniqueItems = new Map<string, any>();
-      for (const item of allPronounItems) {
-        if (!item.originalName) continue;
-        const key = String(item.originalName).toLowerCase().trim();
-        
-        const existing = uniqueItems.get(key);
-        if (!existing) {
-          uniqueItems.set(key, item);
-        } else {
-          const existingScore = getGenderScore(existing.gender);
-          const newScore = getGenderScore(item.gender);
-          
-          if (newScore > existingScore) {
-            uniqueItems.set(key, item);
-          } else if (newScore === existingScore) {
-            const existingNotesLen = existing.notes ? String(existing.notes).length : 0;
-            const newNotesLen = item.notes ? String(item.notes).length : 0;
-            if (newNotesLen > existingNotesLen) {
-              uniqueItems.set(key, item);
-            }
-          }
+      let rawResult = '';
+      if (allPronounItems.length > 0) {
+        rawResult = '| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|---|---|\n';
+        for (const pt of allPronounItems) {
+          rawResult += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
         }
       }
 
-      const deduplicatedPronouns = Array.from(uniqueItems.values());
-      deduplicatedPronouns.sort((a, b) => String(a.originalName).localeCompare(String(b.originalName)));
-
-      let result = '';
-      if (deduplicatedPronouns.length > 0) {
-        result = '| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|---|---|\n';
-        for (const pt of deduplicatedPronouns) {
-          result += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
-        }
-      }
+      this.generationStatus.set('Đang chuẩn hóa bảng đại từ...');
+      const result = await this.gemini.normalizePronouns(textToAnalyze, rawResult, this.pronounModel(), 0.1, this.store.bookTitle(), this.store.author());
 
       this.draftPronounTable.set(result);
       this.isManuallyEdited.set(false);

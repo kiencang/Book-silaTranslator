@@ -94,7 +94,7 @@ import { BookStore } from '../../../core/book.store';
         <div class="flex flex-col space-y-3">
             <label class="flex items-center space-x-3 transition-opacity" [class.cursor-pointer]="!!store.pronounTable()" [class.cursor-not-allowed]="store.isTranslatingAny() || !store.pronounTable()" [class.opacity-50]="store.isTranslatingAny() || !store.pronounTable()">
             <input type="checkbox" 
-              [checked]="store.usePronouns()"
+              [checked]="store.usePronouns() && !!store.pronounTable()"
               (change)="toggleUsePronouns($event)"
               [disabled]="store.isTranslatingAny() || !store.pronounTable()"
               class="w-4 h-4 text-indigo-600 rounded border-zinc-300 focus:ring-indigo-500 disabled:cursor-not-allowed"
@@ -129,7 +129,7 @@ import { BookStore } from '../../../core/book.store';
         <div class="flex flex-col space-y-3">
             <label class="flex items-center space-x-3 transition-opacity" [class.cursor-pointer]="!!store.glossaryTable()" [class.cursor-not-allowed]="store.isTranslatingAny() || !store.glossaryTable()" [class.opacity-50]="store.isTranslatingAny() || !store.glossaryTable()">
             <input type="checkbox" 
-              [checked]="store.useGlossary()"
+              [checked]="store.useGlossary() && !!store.glossaryTable()"
               (change)="toggleUseGlossary($event)"
               [disabled]="store.isTranslatingAny() || !store.glossaryTable()"
               class="w-4 h-4 text-green-600 rounded border-zinc-300 focus:ring-green-500 disabled:cursor-not-allowed"
@@ -161,11 +161,13 @@ export class TranslatorConfigComponent {
   store = inject(BookStore);
 
   toggleUsePronouns(event: Event) {
+    if (!this.store.pronounTable()) return;
     const isChecked = (event.target as HTMLInputElement).checked;
     this.store.usePronouns.set(isChecked);
   }
 
   toggleUseGlossary(event: Event) {
+    if (!this.store.glossaryTable()) return;
     const isChecked = (event.target as HTMLInputElement).checked;
     this.store.useGlossary.set(isChecked);
   }

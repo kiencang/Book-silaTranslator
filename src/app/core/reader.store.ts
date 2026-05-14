@@ -4,7 +4,7 @@ import { DbService } from './db';
 export interface ReaderPreferences {
   fontSize: number;
   theme: 'white' | 'sepia' | 'dark';
-  fontFamily: 'Inter' | 'Lora' | 'Nunito';
+  fontFamily: 'Inter' | 'Lora' | 'Lexend';
   isToolbarExpanded: boolean;
 }
 

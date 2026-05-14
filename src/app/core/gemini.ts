@@ -178,6 +178,50 @@ export class GeminiClient {
     }
   }
 
+  async normalizePronouns(text: string, rawPronounTable: string, model: string, temperature: number, bookTitle: string, author: string): Promise<string> {
+    try {
+      if (!rawPronounTable.trim()) return '';
+      
+      const si = await this.loadPromptText('/prompts/normalize_pronouns_system_instructions.md') || 'You are an expert context analyzer. Your task is to normalize and refine the provided raw pronoun table based on the full book content.';
+      let prompt = await this.loadPromptText('/prompts/normalize_pronouns_prompt.md');
+      if (!prompt) {
+        prompt = "Raw Pronoun Table:\n[bảng đại từ]\n\nFull Book Content:\n[nội dung]\n\nPlease normalize it.";
+      }
+      
+      prompt = prompt.replace('[tên sách]', bookTitle || 'Không rõ');
+      prompt = prompt.replace('[tên tác giả]', author || 'Vô danh');
+      prompt = prompt.replace('[bảng đại từ]', rawPronounTable);
+      prompt = prompt.replace('[nội dung]', text);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const filterConfig: any = {
+        systemInstruction: si,
+        temperature: temperature,
+        thinkingConfig: { thinkingLevel: 'HIGH' }
+      };
+
+      const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+      const response = await ai.models.generateContent({
+        model: model,
+        contents: [ { text: prompt } ],
+        config: filterConfig
+      });
+      
+      let result = response.text || '';
+      if (result.startsWith('```markdown')) {
+        result = result.replace(/^```markdown\n/, '').replace(/\n```$/, '');
+      } else if (result.startsWith('```')) {
+        result = result.replace(/^```\n/, '').replace(/\n```$/, '');
+      }
+      
+      return result;
+      
+    } catch (e) {
+      console.error('Failed to normalize pronouns', e);
+      return rawPronounTable; 
+    }
+  }
+
   async translateChapter(text: string, model: string, temperature: number, bookTitle = '', author = '', pronounTable = '', usePronouns = false, glossaryTable = '', useGlossary = false, shouldFilterGlossary = true): Promise<{text: string, customGlossary?: string, glossaryStatus?: 'none' | 'full' | 'filtered', glossaryRatio?: number}> {
     
     let activeGlossary = '';
@@ -202,7 +246,7 @@ export class GeminiClient {
     let systemInstruction = null;
     let finalPrompt = '';
     
-    if (usePronouns && activeGlossary && pronounTable) {
+    if (usePronouns && pronounTable && activeGlossary) {
        systemInstruction = await this.loadPromptText('/prompts/multi_system_instructions.md');
        finalPrompt = await this.loadPromptText('/prompts/multi_pronouns_glossary_prompt.md') || '';
        if (finalPrompt) {

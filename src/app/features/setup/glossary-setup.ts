@@ -17,7 +17,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
       <div class="flex items-center justify-between mb-8">
         <div>
           <h2 class="text-2xl font-bold text-zinc-900">Thiết lập Bảng Thuật Ngữ / Từ Khó (Tùy chọn)</h2>
-          <p class="text-zinc-500 mt-1">Sử dụng mô hình AI mạnh nhất để quét cuốn sách và trích xuất bảng thuật ngữ/từ khó dịch. Giúp bản dịch có chất lượng cao và thống nhất hơn. Đặc biệt cần thiết với sách chuyên ngành hoặc/và sách cổ. Tuy nhiên đây là tùy chọn, không bắt buộc phải làm nếu không thấy cần thiết.</p>
+          <p class="text-zinc-500 mt-1">Sử dụng mô hình AI mạnh để quét cuốn sách và trích xuất bảng thuật ngữ/từ khó dịch. Giúp bản dịch có chất lượng cao và thống nhất hơn. Đặc biệt cần thiết với sách khó dịch. Mặc dù đây là tùy chọn, không bắt buộc, nhưng khi tạo thường cho kết quả tốt hơn với bất kỳ thể loại sách nào.</p>
         </div>
       </div>
 

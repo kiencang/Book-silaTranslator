@@ -143,17 +143,17 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                     <span class="flex items-center gap-1.5">
                       <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-green-500">schedule</mat-icon> {{ activeV.timestamp | date:'dd/MM/yyyy HH:mm' }}
                     </span>
-                    @if (activeV.glossaryStatus === 'filtered' || (activeV.customGlossary && !activeV.glossaryStatus)) {
+                    @if (activeV.glossaryStatus === 'filtered') {
                       <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio)" class="flex items-center gap-1 text-indigo-600 hover:underline">
-                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">menu_book</mat-icon> Thuật ngữ đã dùng
+                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">menu_book</mat-icon> Sử dụng danh sách thuật ngữ đã lọc
                       </button>
                     } @else if (activeV.glossaryStatus === 'full') {
-                      <span class="flex items-center gap-1 text-zinc-500">
-                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">library_books</mat-icon> Bảng thuật ngữ đầy đủ
-                      </span>
-                    } @else if (activeV.glossaryStatus === 'none' || (!activeV.customGlossary && !activeV.glossaryStatus)) {
-                      <span class="flex items-center gap-1 text-zinc-500">
-                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">book</mat-icon> Không có bảng thuật ngữ
+                      <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio)" class="flex items-center gap-1 text-indigo-600 hover:underline">
+                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">library_books</mat-icon> Sử dụng đầy đủ danh sách thuật ngữ
+                      </button>
+                    } @else {
+                      <span class="flex items-center gap-1 text-zinc-400">
+                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">book</mat-icon> Không sử dụng danh sách thuật ngữ
                       </span>
                     }
                   </div>
@@ -228,7 +228,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                 <div class="flex flex-col gap-1 w-8">
                   <button (click)="changeFontFamily('Inter')" class="w-full h-8 flex items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-xs font-medium tracking-tight" [class.font-bold]="readerStore.prefs().fontFamily === 'Inter'" [class.ring-1]="readerStore.prefs().fontFamily === 'Inter'" style="font-family: 'Inter';" title="Font Inter">In</button>
                   <button (click)="changeFontFamily('Lora')" class="w-full h-8 flex items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-xs font-medium tracking-tight" [class.font-bold]="readerStore.prefs().fontFamily === 'Lora'" [class.ring-1]="readerStore.prefs().fontFamily === 'Lora'" style="font-family: 'Lora', serif;" title="Font Lora">Lo</button>
-                  <button (click)="changeFontFamily('Nunito')" class="w-full h-8 flex items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-xs font-medium tracking-tight" [class.font-bold]="readerStore.prefs().fontFamily === 'Nunito'" [class.ring-1]="readerStore.prefs().fontFamily === 'Nunito'" style="font-family: 'Nunito', sans-serif;" title="Font Nunito">Nu</button>
+                  <button (click)="changeFontFamily('Lexend')" class="w-full h-8 flex items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-xs font-medium tracking-tight" [class.font-bold]="readerStore.prefs().fontFamily === 'Lexend'" [class.ring-1]="readerStore.prefs().fontFamily === 'Lexend'" style="font-family: 'Lexend', sans-serif;" title="Font Lexend">Le</button>
                 </div>
 
                 <div class="w-6 h-[1px] bg-current opacity-20"></div>
@@ -554,7 +554,7 @@ export class ChapterItemComponent {
     this.readerStore.updatePrefs({ theme });
   }
 
-  changeFontFamily(fontFamily: 'Inter' | 'Lora' | 'Nunito') {
+  changeFontFamily(fontFamily: 'Inter' | 'Lora' | 'Lexend') {
     this.readerStore.updatePrefs({ fontFamily });
   }
 
@@ -596,7 +596,7 @@ export class ChapterItemComponent {
   getFontFamily(font: string) {
     switch (font) {
       case 'Lora': return "'Lora', serif";
-      case 'Nunito': return "'Nunito', sans-serif";
+      case 'Lexend': return "'Lexend', sans-serif";
       case 'Inter':
       default: return "'Inter', sans-serif";
     }
@@ -615,7 +615,7 @@ export class ChapterItemComponent {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${title}</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Lexend:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 ${OFFLINE_READER_STYLES}
 </style>

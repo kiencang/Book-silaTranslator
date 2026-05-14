@@ -14,10 +14,16 @@ import { ChapterItemComponent } from './components/chapter-item';
   imports: [MatIconModule, FormsModule, TokenEstimationComponent, TranslatorConfigComponent, ChapterItemComponent],
   template: `
     <div class="max-w-6xl mx-auto py-8 px-4">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h2 class="text-3xl font-bold text-zinc-900">Dịch thuật</h2>
-          <p class="text-zinc-500 mt-1">Đã sẵn sàng dịch {{ store.chapters().length }} phần của "{{ store.fileName() }}".</p>
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-3xl font-bold text-zinc-900">Dịch thuật</h2>
+            <p class="text-zinc-500 mt-1">Đã sẵn sàng dịch {{ store.chapters().length }} phần của "{{ store.fileName() }}".</p>
+          </div>
+        </div>
+        <div class="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl flex gap-3 text-sm text-indigo-900 w-full">
+          <mat-icon class="text-indigo-500 shrink-0">lightbulb</mat-icon>
+          <p>Nếu có thể hãy luôn chọn mô hình AI mạnh nhất để dịch. Nếu bạn đã tạo bảng Thuật ngữ - Từ khó hoặc/và bảng Đại từ nhân xưng, nhớ tích hợp chúng vào trong quá trình dịch bằng cách tick tùy chọn "Kích hoạt"</p>
         </div>
       </div>
 

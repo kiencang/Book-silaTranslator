@@ -159,7 +159,7 @@ export const OFFLINE_READER_TOOLBAR_HTML = `
     <div style="display:flex; flex-direction:column; gap:4px; width:32px;">
       <button class="toolbar-btn rect" id="btnFontInter" style="font-family:'Inter', sans-serif;" title="Font Inter">In</button>
       <button class="toolbar-btn rect" id="btnFontLora" style="font-family:'Lora', serif;" title="Font Lora">Lo</button>
-      <button class="toolbar-btn rect" id="btnFontNunito" style="font-family:'Nunito', sans-serif;" title="Font Nunito">Nu</button>
+      <button class="toolbar-btn rect" id="btnFontLexend" style="font-family:'Lexend', sans-serif;" title="Font Lexend">Le</button>
     </div>
     <div class="toolbar-divider"></div>
     <div style="display:flex; flex-direction:column; gap:8px; padding:4px 0;">
@@ -206,8 +206,8 @@ export const OFFLINE_READER_SCRIPT = `
     let fontStr = '';
     if (prefs.fontFamily === 'Lora') {
       fontStr = "'Lora', Georgia, 'Times New Roman', serif";
-    } else if (prefs.fontFamily === 'Nunito') {
-      fontStr = "'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+    } else if (prefs.fontFamily === 'Lexend') {
+      fontStr = "'Lexend', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
     } else {
       fontStr = "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
     }
@@ -231,7 +231,7 @@ export const OFFLINE_READER_SCRIPT = `
     }
 
     // Update active states
-    ['Inter', 'Lora', 'Nunito'].forEach(f => {
+    ['Inter', 'Lora', 'Lexend'].forEach(f => {
       const el = document.getElementById('btnFont' + f);
       if (el) {
         if (prefs.fontFamily === f) el.classList.add('active');
@@ -280,7 +280,7 @@ export const OFFLINE_READER_SCRIPT = `
     });
   }
 
-  ['Inter', 'Lora', 'Nunito'].forEach(f => {
+  ['Inter', 'Lora', 'Lexend'].forEach(f => {
     const el = document.getElementById('btnFont' + f);
     if (el) {
       el.addEventListener('click', () => {
