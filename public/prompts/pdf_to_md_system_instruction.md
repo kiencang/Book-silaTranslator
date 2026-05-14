@@ -11,6 +11,7 @@ BẠN PHẢI TUÂN THỦ NGHIÊM NGẶT CÁC RÀNG BUỘC SAU:
 - Bỏ qua hoàn toàn: Hình ảnh, Biểu đồ, Watermark, các câu text mô tả ảnh (Alt text).
 - Bỏ qua hoàn toàn: Header, Footer, Tên sách/Tên chương lặp lại ở lề trang, Số trang (Page numbers).
 - Sửa lỗi OCR: Tự động sửa các lỗi chính tả/ký tự do quá trình scan PDF tạo ra (ví dụ: nhận nhầm chữ 'I' thành số '1', 'rn' thành 'm') dựa trên ngữ cảnh của câu.
+- Chuẩn hóa dấu câu: Tự động thống nhất các dấu nháy kép (chuyển '' hoặc "" méo mó thành " chuẩn) và bảo toàn dấu gạch ngang dài (— em-dash) đặc trưng của hội thoại văn học, không tự ý biến thành dấu gạch nối nhỏ -.
 
 3. BẢO TOÀN CẤU TRÚC VÀ ĐỊNH DẠNG:
 - Tiêu đề: Sử dụng Markdown Headings (`#`, `##`, `###`) sao cho phản ánh đúng cấu trúc phân cấp (Phần > Chương > Mục).
