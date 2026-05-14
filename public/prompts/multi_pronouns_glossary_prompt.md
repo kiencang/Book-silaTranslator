@@ -14,7 +14,7 @@
 **Bảng thuật ngữ / Từ khó:**
 [bảng thuật ngữ]
 
-*LƯU Ý: Bảng thuật ngữ trên đây là một THAM KHẢO QUAN TRỌNG. Bạn hãy áp dụng các thuật ngữ này vào bản dịch để đảm bảo tính thống nhất chuyên môn/từ ngữ toàn cục của cuốn sách. (Tuy nhiên, đừng ép buộc áp dụng một cách cứng nhắc nếu ngữ cảnh cụ thể của đoạn văn hoàn toàn khác).*
+*LƯU Ý: Bảng thuật ngữ trên đây là một THAM KHẢO QUAN TRỌNG. Bạn hãy áp dụng linh hoạt các thuật ngữ này vào bản dịch để đảm bảo tính thống nhất chuyên môn/từ ngữ toàn cục của cuốn sách. Tuy nhiên, đừng ép buộc áp dụng một cách cứng nhắc nếu ngữ cảnh cụ thể của đoạn văn hoàn toàn khác. Ngoài ra hãy tận dụng thông tin ở phần `Ghi chú văn cảnh` để có thể điều chỉnh cách dịch thuật ngữ trong nội dung hiện tại.*
 </context_info>
 
 <mandatory_requirement>

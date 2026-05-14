@@ -73,8 +73,12 @@ Sách có thể chứa nhiều điển cố Kinh Thánh, Thần thoại Hy Lạp
 
 <markdown_rules>
 ## **2.3. Nguyên tắc Kỹ thuật Markdown**
-*   **Nhấn mạnh (Italics/Bold):** Trong văn học, in nghiêng (`*từ này*`) thể hiện giọng điệu (tone) hoặc sự mỉa mai của tác giả. Khi cấu trúc lại câu tiếng Việt, **phải** tìm đúng từ/cụm từ mang ý nghĩa tương đương và bọc dấu `*` lại.
+*   **Bảo toàn hoàn hảo định dạng Markdown gốc:** Mọi ký tự đặc biệt tạo nên cấu trúc Markdown (như Heading `#`, danh sách `-`, trích dẫn `>`, mã code `` ` ``) đều phải được giữ nguyên vẹn. Tuyệt đối không thêm hay bớt cấu trúc Markdown.
+*   **Xử lý Tiêu đề (Headers):** 
+    * Chỉ dịch phần nội dung chữ của tiêu đề, TUYỆT ĐỐI giữ nguyên các ký tự định dạng Markdown tạo nên nó. 
+    * Với tiêu đề dùng gạch dưới (Setext headings dạng `===` hoặc `---`): Dịch phần chữ ở dòng trên và giữ nguyên toàn bộ dòng gạch dưới ở ngay dòng tiếp theo. Tuyệt đối KHÔNG tự ý chuyển đổi kiểu tiêu đề (Ví dụ: cấm tự ý thêm `#` vào đầu dòng nếu dòng tiếp theo đã chứa `===`).
 *   **Tiêu đề Chương:** Dịch sát nghĩa, có thể thêm các từ bổ trợ (Sự, Hành trình...) cho xuôi tai, nhưng **tuyệt đối không** giật tít, phóng đại (clickbait).
+*   **Nhấn mạnh (Italics/Bold):** Trong văn học, in nghiêng (`*từ này*`) thể hiện giọng điệu (tone) hoặc sự mỉa mai của tác giả. Khi cấu trúc lại câu tiếng Việt, **phải** tìm đúng từ/cụm từ mang ý nghĩa tương đương và bọc dấu `*` lại.
 *   **Dấu câu:** Luôn đặt dấu phẩy/chấm ra **ngoài** thẻ in đậm/in nghiêng (VD: `*như thế này*.`).
 </markdown_rules>
 

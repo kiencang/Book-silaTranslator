@@ -285,6 +285,10 @@ export function generatePreview(text: string, kw: string, minWords: number, maxW
     }
   }
 
+  if (processedMain.length === 1) {
+    processedMain[0].title = 'Toàn bộ nội dung';
+  }
+
   const finalResult = [];
   if (gutenbergHeader) finalResult.push(gutenbergHeader);
   finalResult.push(...processedMain);
