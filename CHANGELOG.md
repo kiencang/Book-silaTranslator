@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.32]- 2026-05-14
+### Fixed
+- Giảm tải danh sách từ khó/thuật ngữ theo từng khối dịch.
+
 ## [v1.0.31]- 2026-05-14
 ### Fixed
 - Chia tách mã nguồn phase2 (chia chương sách) thành các phần nhỏ hơn cho dễ quản lý.
