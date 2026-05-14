@@ -13,6 +13,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Xây dựng một quy tắc kinh nghiệm để kiểm tra độ tin cậy của tương đương ID trong khi xem ở chế độ song ngữ.
 - Nếu quy tắc này thỏa mãn việc thao tác click xem giữa 2 bên được CSS mạnh hơn để việc đối chiếu rõ ràng hơn.
 - Nếu không thảo mãn quay lại cách đơn giản là cho ID tiếng Anh tương ứng với ID tiếng Việt ra giữa màn hình.
+- Điều chỉnh số lượng từ mỗi chunking trong phần xác định từ khó từ 30 ngàn từ tối đa xuống 20 ngàn từ.
 
 ## [v1.0.33]- 2026-05-14
 ### Fixed
