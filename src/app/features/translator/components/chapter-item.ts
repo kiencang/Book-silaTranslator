@@ -1,4 +1,4 @@
-import { Component, input, model, output, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, input, model, output, inject, signal, OnInit, OnDestroy, HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-translating-skeleton',
@@ -320,6 +320,9 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
               <div class="max-w-2xl mx-auto">
                 <h4 class="text-xs font-semibold uppercase tracking-wider mb-8 opacity-40 text-center flex items-center justify-center gap-2">
                   <mat-icon class="!w-4 !h-4 !text-[16px]">g_translate</mat-icon> Bản gốc
+                  @if (isBilingualAligned()) {
+                    <mat-icon class="!w-4 !h-4 !text-[16px] text-green-500 ml-2" title="Đồng bộ tự động" aria-label="Aligned">swap_horiz</mat-icon>
+                  }
                 </h4>
                 <div class="prose max-w-none transition-all duration-300 leading-relaxed prose-original cursor-pointer group"
                      [class]="getContentClass(readerStore.prefs().theme)"
@@ -334,6 +337,9 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
               <div class="max-w-2xl mx-auto">
                 <h4 class="text-xs font-semibold uppercase tracking-wider mb-8 opacity-40 text-center flex items-center justify-center gap-2">
                    <mat-icon class="!w-4 !h-4 !text-[16px]">translate</mat-icon> Bản dịch
+                   @if (isBilingualAligned()) {
+                    <mat-icon class="!w-4 !h-4 !text-[16px] text-green-500 ml-2" title="Đồng bộ tự động" aria-label="Aligned">swap_horiz</mat-icon>
+                  }
                 </h4>
                 <div class="prose max-w-none transition-all duration-300 leading-relaxed prose-translated cursor-pointer group"
                      [class]="getContentClass(readerStore.prefs().theme)"
@@ -382,6 +388,7 @@ export class ChapterItemComponent {
   isExpanded = model(false);
   isFullscreen = signal(false);
   isBilingualFullscreen = signal(false);
+  isBilingualAligned = signal(false);
   
   showGlossaryModal = signal(false);
   parsedCustomGlossary = signal<SafeHtml | string>('');
@@ -418,36 +425,99 @@ export class ChapterItemComponent {
   openBilingualFullscreen() {
     this.isBilingualFullscreen.set(true);
     document.body.style.overflow = 'hidden';
+    setTimeout(() => {
+      this.alignBilingualBlocks();
+    }, 50); // allow DOM to render
   }
 
   closeBilingualFullscreen() {
     this.isBilingualFullscreen.set(false);
+    this.isBilingualAligned.set(false);
     document.body.style.overflow = '';
+  }
+
+  alignBilingualBlocks() {
+    const originalProse = document.querySelector('.bilingual-fullscreen-container .prose-original');
+    const translatedProse = document.querySelector('.bilingual-fullscreen-container .prose-translated');
+
+    if (!originalProse || !translatedProse) return;
+
+    const originalBlocks = Array.from(originalProse.querySelectorAll(':scope > p, :scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6, :scope > ul, :scope > ol, :scope > blockquote, :scope > table')) as HTMLElement[];
+    const translatedBlocks = Array.from(translatedProse.querySelectorAll(':scope > p, :scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6, :scope > ul, :scope > ol, :scope > blockquote, :scope > table')) as HTMLElement[];
+
+    // Lớp 1: Số lượng block phải bằng nhau
+    if (originalBlocks.length !== translatedBlocks.length || originalBlocks.length === 0) {
+      this.isBilingualAligned.set(false);
+      return;
+    }
+
+    // Lớp 2: Loại tag của các block phải khớp nhau hoàn toàn theo thứ tự
+    const tagsMatch = originalBlocks.every((el, i) => el.tagName === translatedBlocks[i].tagName);
+    if (!tagsMatch) {
+      this.isBilingualAligned.set(false);
+      return;
+    }
+
+    this.isBilingualAligned.set(true);
+    
+    // Khôi phục chiều cao mặc định nếu trước đó đã áp dụng minHeight (để an toàn khi resize)
+    for (let i = 0; i < originalBlocks.length; i++) {
+        originalBlocks[i].style.minHeight = '';
+        translatedBlocks[i].style.minHeight = '';
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    if (this.isBilingualFullscreen() && this.isBilingualAligned()) {
+      this.alignBilingualBlocks();
+    }
   }
 
   onBilingualContentClick(event: MouseEvent, source: 'original' | 'translated') {
     const target = event.target as HTMLElement;
-    const blockElement = target.closest('p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, table');
+    const blockElement = target.closest('p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, table') as HTMLElement;
     if (!blockElement) return;
 
     const parentProse = blockElement.closest('.prose');
     if (!parentProse) return;
 
     const allBlocks = Array.from(parentProse.querySelectorAll(':scope > p, :scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6, :scope > ul, :scope > ol, :scope > blockquote, :scope > table'));
-    const index = allBlocks.indexOf(blockElement as Element);
+    const index = allBlocks.indexOf(blockElement);
 
     if (index === -1) return;
+
+    const isAligned = this.isBilingualAligned();
 
     // Find counterpart container
     const counterpartSelector = source === 'original' ? '.prose-translated' : '.prose-original';
     const counterpartProse = document.querySelector(`.bilingual-fullscreen-container ${counterpartSelector}`);
-    
-    if (counterpartProse) {
+    const counterpartScrollContainer = counterpartProse?.closest('.overflow-y-auto') as HTMLElement;
+    const activeScrollContainer = parentProse.closest('.overflow-y-auto') as HTMLElement;
+
+    if (counterpartProse && counterpartScrollContainer && activeScrollContainer) {
       const counterpartBlocks = Array.from(counterpartProse.querySelectorAll(':scope > p, :scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6, :scope > ul, :scope > ol, :scope > blockquote, :scope > table'));
-      const counterpartBlock = counterpartBlocks[index];
+      const counterpartBlock = counterpartBlocks[index] as HTMLElement;
       
       if (counterpartBlock) {
-        counterpartBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (isAligned) {
+            // Exactly sync position relative to viewport
+            const activeBlockRect = blockElement.getBoundingClientRect();
+            const activeContainerRect = activeScrollContainer.getBoundingClientRect();
+            const relativeTopOffset = activeBlockRect.top - activeContainerRect.top;
+            
+            const counterpartBlockRect = counterpartBlock.getBoundingClientRect();
+            const counterpartContainerRect = counterpartScrollContainer.getBoundingClientRect();
+            const targetScrollTop = counterpartScrollContainer.scrollTop + (counterpartBlockRect.top - counterpartContainerRect.top) - relativeTopOffset;
+            
+            counterpartScrollContainer.scrollTo({
+              top: targetScrollTop,
+              behavior: 'smooth'
+            });
+        } else {
+            // Fallback to center scroll without strong highlighting if not strictly aligned
+            counterpartBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
     }
   }

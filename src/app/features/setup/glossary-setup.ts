@@ -191,7 +191,7 @@ export class GlossarySetup {
       const lengthToTake = Math.floor(fullText.length * ratio);
       const textToAnalyze = fullText.substring(0, lengthToTake);
 
-      const maxWordsPerChunk = 30000;
+      const maxWordsPerChunk = 20000;
       const chunks = smartHardSplit(textToAnalyze, maxWordsPerChunk);
       
       let allGlossaryItems: any[] = [];
