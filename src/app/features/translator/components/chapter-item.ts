@@ -67,6 +67,7 @@ import { ToastService } from '../../../core/toast.service';
 import { getConfiguredMarked } from '../../../core/marked-setup';
 import { ReaderStore } from '../../../core/reader.store';
 import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HTML } from '../../../core/html-export.util';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-chapter-item',
@@ -172,6 +173,9 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
                   <div class="flex items-center gap-2">
                     <button (click)="downloadHtml()" class="tooltip-trigger flex items-center justify-center p-1.5 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors" title="Tải xuống HTML">
                       <mat-icon class="!w-4 !h-4 !text-[16px]">download</mat-icon>
+                    </button>
+                    <button (click)="openBilingualFullscreen()" class="tooltip-trigger flex items-center justify-center p-1.5 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors" title="Đọc song ngữ">
+                      <mat-icon class="!w-4 !h-4 !text-[16px]">vertical_split</mat-icon>
                     </button>
                     <button (click)="openFullscreen()" class="tooltip-trigger flex items-center justify-center p-1.5 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors" title="Đọc toàn màn hình">
                       <mat-icon class="!w-4 !h-4 !text-[16px]">fullscreen</mat-icon>
@@ -279,6 +283,69 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
         </div>
       }
       
+      @if (isBilingualFullscreen()) {
+        <div class="fixed inset-0 z-50 overflow-hidden flex flex-col transition-colors duration-300 bilingual-fullscreen-container"
+             [style.background-color]="getContainerBg(readerStore.prefs().theme)">
+             
+          <!-- Header -->
+          <div class="h-16 flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0" [class]="getToolbarClass(readerStore.prefs().theme)">
+            <div class="flex items-center gap-4">
+              <button (click)="closeBilingualFullscreen()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors" title="Đóng chế độ song ngữ">
+                <mat-icon>close</mat-icon>
+              </button>
+              <div>
+                <span class="font-semibold text-[15px] opacity-90">{{ chapter().title || 'Phần ' + (index() + 1) }}</span>
+                <span class="text-[11px] opacity-70 ml-2 font-medium tracking-wider uppercase border border-current rounded px-1.5 py-0.5">Song ngữ</span>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1 bg-black/5 dark:bg-white/5 rounded-full p-1">
+                <button (click)="changeFontSize(-2)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 dark:hover:bg-black/20 transition-colors font-medium text-[12px] opacity-80 hover:opacity-100">A-</button>
+                <button (click)="changeFontSize(2)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 dark:hover:bg-black/20 transition-colors font-medium text-[16px] opacity-80 hover:opacity-100">A+</button>
+              </div>
+              <div class="w-[1px] h-6 bg-current opacity-20"></div>
+              <div class="flex gap-2">
+                 <button (click)="changeTheme('white')" class="w-6 h-6 rounded-full border shadow-inner transition-transform hover:scale-110" [class.ring-2]="readerStore.prefs().theme === 'white'" style="background-color: #FFFFFF; border-color: #E5E7EB;" title="Nền trắng"></button>
+                 <button (click)="changeTheme('sepia')" class="w-6 h-6 rounded-full border shadow-inner transition-transform hover:scale-110" [class.ring-2]="readerStore.prefs().theme === 'sepia'" style="background-color: #FFFFF0; border-color: #E5E7EB;" title="Nền ngà"></button>
+                 <button (click)="changeTheme('dark')" class="w-6 h-6 rounded-full border shadow-inner transition-transform hover:scale-110" [class.ring-2]="readerStore.prefs().theme === 'dark'" style="background-color: #121212; border-color: #374151;" title="Nền tối"></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Content columns -->
+          <div class="flex-1 overflow-hidden grid grid-cols-2 divide-x divide-zinc-200/50 dark:divide-zinc-800/50">
+            <!-- Original Column -->
+            <div class="overflow-y-auto px-8 lg:px-16 py-12 scroll-smooth" (click)="onBilingualContentClick($event, 'original')">
+              <div class="max-w-2xl mx-auto">
+                <h4 class="text-xs font-semibold uppercase tracking-wider mb-8 opacity-40 text-center flex items-center justify-center gap-2">
+                  <mat-icon class="!w-4 !h-4 !text-[16px]">g_translate</mat-icon> Bản gốc
+                </h4>
+                <div class="prose max-w-none transition-all duration-300 leading-relaxed prose-original cursor-pointer group"
+                     [class]="getContentClass(readerStore.prefs().theme)"
+                     [style.font-size.px]="readerStore.prefs().fontSize"
+                     [style.font-family]="getFontFamily(readerStore.prefs().fontFamily)"
+                     [innerHTML]="parseMarkdown(chapter().originalText)"></div>
+              </div>
+            </div>
+
+            <!-- Translated Column -->
+            <div class="overflow-y-auto px-8 lg:px-16 py-12 scroll-smooth bg-black/[0.02] dark:bg-white/[0.02]" (click)="onBilingualContentClick($event, 'translated')">
+              <div class="max-w-2xl mx-auto">
+                <h4 class="text-xs font-semibold uppercase tracking-wider mb-8 opacity-40 text-center flex items-center justify-center gap-2">
+                   <mat-icon class="!w-4 !h-4 !text-[16px]">translate</mat-icon> Bản dịch
+                </h4>
+                <div class="prose max-w-none transition-all duration-300 leading-relaxed prose-translated cursor-pointer group"
+                     [class]="getContentClass(readerStore.prefs().theme)"
+                     [style.font-size.px]="readerStore.prefs().fontSize"
+                     [style.font-family]="getFontFamily(readerStore.prefs().fontFamily)"
+                     [innerHTML]="parseMarkdown(chapter().translatedText)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      
       @if (showGlossaryModal()) {
         <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 cursor-pointer" tabindex="0" (click)="closeGlossaryModal()" (keydown.escape)="closeGlossaryModal()">
           <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden cursor-default" (click)="$event.stopPropagation()">
@@ -308,14 +375,16 @@ export class ChapterItemComponent {
   store = inject(BookStore);
   toast = inject(ToastService);
   readerStore = inject(ReaderStore);
+  private sanitizer = inject(DomSanitizer);
   chapter = input.required<Chapter>();
   index = input.required<number>();
   
   isExpanded = model(false);
   isFullscreen = signal(false);
+  isBilingualFullscreen = signal(false);
   
   showGlossaryModal = signal(false);
-  parsedCustomGlossary = signal('');
+  parsedCustomGlossary = signal<SafeHtml | string>('');
   currentGlossaryRatio = signal<number | undefined>(undefined);
 
   viewCustomGlossary(glossaryMd: string | undefined, ratio?: number) {
@@ -344,6 +413,43 @@ export class ChapterItemComponent {
   closeFullscreen() {
     this.isFullscreen.set(false);
     document.body.style.overflow = '';
+  }
+
+  openBilingualFullscreen() {
+    this.isBilingualFullscreen.set(true);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeBilingualFullscreen() {
+    this.isBilingualFullscreen.set(false);
+    document.body.style.overflow = '';
+  }
+
+  onBilingualContentClick(event: MouseEvent, source: 'original' | 'translated') {
+    const target = event.target as HTMLElement;
+    const blockElement = target.closest('p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, table');
+    if (!blockElement) return;
+
+    const parentProse = blockElement.closest('.prose');
+    if (!parentProse) return;
+
+    const allBlocks = Array.from(parentProse.querySelectorAll(':scope > p, :scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6, :scope > ul, :scope > ol, :scope > blockquote, :scope > table'));
+    const index = allBlocks.indexOf(blockElement as Element);
+
+    if (index === -1) return;
+
+    // Find counterpart container
+    const counterpartSelector = source === 'original' ? '.prose-translated' : '.prose-original';
+    const counterpartProse = document.querySelector(`.bilingual-fullscreen-container ${counterpartSelector}`);
+    
+    if (counterpartProse) {
+      const counterpartBlocks = Array.from(counterpartProse.querySelectorAll(':scope > p, :scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6, :scope > ul, :scope > ol, :scope > blockquote, :scope > table'));
+      const counterpartBlock = counterpartBlocks[index];
+      
+      if (counterpartBlock) {
+        counterpartBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
   }
 
   prevTranslatedChapterIndex(): number {
@@ -469,9 +575,10 @@ ${OFFLINE_READER_SCRIPT}
     }
   }
 
-  parseMarkdown(text: string | undefined) {
+  parseMarkdown(text: string | undefined): SafeHtml | string {
     if (!text) return '';
-    return getConfiguredMarked().parse(text) as string;
+    const parsed = getConfiguredMarked().parse(text) as string;
+    return this.sanitizer.bypassSecurityTrustHtml(parsed);
   }
 
   getActiveVersion(chapter: Chapter) {

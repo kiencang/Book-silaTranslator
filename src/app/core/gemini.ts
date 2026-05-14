@@ -127,26 +127,30 @@ export class GeminiClient {
       prompt = prompt.replace('[danh sách thuật ngữ]', JSON.stringify(compactList));
       prompt = prompt.replace('[nội dung cần dịch]', text);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const filterConfig: any = {
+        systemInstruction: si,
+        temperature: 0.1,
+        thinkingConfig: { thinkingLevel: 'HIGH' },
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              english: { type: Type.STRING },
+              pos: { type: Type.STRING }
+            },
+            required: ["english", "pos"]
+          }
+        }
+      };
+
       const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
       const response = await ai.models.generateContent({
         model: 'gemini-flash-lite-latest',
         contents: [ { text: prompt } ],
-        config: {
-          systemInstruction: si,
-          temperature: 0.1,
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                english: { type: Type.STRING },
-                pos: { type: Type.STRING }
-              },
-              required: ["english", "pos"]
-            }
-          }
-        }
+        config: filterConfig
       });
       
       const resultText = response.text || '[]';
