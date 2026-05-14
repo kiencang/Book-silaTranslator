@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.37]- 2026-05-15
 ### Fixed
 - Cập nhật SI/Prompt phiên bản mới nhất.
+- Điều chỉnh tiêu đề trong phần chia sách phù hợp hơn nếu nó chỉ có một khối.
 
 ## [v1.0.36]- 2026-05-14
 ### Fixed
