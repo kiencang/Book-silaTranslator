@@ -13,6 +13,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Chuẩn hóa bảng đại từ, bằng bước trung gian để AI viết lại dựa trên bảng đại từ tổng thể sơ bộ (tổng hợp từ các chunk) & toàn bộ nội dung gốc, điều đó giúp có một bảng đại từ chất lượng tốt hơn so với việc loại bỏ trùng lặp thuần túy bằng code dễ có nhiều sai lầm.
 - Sửa lại text trong các thông báo trong các phase đại từ/từ khó/dịch thuật để chúng dễ hiểu hơn.
 - Thông báo rõ ràng hơn danh sách từ khó/thuật ngữ nào đang dùng tại phiên bản dịch cụ thể của khối/block.
+- Đổi font chữ Nunito thành font chữ Lexend để tối ưu việc đọc cho người khó đọc.
 
 ## [v1.0.34]- 2026-05-14
 ### Fixed
