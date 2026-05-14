@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.33]- 2026-05-14
 ### Fixed
 - Bổ sung thinkingLevel là HIGH cho phần lọc thuật ngữ.
+- Chế độ xem song ngữ Anh - Việt.
 
 ## [v1.0.32]- 2026-05-14
 ### Fixed
