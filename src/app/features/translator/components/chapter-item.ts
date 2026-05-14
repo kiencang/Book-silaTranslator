@@ -142,6 +142,19 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
                     <span class="flex items-center gap-1.5">
                       <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-green-500">schedule</mat-icon> {{ activeV.timestamp | date:'dd/MM/yyyy HH:mm' }}
                     </span>
+                    @if (activeV.glossaryStatus === 'filtered' || (activeV.customGlossary && !activeV.glossaryStatus)) {
+                      <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio)" class="flex items-center gap-1 text-indigo-600 hover:underline">
+                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">menu_book</mat-icon> Thuật ngữ đã dùng
+                      </button>
+                    } @else if (activeV.glossaryStatus === 'full') {
+                      <span class="flex items-center gap-1 text-zinc-500">
+                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">library_books</mat-icon> Bảng thuật ngữ đầy đủ
+                      </span>
+                    } @else if (activeV.glossaryStatus === 'none' || (!activeV.customGlossary && !activeV.glossaryStatus)) {
+                      <span class="flex items-center gap-1 text-zinc-500">
+                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">book</mat-icon> Không có bảng thuật ngữ
+                      </span>
+                    }
                   </div>
                 }
             </div>
@@ -265,6 +278,29 @@ import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HT
           </div>
         </div>
       }
+      
+      @if (showGlossaryModal()) {
+        <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 cursor-pointer" tabindex="0" (click)="closeGlossaryModal()" (keydown.escape)="closeGlossaryModal()">
+          <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden cursor-default" (click)="$event.stopPropagation()">
+            <div class="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50/80">
+              <div>
+                <h2 class="text-xl font-bold text-zinc-900">Thuật ngữ đã dùng cho khối này</h2>
+                <p class="text-[13px] text-zinc-500 mt-1">Mỗi khối dịch sẽ trích những thuật ngữ phù hợp từ danh sách tổng thể thuật ngữ của cả cuốn sách, điều này giúp tránh dư thừa các thuật ngữ không dùng đến.</p>
+                @if (currentGlossaryRatio() !== undefined) {
+                  <p class="text-[13px] font-medium text-indigo-600 mt-1">Khối này dùng {{ currentGlossaryRatio() }}% số thuật ngữ của toàn cuốn sách.</p>
+                }
+              </div>
+              <button (click)="closeGlossaryModal()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center self-start flex-shrink-0 ml-4">
+                <span class="material-icons !text-[20px] !w-5 !h-5 !flex !items-center !justify-center leading-none">close</span>
+              </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 bg-white">
+               <div class="prose prose-sm max-w-none text-zinc-700 w-full [&>table]:w-full [&>table]:min-w-full [&_th]:bg-zinc-50 [&_th]:font-semibold [&_th]:text-left [&_th]:p-3 [&_th]:border-y [&_th]:border-zinc-200 [&_td]:p-3 [&_td]:border-b [&_td]:border-zinc-100" [innerHTML]="parsedCustomGlossary()"></div>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `
 })
@@ -277,6 +313,21 @@ export class ChapterItemComponent {
   
   isExpanded = model(false);
   isFullscreen = signal(false);
+  
+  showGlossaryModal = signal(false);
+  parsedCustomGlossary = signal('');
+  currentGlossaryRatio = signal<number | undefined>(undefined);
+
+  viewCustomGlossary(glossaryMd: string | undefined, ratio?: number) {
+    if (!glossaryMd) return;
+    this.parsedCustomGlossary.set(this.parseMarkdown(glossaryMd));
+    this.currentGlossaryRatio.set(ratio);
+    this.showGlossaryModal.set(true);
+  }
+  
+  closeGlossaryModal() {
+    this.showGlossaryModal.set(false);
+  }
 
   translateSingle = output<void>();
   requestNavigate = output<number>();

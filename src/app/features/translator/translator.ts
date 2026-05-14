@@ -166,7 +166,10 @@ export class Translator {
     
     try {
       const config = this.store.config();
-      const result = await this.gemini.translateChapter(
+      const chapters = this.store.chapters() || [];
+      const validChaptersCount = chapters.filter((c: Chapter) => !c.excludeFromTranslation).length;
+
+      const { text: translatedText, customGlossary, glossaryStatus, glossaryRatio } = await this.gemini.translateChapter(
         chapter.originalText, 
         config.model, 
         config.temperature,
@@ -175,23 +178,27 @@ export class Translator {
         this.store.pronounTable(),
         this.store.usePronouns(),
         this.store.glossaryTable(),
-        this.store.useGlossary()
+        this.store.useGlossary(),
+        validChaptersCount > 3
       );
       
       const newVersionNumber = (chapter.latestVersionNumber || 0) + 1;
       const newVersion = {
         versionNumber: newVersionNumber,
-        text: result,
+        text: translatedText,
         model: config.model,
         temperature: config.temperature,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        customGlossary: customGlossary,
+        glossaryStatus: glossaryStatus,
+        glossaryRatio: glossaryRatio
       };
       
       const versions = [...(chapter.versions || []), newVersion].slice(-3);
       
       this.store.updateChapter(chapter.id, { 
         status: 'done',
-        translatedText: result,
+        translatedText: translatedText,
         versions: versions,
         latestVersionNumber: newVersionNumber,
         activeVersionNumber: newVersionNumber

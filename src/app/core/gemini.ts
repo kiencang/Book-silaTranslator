@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Type } from '@google/genai';
 
 export function parseGeminiError(e: unknown): string {
   const msg = (e as Error)?.message || e?.toString() || '';
@@ -93,27 +93,128 @@ export class GeminiClient {
     return result;
   }
 
-  async translateChapter(text: string, model: string, temperature: number, bookTitle = '', author = '', pronounTable = '', usePronouns = false, glossaryTable = '', useGlossary = false): Promise<string> {
+  async filterGlossary(text: string, glossaryTable: string): Promise<{ text: string; usedCount: number; totalCount: number }> {
+    try {
+      const lines = glossaryTable.split('\n').filter(l => l.trim().startsWith('|'));
+      if (lines.length <= 2) return { text: glossaryTable, usedCount: 0, totalCount: 0 };
+
+      const headers = lines[0].split('|').map(h => h.trim()).filter(h => h);
+      if (headers.length < 4 || headers[0] !== 'Tiếng Anh') return { text: glossaryTable, usedCount: 0, totalCount: 0 };
+
+      const fullGlossary: any[] = [];
+      const compactList: any[] = [];
+      
+      for (let i = 2; i < lines.length; i++) {
+        const cells = lines[i].split('|').map(c => c.trim());
+        if (cells.length >= 5) {
+           const english = cells[1];
+           const pos = cells[2];
+           const vietnamese = cells[3];
+           const notes = cells[4];
+           fullGlossary.push({ english, pos, vietnamese, notes });
+           compactList.push({ english, pos });
+        }
+      }
+
+      if (compactList.length <= 100) return { text: glossaryTable, usedCount: compactList.length, totalCount: compactList.length };
+
+      const si = await this.loadPromptText('/prompts/filter_glossary_system_instruction.md') || 'You are an expert terminology extractor. Your task is to filter a given list of glossary terms and identify which ones are present in the provided text block. Return ONLY a valid JSON array of objects with "english" and "pos" properties.';
+      let prompt = await this.loadPromptText('/prompts/filter_glossary_prompt.md');
+      if (!prompt) {
+        prompt = "Glossary Terms:\n[danh sách thuật ngữ]\n\nText Block:\n[nội dung cần dịch]";
+      }
+      
+      prompt = prompt.replace('[danh sách thuật ngữ]', JSON.stringify(compactList));
+      prompt = prompt.replace('[nội dung cần dịch]', text);
+
+      const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+      const response = await ai.models.generateContent({
+        model: 'gemini-flash-lite-latest',
+        contents: [ { text: prompt } ],
+        config: {
+          systemInstruction: si,
+          temperature: 0.1,
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                english: { type: Type.STRING },
+                pos: { type: Type.STRING }
+              },
+              required: ["english", "pos"]
+            }
+          }
+        }
+      });
+      
+      const resultText = response.text || '[]';
+      const matchedItems = JSON.parse(resultText);
+      
+      if (!Array.isArray(matchedItems) || matchedItems.length === 0) {
+        return { text: '', usedCount: 0, totalCount: fullGlossary.length };
+      }
+      
+      const matchedSet = new Set(matchedItems.map((item: any) => `${item.english}_${item.pos}`.toLowerCase()));
+      const filteredGlossary = fullGlossary.filter(item => matchedSet.has(`${item.english}_${item.pos}`.toLowerCase()));
+      
+      if (filteredGlossary.length === 0) return { text: '', usedCount: 0, totalCount: fullGlossary.length };
+      
+      let resultTable = '| Tiếng Anh | Từ loại | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|---|\n';
+      for (const item of filteredGlossary) {
+        resultTable += `| ${item.english} | ${item.pos} | ${item.vietnamese} | ${item.notes} |\n`;
+      }
+      
+      return { text: resultTable, usedCount: filteredGlossary.length, totalCount: fullGlossary.length };
+      
+    } catch (e) {
+      console.error('Failed to filter glossary', e);
+      return { text: glossaryTable, usedCount: 0, totalCount: 0 }; 
+    }
+  }
+
+  async translateChapter(text: string, model: string, temperature: number, bookTitle = '', author = '', pronounTable = '', usePronouns = false, glossaryTable = '', useGlossary = false, shouldFilterGlossary = true): Promise<{text: string, customGlossary?: string, glossaryStatus?: 'none' | 'full' | 'filtered', glossaryRatio?: number}> {
+    
+    let activeGlossary = '';
+    let glossaryStatus: 'none' | 'full' | 'filtered' = 'none';
+    let glossaryRatio: number | undefined = undefined;
+
+    if (useGlossary && glossaryTable) {
+        if (shouldFilterGlossary) {
+            const filterRes = await this.filterGlossary(text, glossaryTable);
+            activeGlossary = filterRes.text;
+            glossaryStatus = activeGlossary === glossaryTable ? 'full' : 'filtered';
+            if (filterRes.totalCount > 0) {
+              glossaryRatio = Math.round((filterRes.usedCount / filterRes.totalCount) * 100);
+            }
+        } else {
+            activeGlossary = glossaryTable;
+            glossaryStatus = 'full';
+            glossaryRatio = 100;
+        }
+    }
+    
     let systemInstruction = null;
     let finalPrompt = '';
     
-    if (usePronouns && useGlossary && pronounTable && glossaryTable) {
+    if (usePronouns && activeGlossary && pronounTable) {
        systemInstruction = await this.loadPromptText('/prompts/multi_system_instructions.md');
        finalPrompt = await this.loadPromptText('/prompts/multi_pronouns_glossary_prompt.md') || '';
        if (finalPrompt) {
          finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
          finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
          finalPrompt = finalPrompt.replace('[bảng đại từ nhân xưng]', pronounTable);
-         finalPrompt = finalPrompt.replace('[bảng thuật ngữ]', glossaryTable);
+         finalPrompt = finalPrompt.replace('[bảng thuật ngữ]', activeGlossary);
          finalPrompt = finalPrompt.replace('[nội dung cần dịch]', '\n' + text);
        }
-    } else if (useGlossary && glossaryTable) {
+    } else if (activeGlossary) {
        systemInstruction = await this.loadPromptText('/prompts/multi_system_instructions.md');
        finalPrompt = await this.loadPromptText('/prompts/multi_glossary_prompt.md') || '';
        if (finalPrompt) {
          finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
          finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
-         finalPrompt = finalPrompt.replace('[bảng thuật ngữ]', glossaryTable);
+         finalPrompt = finalPrompt.replace('[bảng thuật ngữ]', activeGlossary);
          finalPrompt = finalPrompt.replace('[nội dung cần dịch]', '\n' + text);
        }
     } else if (usePronouns && pronounTable) {
@@ -164,7 +265,7 @@ export class GeminiClient {
       result = result.replace(/^```\n/, '').replace(/\n```$/, '');
     }
     
-    return result;
+    return { text: result, customGlossary: activeGlossary || undefined, glossaryStatus, glossaryRatio };
   }
 
   async generatePronounsRaw(text: string, model: string, bookTitle = '', author = '', temperature = 0.1): Promise<any[]> {

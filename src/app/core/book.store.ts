@@ -11,6 +11,9 @@ export interface TranslationVersion {
   model: string;
   temperature: number;
   timestamp: number;
+  customGlossary?: string;
+  glossaryStatus?: 'none' | 'full' | 'filtered';
+  glossaryRatio?: number;
 }
 
 export interface Chapter {
