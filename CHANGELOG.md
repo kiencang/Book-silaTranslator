@@ -8,7 +8,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
-## [v1.0.33]- 2026-05-14
+## [v1.0.34]- 2026-05-14
 ### Fixed
 - Xây dựng một quy tắc kinh nghiệm để kiểm tra độ tin cậy của tương đương ID trong khi xem ở chế độ song ngữ.
 - Nếu quy tắc này thỏa mãn việc thao tác click xem giữa 2 bên được CSS mạnh hơn để việc đối chiếu rõ ràng hơn.
