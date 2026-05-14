@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.37]- 2026-05-15
+### Fixed
+- Cập nhật SI/Prompt phiên bản mới nhất.
+
 ## [v1.0.36]- 2026-05-14
 ### Fixed
 - Cập nhật SI/Prompt phiên bản mới nhất.
