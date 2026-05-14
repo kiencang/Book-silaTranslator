@@ -10,6 +10,12 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [v1.0.33]- 2026-05-14
 ### Fixed
+- Xây dựng một quy tắc kinh nghiệm để kiểm tra độ tin cậy của tương đương ID trong khi xem ở chế độ song ngữ.
+- Nếu quy tắc này thỏa mãn việc thao tác click xem giữa 2 bên được CSS mạnh hơn để việc đối chiếu rõ ràng hơn.
+- Nếu không thảo mãn quay lại cách đơn giản là cho ID tiếng Anh tương ứng với ID tiếng Việt ra giữa màn hình.
+
+## [v1.0.33]- 2026-05-14
+### Fixed
 - Bổ sung thinkingLevel là HIGH cho phần lọc thuật ngữ.
 - Chế độ xem song ngữ Anh - Việt.
 
