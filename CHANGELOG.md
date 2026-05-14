@@ -10,7 +10,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [v1.0.35]- 2026-05-14
 ### Fixed
-- Chuẩn hóa bảng đại từ, bằng một bước để AI viết lại dựa trên bảng đại từ tổng thể, điều đó giúp có một bảng đại từ chất lượng tốt hơn so với việc loại bỏ trùng lặp thuần túy bằng code dễ có nhiều sai lầm.
+- Chuẩn hóa bảng đại từ, bằng một bước trung gian để AI viết lại dựa trên bảng đại từ tổng thể & toàn bộ nội dung gốc, điều đó giúp có một bảng đại từ chất lượng tốt hơn so với việc loại bỏ trùng lặp thuần túy bằng code dễ có nhiều sai lầm.
 
 ## [v1.0.34]- 2026-05-14
 ### Fixed
