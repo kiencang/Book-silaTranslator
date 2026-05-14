@@ -10,7 +10,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [v1.0.32]- 2026-05-14
 ### Fixed
-- Giảm tải danh sách từ khó/thuật ngữ theo từng khối dịch.
+- Giảm tải danh sách từ khó/thuật ngữ theo từng khối dịch, không đưa toàn bộ danh sách cả cả cuốn sách cho từng khối.
 
 ## [v1.0.31]- 2026-05-14
 ### Fixed
