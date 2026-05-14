@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.33]- 2026-05-14
+### Fixed
+- Bổ sung thinkingLevel là HIGH cho phần lọc thuật ngữ.
+
 ## [v1.0.32]- 2026-05-14
 ### Fixed
 - Giảm tải danh sách từ khó/thuật ngữ theo từng khối dịch, không đưa toàn bộ danh sách cả cả cuốn sách cho từng khối.
