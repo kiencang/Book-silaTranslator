@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.40]- 2026-05-15
+### Fixed
+- Điều chỉnh giao diện ở phần chia khối dịch cho rõ ràng, dễ hiểu hơn.
+
 ## [v1.0.39]- 2026-05-15
 ### Fixed
 - Thêm tính năng cắt file PDF ngay trong giao diện.
