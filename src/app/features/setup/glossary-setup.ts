@@ -63,6 +63,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
               [value]="draftTable()"
               (valueChange)="onTableChange($event)"
               [disabled]="isGenerating()"
+              placeholder="Ví dụ:&#10;| Tiếng Anh | Từ loại | Tiếng Việt | Ghi chú văn cảnh |&#10;|---|---|---|---|&#10;| Hogwarts | Noun | Hogwarts | Trường đào tạo phù thủy |"
             >
               @if (store.glossaryVersions().length > 0) {
                 <div class="flex items-center justify-between py-2 border-b border-zinc-100 mb-2">

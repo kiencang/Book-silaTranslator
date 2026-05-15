@@ -63,6 +63,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
               [value]="draftPronounTable()"
               (valueChange)="onTableChange($event)"
               [disabled]="isGeneratingPronouns()"
+              placeholder="Ví dụ:&#10;| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |&#10;|---|---|---|---|---|---|---|&#10;| Harry Potter | Nam | Cô nhi | Cậu bé sống sót | Cậu, hắn | Với Ron: Bồ - Mình | Tự tin hơi bốc đồng |"
             >
               @if (store.pronounVersions().length > 0) {
                 <div class="flex items-center justify-between py-2 border-b border-zinc-100 mb-2">

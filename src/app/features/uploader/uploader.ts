@@ -20,23 +20,31 @@ import { PDFDocument } from 'pdf-lib';
       <div class="w-full max-w-2xl">
         
         @if (pendingPdfFile(); as pFile) {
-          <div class="bg-white border text-center border-zinc-200 rounded-2xl p-8 shadow-sm">
-            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <mat-icon class="!text-3xl !w-8 !h-8 !flex !items-center !justify-center">picture_as_pdf</mat-icon>
+          <div class="bg-white border text-center border-zinc-200 rounded-2xl p-8 shadow-sm max-w-md mx-auto">
+            <h3 class="text-xl font-semibold text-zinc-800 mb-1 truncate" [title]="pFile.name">{{pFile.name}}</h3>
+            <p class="text-sm text-zinc-500 mb-8">{{ pdfFileSizeMB() }}</p>
+
+            <div class="border border-zinc-200 rounded-xl p-4 mb-8 bg-zinc-50/50">
+              <div class="flex items-center gap-2 mb-3 text-zinc-700 font-medium text-[15px]">
+                <mat-icon class="!w-[20px] !h-[20px] !text-[20px]">content_cut</mat-icon>
+                <span>Cắt trang (Tổng: {{ pdfTotalPages() }})</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="flex-1 flex items-center bg-white border border-zinc-200 rounded-lg px-3 py-2 shadow-sm focus-within:border-indigo-500 transition-colors">
+                  <span class="text-sm text-zinc-500 w-8">Từ</span>
+                  <input type="number" min="1" [max]="pdfEndPage()" [(ngModel)]="pdfStartPage" (ngModelChange)="onPageChange()" class="w-full text-center outline-none bg-transparent font-medium text-zinc-800">
+                </div>
+                <span class="text-zinc-300 font-medium">-</span>
+                <div class="flex-1 flex items-center bg-white border border-zinc-200 rounded-lg px-3 py-2 shadow-sm focus-within:border-indigo-500 transition-colors">
+                  <span class="text-sm text-zinc-500 w-8">Đến</span>
+                  <input type="number" [min]="pdfStartPage()" [max]="pdfTotalPages()" [(ngModel)]="pdfEndPage" (ngModelChange)="onPageChange()" class="w-full text-center outline-none bg-transparent font-medium text-zinc-800">
+                </div>
+              </div>
             </div>
-            <h3 class="text-xl font-semibold mb-2">Chuyển đổi tài liệu PDF</h3>
-            <p class="text-sm text-zinc-500 w-[350px] mx-auto truncate" [title]="pFile.name">{{pFile.name}}</p>
-            @if (tokenCountText() !== null) {
-              <p class="text-xs text-indigo-500 mb-6 font-medium">{{ tokenCountText() }}</p>
-            } @else {
-              <p class="text-xs text-zinc-400 mb-6 mt-1 flex justify-center items-center gap-1">
-                <mat-icon class="!w-3 !h-3 !text-[12px] animate-spin">autorenew</mat-icon> Đang đếm token...
-              </p>
-            }
-            
-            <div class="text-left max-w-md mx-auto mb-8 relative">
+
+            <div class="text-left mb-8 relative">
               <label class="block text-sm font-medium text-zinc-700 mb-2">Chọn model xử lý</label>
-              <select [(ngModel)]="pdfModel" class="w-full px-4 pr-10 py-3 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors appearance-none">
+              <select [(ngModel)]="pdfModel" (ngModelChange)="onModelChange()" class="w-full px-4 pr-10 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors appearance-none">
                 <option value="gemini-flash-lite-latest">Lite (rẻ & nhanh nhất)</option>
                 <option value="gemini-flash-latest">Flash (cho nội dung trình bày phức tạp)</option>
               </select>
@@ -44,19 +52,47 @@ import { PDFDocument } from 'pdf-lib';
                 <mat-icon class="!w-5 !h-5 !text-[20px]">expand_more</mat-icon>
               </div>
             </div>
-            
-            <div class="flex justify-center gap-4 border-t border-zinc-100 pt-6">
-              <button (click)="cancelPdfPending()" class="px-6 py-2.5 rounded-lg border border-zinc-200 font-medium text-zinc-600 hover:bg-zinc-100 transition-colors">
-                Hủy
-              </button>
-              <button (click)="startPdfConversion(pFile)" [disabled]="store.isConverting()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+
+            <div class="mb-8">
+              <div class="flex justify-between text-xs font-semibold uppercase tracking-wider mb-2">
+                <span class="text-zinc-500">Token Usage</span>
+                @if (isCountingTokens()) {
+                   <span class="text-indigo-500 flex items-center gap-1">
+                     <mat-icon class="!w-3 !h-3 !text-[12px] animate-spin">autorenew</mat-icon> Đang tính...
+                   </span>
+                } @else if (tokenCountError()) {
+                   <span class="text-red-500">{{ tokenCountError() }}</span>
+                } @else {
+                   <span [class.text-red-500]="(tokenCount() || 0) > 1000000" class="text-emerald-600">
+                     {{ formattedTokenCount() }} / 1M
+                   </span>
+                }
+              </div>
+              <div class="h-2.5 w-full bg-zinc-100 rounded-full overflow-hidden">
+                 @if (isCountingTokens()) {
+                   <div class="h-full bg-indigo-500/50 w-full animate-pulse transition-all"></div>
+                 } @else {
+                   <div class="h-full transition-all duration-500"
+                        [class.bg-emerald-500]="(tokenCount() || 0) <= 1000000"
+                        [class.bg-red-500]="(tokenCount() || 0) > 1000000"
+                        [style.width.%]="tokenPercentage()">
+                   </div>
+                 }
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <button (click)="startPdfConversion(pFile)" [disabled]="store.isConverting() || isCountingTokens() || (tokenCount() || 0) > 1000000" class="w-full justify-center flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 @if (store.isConverting()) {
                   <mat-icon class="!w-[20px] !h-[20px] !text-[20px] flex items-center justify-center animate-spin">autorenew</mat-icon>
                   <span>Đang xử lý...</span>
                 } @else {
-                  <mat-icon class="!w-[20px] !h-[20px] !text-[20px] flex items-center justify-center">play_arrow</mat-icon>
-                  <span>Bắt đầu xử lý</span>
+                  <span>Bắt đầu xử lý PDF</span>
                 }
+              </button>
+              <button (click)="cancelPdfPending()" [disabled]="store.isConverting()" class="w-full justify-center flex items-center gap-2 px-6 py-3 rounded-lg border border-zinc-200 font-medium text-zinc-600 hover:bg-zinc-100 transition-colors disabled:opacity-50">
+                <mat-icon class="!w-[20px] !h-[20px] !text-[20px] flex items-center justify-center">insert_drive_file</mat-icon>
+                Chọn file khác
               </button>
             </div>
             
@@ -153,11 +189,17 @@ import { PDFDocument } from 'pdf-lib';
               <div>
                 <h3 class="text-lg font-medium text-zinc-900">Tải lên cuốn sách cần dịch</h3>
                 <p class="text-sm text-zinc-500 mt-1">Click chọn hoặc kéo thả vào đây.</p>
-                <div class="flex gap-2 justify-center mt-3">
-                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">TXT</span>
-                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">MD</span>
-                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">HTML</span>
-                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">PDF</span>
+                <div class="flex flex-wrap gap-2 justify-center mt-4">
+                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">TXT (3MB)</span>
+                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">MD (3MB)</span>
+                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">HTML (5MB)</span>
+                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">PDF (50MB)</span>
+                </div>
+                <div class="mt-5 pt-4 border-t border-zinc-100">
+                  <p class="text-xs text-zinc-400 flex items-center justify-center gap-1">
+                    <mat-icon class="!w-[14px] !h-[14px] !text-[14px]">info</mat-icon>
+                    Giới hạn xử lý tối đa: <span class="font-medium text-zinc-500">1M Tokens</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -179,14 +221,89 @@ export class Uploader {
 
   pendingPdfFile = signal<File | null>(null);
   pdfModel = signal<string>('gemini-flash-lite-latest');
-  tokenCountText = signal<string | null>(null);
+  
+  pdfFileSizeMB = signal<string | null>(null);
+  pdfTotalPages = signal<number>(0);
+  pdfStartPage = signal<number>(1);
+  pdfEndPage = signal<number>(0);
+  tokenCount = signal<number | null>(null);
+  isCountingTokens = signal<boolean>(false);
+  tokenCountError = signal<string | null>(null);
+  
+  countTokensTimeout: any;
+
+  tokenPercentage() {
+    return Math.min(100, (this.tokenCount() || 0) / 10000);
+  }
+
+  formattedTokenCount(): string {
+    const count = this.tokenCount() || 0;
+    if (count === 0) return '0';
+    if (count < 1000) return count.toString();
+    return Math.round(count / 1000) + 'K';
+  }
 
   cancelPdfPending() {
      this.pendingPdfFile.set(null);
-     this.tokenCountText.set(null);
+     this.pdfFileSizeMB.set(null);
+     this.tokenCount.set(null);
+     this.isCountingTokens.set(false);
+     this.tokenCountError.set(null);
      if (this.fileInput()) {
        this.fileInput().nativeElement.value = '';
      }
+  }
+
+  onPageChange() {
+    this.triggerTokenCount();
+  }
+
+  onModelChange() {
+    this.triggerTokenCount();
+  }
+
+  triggerTokenCount() {
+    clearTimeout(this.countTokensTimeout);
+    this.countTokensTimeout = setTimeout(() => {
+      this.calculateTokens();
+    }, 1000);
+  }
+
+  async calculateTokens() {
+    const file = this.pendingPdfFile();
+    if (!file) return;
+
+    this.isCountingTokens.set(true);
+    this.tokenCountError.set(null);
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      
+      const start = Math.max(1, this.pdfStartPage());
+      const end = Math.min(this.pdfTotalPages(), this.pdfEndPage());
+      
+      if (start > end) {
+        this.isCountingTokens.set(false);
+        this.tokenCount.set(0);
+        return;
+      }
+
+      const newPdf = await PDFDocument.create();
+      const pageIndices = Array.from({ length: end - start + 1 }, (_, i) => start - 1 + i);
+      const copiedPages = await newPdf.copyPages(pdfDoc, pageIndices);
+      copiedPages.forEach((page) => newPdf.addPage(page));
+      
+      const b64Data = await newPdf.saveAsBase64();
+      
+      const count = await this.gemini.countTokens(b64Data, 'application/pdf', this.pdfModel());
+      this.tokenCount.set(count);
+    } catch (e) {
+      console.error('Lỗi khi đếm token:', e);
+      this.tokenCountError.set('Không thể đếm Token');
+    } finally {
+      this.isCountingTokens.set(false);
+    }
   }
 
   onDragOver(event: DragEvent) {
@@ -317,23 +434,22 @@ export class Uploader {
     
     if (ext === 'pdf') {
        this.pendingPdfFile.set(file);
+       this.pdfFileSizeMB.set((file.size / (1024 * 1024)).toFixed(2) + ' MB');
        if (this.fileInput()) {
          this.fileInput().nativeElement.value = '';
        }
        
-       this.tokenCountText.set(null);
-       this.fileToBase64(file).then(base64 => {
-         const b64Data = base64.split(',')[1];
-         return this.gemini.countTokens(b64Data, 'application/pdf', 'gemini-flash-lite-latest');
-       }).then(count => {
-         if (count > 0) {
-           this.tokenCountText.set((count / 1000).toFixed(1) + 'K Token');
-         } else {
-           this.tokenCountText.set('Không thể đếm Token');
-         }
+       this.isCountingTokens.set(true);
+       file.arrayBuffer().then(buffer => PDFDocument.load(buffer)).then(pdfDoc => {
+         const count = pdfDoc.getPageCount();
+         this.pdfTotalPages.set(count);
+         this.pdfStartPage.set(1);
+         this.pdfEndPage.set(count);
+         this.triggerTokenCount();
        }).catch(e => {
-         console.error('Lỗi khi đếm token:', e);
-         this.tokenCountText.set('Không thể đếm Token');
+         console.error('Failed to parse PDF', e);
+         this.isCountingTokens.set(false);
+         this.tokenCountError.set('Lỗi đọc PDF');
        });
 
        return;
@@ -382,12 +498,21 @@ export class Uploader {
       }
 
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const originalPdfDoc = await PDFDocument.load(arrayBuffer);
+      
+      const start = Math.max(1, this.pdfStartPage());
+      const end = Math.min(this.pdfTotalPages(), this.pdfEndPage());
+      
+      const pdfDoc = await PDFDocument.create();
+      const pageIndices = Array.from({ length: end - start + 1 }, (_, i) => start - 1 + i);
+      const copiedPages = await pdfDoc.copyPages(originalPdfDoc, pageIndices);
+      copiedPages.forEach((page) => pdfDoc.addPage(page));
+      
       const pageCount = pdfDoc.getPageCount();
 
       if (pageCount <= 30) {
-        const base64 = await this.fileToBase64(file);
-        const b64Data = base64.split(',')[1];
+        const base64 = await pdfDoc.saveAsBase64();
+        const b64Data = base64.includes(',') ? base64.split(',')[1] : base64;
         const markdown = await this.gemini.convertPdfToMarkdown(b64Data, this.pdfModel());
         this.store.setMarkdown(markdown, file.name);
         this.toast.success(this.toast.Messages.FILE_PROCESS_SUCCESS);
@@ -399,8 +524,8 @@ export class Uploader {
         for (let i = 0; i < pageCount; i += CHUNK_SIZE) {
           const endPage = Math.min(i + CHUNK_SIZE, pageCount) - 1;
           const newPdf = await PDFDocument.create();
-          const pageIndices = Array.from({ length: endPage - i + 1 }, (_, k) => k + i);
-          const copiedPages = await newPdf.copyPages(pdfDoc, pageIndices);
+          const chunkIndices = Array.from({ length: endPage - i + 1 }, (_, k) => k + i);
+          const copiedPages = await newPdf.copyPages(pdfDoc, chunkIndices);
           copiedPages.forEach((page) => newPdf.addPage(page));
           const chunkBase64 = await newPdf.saveAsBase64({ dataUri: true });
           

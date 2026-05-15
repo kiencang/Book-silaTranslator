@@ -75,7 +75,7 @@ import { MatIconModule } from '@angular/material/icon';
             [disabled]="disabled()"
             rows="12" 
             class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 w-full sm:text-sm border border-zinc-300 rounded-lg bg-white disabled:bg-zinc-100 p-3 font-mono text-sm leading-relaxed"
-            placeholder="Ví dụ:&#10;| Từ | Nghĩa |&#10;| --- | --- |"></textarea>
+            [placeholder]="placeholder()"></textarea>
         } @else {
           <div class="border border-zinc-300 rounded-lg bg-white overflow-hidden flex flex-col shadow-sm">
             @if (tableData().length === 0) {
@@ -160,6 +160,7 @@ import { MatIconModule } from '@angular/material/icon';
 export class MarkdownTableEditorComponent {
   value = model<string>('');
   disabled = input<boolean>(false);
+  placeholder = input<string>('Ví dụ:\n| Từ | Nghĩa |\n| --- | --- |');
 
   mode = signal<'table' | 'raw'>('table');
   tableData = signal<string[][]>([]);
