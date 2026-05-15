@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 
+## [v1.0.38]- 2026-05-15
+### Fixed
+- Cập nhật SI/Prompt phiên bản mới nhất. Điều chỉnh khả năng chuyển PDF sang markdown.
+
 ## [v1.0.37]- 2026-05-15
 ### Fixed
 - Cập nhật SI/Prompt phiên bản mới nhất.
