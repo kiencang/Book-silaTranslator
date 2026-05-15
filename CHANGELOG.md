@@ -9,6 +9,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 - Thiết kế tính năng tổng hợp từ khó/thuật ngữ để có phiên bản đầy đủ, toàn diện hơn.
 
+## [v1.0.42]- 2026-05-16
+### Fixed
+- Hạ chunk tối đa của phần thuật ngữ từ khó xuống 10 ngàn từ.
+
 ## [v1.0.41]- 2026-05-15
 ### Fixed
 - Cập nhật SI bản mới nhất, không kiểm duyệt các từ tục trong tác phẩm Văn học.
