@@ -7,6 +7,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [Unreleased]
 - Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
+- Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
 ## [v1.0.40]- 2026-05-15
 ### Fixed
