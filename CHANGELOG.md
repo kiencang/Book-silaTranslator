@@ -14,6 +14,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Điều chỉnh giao diện ở phần chia khối dịch cho rõ ràng, dễ hiểu hơn.
 - Chỉnh khoảng cách mỗi khối dịch ở trong phase Dịch thuật.
 - Vô hiệu hóa một số button trong phase Đại từ & Từ khó khi quá trình trao đổi với AI đang diễn ra.
+- Hạ số request gửi đồng thời ở model Pro xuống còn 2 khi phân tích Đại từ & Từ khó. Chỉ model Flash là còn giữ nguyên 4.
 
 ## [v1.0.39]- 2026-05-15
 ### Fixed
