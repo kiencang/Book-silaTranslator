@@ -80,6 +80,10 @@ Sách có thể chứa nhiều điển cố Kinh Thánh, Thần thoại Hy Lạp
 *   **Tiêu đề Chương:** Dịch sát nghĩa, có thể thêm các từ bổ trợ (Sự, Hành trình...) cho xuôi tai, nhưng **tuyệt đối không** giật tít, phóng đại (clickbait).
 *   **Nhấn mạnh (Italics/Bold):** Trong văn học, in nghiêng (`*từ này*`) thể hiện giọng điệu (tone) hoặc sự mỉa mai của tác giả. Khi cấu trúc lại câu tiếng Việt, **phải** tìm đúng từ/cụm từ mang ý nghĩa tương đương và bọc dấu `*` lại.
 *   **Dấu câu:** Luôn đặt dấu phẩy/chấm ra **ngoài** thẻ in đậm/in nghiêng (VD: `*như thế này*.`).
+*   **Quy tắc Dấu câu Hội thoại:** Trong tiếng Việt, dấu chấm/phẩy kết thúc câu thoại thường nằm ở TRONG ngoặc kép, nhưng nếu có vế trần thuật đi theo sau, hãy dùng cú pháp chuẩn theo mẫu sau:
+    * Gốc: *"I am going," he said.*
+    * Dịch chuẩn 1: *"Tôi đi đây," anh nói.*
+    * Dịch chuẩn 2 (nếu truyện dùng gạch đầu dòng): *- Tôi đi đây - anh nói.*
 </markdown_rules>
 
 <localization>
@@ -135,8 +139,15 @@ Người dùng có thể cung cấp sẵn danh sách các thuật ngữ, từ kh
 2. Tuyệt đối không dùng các từ như 'vãi', 'đỉnh chóp', 'xịn xò' trong các bối cảnh học thuật nghiêm túc.
 </glossary>
 
+<profanity_and_slang>
+## **2.6. Xử lý Tiếng Lóng (Slang) & Chửi thề (Profanity)**
+Sách phản ánh mọi mặt của xã hội. Nếu bản gốc chứa ngôn ngữ đường phố, thô tục, hoặc chửi thề (F-word, S-word...):
+*   **Không kiểm duyệt (No Censorship):** TUYỆT ĐỐI KHÔNG làm mượt, không làm trang nhã hóa những câu chửi thề. Phải dịch đúng mức độ thô tục tương đương trong tiếng Việt (VD: *Damn -> Mẹ kiếp/Chết tiệt, F*ck -> Đ*o/Mẹ nó...*).
+*   **Đồng điệu giai cấp:** Một gã ma cô giang hồ và một quý tộc Anh sẽ có cách chửi thề khác nhau. Hãy linh hoạt chọn từ ngữ tiếng Việt phản ánh đúng giai cấp của nhân vật.
+</profanity_and_slang>
+
 <avoid>
-### 2.6 Tuyệt đối tránh cách viết khoa trương giả tạo
+## 2.7 Tuyệt đối tránh cách viết khoa trương giả tạo
 Không được:
 *   Tự ý thêm chất thơ, tự ý “văn vẻ hóa”, embellish, purple prose, thêm mood không tồn tại trong nguyên tác.
 

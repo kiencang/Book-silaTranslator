@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BookStore } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
@@ -26,36 +26,56 @@ import { smartHardSplit } from '../splitter/splitter.util';
           <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-200 space-y-4">
             <div class="flex flex-col sm:flex-row gap-4">
               <div class="flex-1">
-                <label for="pronounExtractRatio" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2">Trích xuất nội dung từ bản text đã lọc</label>
-                <select id="pronounExtractRatio" [value]="pronounExtractRatio()" (change)="pronounExtractRatio.set(+$any($event.target).value)" disabled class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:opacity-75">
-                  <option value="1">100% nội dung sách</option>
-                </select>
-              </div>
-              <div class="flex-1">
                 <label for="pronounModel" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2">Mô hình nhận diện</label>
-                <select id="pronounModel" [value]="pronounModel()" (change)="pronounModel.set($any($event.target).value)" [disabled]="isGeneratingPronouns()" class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border disabled:cursor-not-allowed">
+                <select id="pronounModel" [value]="pronounModel()" (change)="pronounModel.set($any($event.target).value)" [disabled]="isGeneratingPronouns() || !!pronounTask()" class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border disabled:cursor-not-allowed">
                   <option value="gemini-flash-latest">Flash (Nhanh & Tiết kiệm)</option>
                   <option value="gemini-pro-latest">Pro (Tư duy sâu & Chuẩn xác)</option>
                 </select>
               </div>
             </div>
             
-            <button 
-              (click)="generatePronouns()"
-              [disabled]="isGeneratingPronouns()"
-              class="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
-            >
-              @if (isGeneratingPronouns()) {
-                <mat-icon class="animate-spin mr-2 !w-5 !h-5 !text-[20px]">sync</mat-icon>
-                {{ generationStatus() || 'Đang phân tích và tạo bảng...' }}
-              } @else if (draftPronounTable().trim().length > 0) {
-                <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
-                Tạo lại bảng dữ liệu Đại từ
+            <div class="space-y-3">
+              @if (pronounTask() && !isGeneratingPronouns()) {
+                <div class="text-sm text-amber-700 bg-amber-50 rounded-lg p-4 border border-amber-200">
+                  <p class="font-medium mb-1">Tiến trình bị gián đoạn</p>
+                  <p class="text-amber-600">Bạn có một tiến trình tạo bảng đại từ đang dở dang (đã hoàn thành {{ completedChunksCount() }}/{{ pronounTask()?.totalChunks }} phần). Bạn có thể tiếp tục hoặc hủy bỏ để bắt đầu lại.</p>
+                </div>
+                <div class="flex gap-3">
+                  <button 
+                    (click)="resumeGeneration()"
+                    [disabled]="isGeneratingPronouns()"
+                    class="flex-1 flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">play_circle</mat-icon>
+                    Tiếp tục quá trình tạo ({{ completedChunksCount() }}/{{ pronounTask()?.totalChunks }})
+                  </button>
+                  <button 
+                    (click)="cancelTask()"
+                    [disabled]="isGeneratingPronouns()"
+                    class="px-4 py-2 border border-red-200 text-sm font-medium rounded-lg shadow-sm text-red-600 bg-white hover:bg-red-50 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Hủy tiến trình cũ
+                  </button>
+                </div>
               } @else {
-                <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">auto_awesome</mat-icon>
-                Bắt đầu tạo bảng Đại từ tự động
+                <button 
+                  (click)="startGeneration()"
+                  [disabled]="isGeneratingPronouns()"
+                  class="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  @if (isGeneratingPronouns()) {
+                    <mat-icon class="animate-spin mr-2 !w-5 !h-5 !text-[20px]">sync</mat-icon>
+                    {{ generationStatus() || 'Đang phân tích...' }}
+                  } @else if (draftPronounTable().trim().length > 0) {
+                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
+                    Tạo lại bảng dữ liệu Đại từ
+                  } @else {
+                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">auto_awesome</mat-icon>
+                    Bắt đầu tạo bảng Đại từ tự động
+                  }
+                </button>
               }
-            </button>
+            </div>
           </div>
 
           <div class="mt-8">
@@ -136,8 +156,11 @@ export class PronounSetup {
   isGeneratingPronouns = signal<boolean>(false);
   generationStatus = signal<string>('');
   draftPronounTable = signal<string>('');
-  pronounExtractRatio = signal<number>(1);
-  pronounModel = signal<string>(this.store.config().pronounGenModel ?? 'gemini-pro-latest');
+  
+  pronounTask = this.store.pronounTask;
+  completedChunksCount = computed(() => this.pronounTask()?.chunks.filter(c => c.status === 'completed').length || 0);
+  
+  pronounModel = signal<string>(this.store.pronounTask()?.model ?? this.store.config().pronounGenModel ?? 'gemini-pro-latest');
   isManuallyEdited = signal<boolean>(false);
 
   constructor() {
@@ -166,7 +189,11 @@ export class PronounSetup {
     this.isManuallyEdited.set(true);
   }
 
-  async generatePronouns() {
+  cancelTask() {
+    this.store.setPronounTask(undefined);
+  }
+
+  getFullText() {
     let fullText = '';
     const chapters = this.store.chapters();
     if (chapters && chapters.length > 0) {
@@ -174,63 +201,110 @@ export class PronounSetup {
     } else {
        fullText = this.store.rawMarkdown() || '';
     }
+    return fullText;
+  }
+
+  async startGeneration() {
+    const fullText = this.getFullText();
 
     if (!fullText) {
        this.toast.error(this.toast.Messages.NO_CONTENT_TO_ANALYZE);
        return;
     }
 
+    const maxWordsPerChunk = 20000;
+    const chunkTexts = smartHardSplit(fullText, maxWordsPerChunk);
+    
+    this.store.setPronounTask({
+      status: 'processing',
+      model: this.pronounModel(),
+      totalChunks: chunkTexts.length,
+      chunks: chunkTexts.map((text, i) => ({
+        index: i,
+        text,
+        status: 'pending'
+      }))
+    });
+
+    await this.processPronounTask();
+  }
+
+  async resumeGeneration() {
+    const task = this.store.pronounTask();
+    if (task) {
+      this.pronounModel.set(task.model);
+      await this.processPronounTask();
+    }
+  }
+
+  async processPronounTask() {
+    const task = this.store.pronounTask();
+    if (!task) return;
+
     try {
       this.isGeneratingPronouns.set(true);
       this.store.isGeneratingMetadata.set(true);
       
       this.store.updateConfig({
-        pronounGenRatio: this.pronounExtractRatio(),
-        pronounGenModel: this.pronounModel()
+        pronounGenModel: task.model
       });
 
-      const ratio = this.pronounExtractRatio();
-      const lengthToTake = Math.floor(fullText.length * ratio);
-      const textToAnalyze = fullText.substring(0, lengthToTake);
-
-      const maxWordsPerChunk = 20000;
-      const chunks = smartHardSplit(textToAnalyze, maxWordsPerChunk);
-      
-      const allPronounItems: any[] = [];
-      const isProModel = this.pronounModel().includes('pro');
+      const isProModel = task.model.includes('pro');
       const maxConcurrent = isProModel ? 2 : 4;
       
-      for (let i = 0; i < chunks.length; i += maxConcurrent) {
-        const batch = chunks.slice(i, i + maxConcurrent);
-        const promises = batch.map(chunk => 
-          this.gemini.generatePronounsRaw(chunk, this.pronounModel(), this.store.bookTitle(), this.store.author(), 0.1)
-        );
-        const results = await Promise.all(promises);
-        for (const res of results) {
-          if (Array.isArray(res)) {
-            allPronounItems.push(...res);
+      const chunksToProcess = task.chunks.filter(c => c.status !== 'completed');
+
+      this.generationStatus.set(`Đang tiếp tục phân tích... (${task.chunks.length - chunksToProcess.length}/${task.totalChunks})`);
+
+      for (let i = 0; i < chunksToProcess.length; i += maxConcurrent) {
+        const batch = chunksToProcess.slice(i, i + maxConcurrent);
+        const promises = batch.map(async chunk => {
+          try {
+            const result = await this.gemini.generatePronounsRaw(chunk.text, task.model, this.store.bookTitle(), this.store.author(), 0.1);
+            chunk.result = result;
+            chunk.status = 'completed';
+          } catch (err) {
+            chunk.status = 'error';
+            throw err; // Re-throw to stop batch execution
+          }
+        });
+        
+        await Promise.all(promises);
+        
+        // Save intermediate state
+        this.store.setPronounTask({ ...task });
+        
+        const completedCount = task.chunks.filter(c => c.status === 'completed').length;
+        this.generationStatus.set(`Đang nhận diện Đại từ (${completedCount}/${task.totalChunks})...`);
+      }
+
+      // If all completed, generate final
+      const allCompleted = task.chunks.every(c => c.status === 'completed');
+      if (allCompleted) {
+        const allPronounItems = task.chunks.flatMap(c => Array.isArray(c.result) ? c.result : []);
+        let rawResult = '';
+        if (allPronounItems.length > 0) {
+          rawResult = '| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|---|---|\n';
+          for (const pt of allPronounItems) {
+            rawResult += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
           }
         }
+
+        this.generationStatus.set('Đang chuẩn hóa bảng đại từ...');
+        const fullText = this.getFullText();
+        const result = await this.gemini.normalizePronouns(fullText, rawResult, task.model, 0.1, this.store.bookTitle(), this.store.author());
+
+        this.draftPronounTable.set(result);
+        this.isManuallyEdited.set(false);
+        this.store.addPronounVersion(result, task.model, 0.1);
+        this.store.savePronounsConf(true);
+        this.store.setPronounTask(undefined);
+        this.toast.success(this.toast.Messages.PRONOUNS_SUCCESS);
       }
-
-      let rawResult = '';
-      if (allPronounItems.length > 0) {
-        rawResult = '| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|---|---|\n';
-        for (const pt of allPronounItems) {
-          rawResult += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
-        }
-      }
-
-      this.generationStatus.set('Đang chuẩn hóa bảng đại từ...');
-      const result = await this.gemini.normalizePronouns(textToAnalyze, rawResult, this.pronounModel(), 0.1, this.store.bookTitle(), this.store.author());
-
-      this.draftPronounTable.set(result);
-      this.isManuallyEdited.set(false);
-      this.store.addPronounVersion(result, this.pronounModel(), 0.1);
-      this.store.savePronounsConf(true);
-      this.toast.success(this.toast.Messages.PRONOUNS_SUCCESS);
     } catch (e: unknown) {
       console.error(e);
+      // Mark as error
+      this.store.setPronounTask({ ...task, status: 'error' });
       this.toast.error(this.toast.Messages.PRONOUNS_ERROR(parseGeminiError(e)));
     } finally {
       this.isGeneratingPronouns.set(false);

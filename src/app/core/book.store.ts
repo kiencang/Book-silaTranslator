@@ -33,9 +33,7 @@ export interface Chapter {
 export interface TranslationConfig {
   model: 'gemini-flash-latest' | 'gemini-pro-latest';
   temperature: number;
-  pronounGenRatio?: number;
   pronounGenModel?: string;
-  glossaryGenRatio?: number;
   glossaryGenModel?: string;
   analysisModel?: string;
 }
@@ -83,6 +81,8 @@ export class BookStore {
   readonly fileName = signal<string | null>(null);
   readonly rawMarkdown = signal<string | null>(null);
   readonly pdfTask = signal<import('./db').PdfConversionTask | undefined>(undefined);
+  readonly pronounTask = signal<import('./db').PronounGenerationTask | undefined>(undefined);
+  readonly glossaryTask = signal<import('./db').GlossaryGenerationTask | undefined>(undefined);
   readonly isConverting = signal<boolean>(false);
   readonly isGeneratingMetadata = signal<boolean>(false);
   readonly isAnalyzingSplits = signal<boolean>(false);
@@ -181,6 +181,30 @@ export class BookStore {
         }
       });
     });
+
+    effect(() => {
+      const projectId = this.currentProjectId();
+      if (!projectId) return;
+
+      const pronounTask = this.pronounTask();
+      untracked(() => {
+        if (isPlatformBrowser(this.platformId)) {
+          this.db.saveProjectAsset(projectId, 'pronounTask', pronounTask);
+        }
+      });
+    });
+
+    effect(() => {
+      const projectId = this.currentProjectId();
+      if (!projectId) return;
+
+      const glossaryTask = this.glossaryTask();
+      untracked(() => {
+        if (isPlatformBrowser(this.platformId)) {
+          this.db.saveProjectAsset(projectId, 'glossaryTask', glossaryTask);
+        }
+      });
+    });
   }
 
   private async saveCurrentProjectState(meta: ProjectMeta) {
@@ -242,6 +266,8 @@ export class BookStore {
       this.fileName.set(proj.fileName);
       this.rawMarkdown.set(proj.rawMarkdown);
       this.pdfTask.set(proj.pdfTask);
+      this.pronounTask.set(proj.pronounTask);
+      this.glossaryTask.set(proj.glossaryTask);
       
       const adjustedChapters = proj.chapters.map((c: Chapter) => 
         c.status === 'translating' ? { ...c, status: 'error' as const } : c
@@ -269,6 +295,8 @@ export class BookStore {
     this.activeGlossaryVersionId.set(undefined);
     this.useGlossary.set(false);
     this.pdfTask.set(undefined);
+    this.pronounTask.set(undefined);
+    this.glossaryTask.set(undefined);
     this.splitSettings.set(undefined);
     this.phase.set(0);
     if (isPlatformBrowser(this.platformId)) {
@@ -278,6 +306,14 @@ export class BookStore {
 
   setPdfTask(task: import('./db').PdfConversionTask | undefined) {
     this.pdfTask.set(task);
+  }
+
+  setPronounTask(task: import('./db').PronounGenerationTask | undefined) {
+    this.pronounTask.set(task);
+  }
+
+  setGlossaryTask(task: import('./db').GlossaryGenerationTask | undefined) {
+    this.glossaryTask.set(task);
   }
 
   setMarkdown(md: string, name: string) {

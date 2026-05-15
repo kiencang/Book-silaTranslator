@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BookStore } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
@@ -26,36 +26,56 @@ import { smartHardSplit } from '../splitter/splitter.util';
           <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-200 space-y-4">
             <div class="flex flex-col sm:flex-row gap-4">
               <div class="flex-1">
-                <label for="glossaryExtractRatio" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2">Trích xuất nội dung từ bản text đã lọc</label>
-                <select id="glossaryExtractRatio" [value]="glossaryExtractRatio()" (change)="glossaryExtractRatio.set(+$any($event.target).value)" disabled class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:opacity-75">
-                  <option value="1">100% nội dung sách</option>
-                </select>
-              </div>
-              <div class="flex-1">
                 <label for="glossaryModel" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2">Mô hình nhận diện</label>
-                <select id="glossaryModel" [value]="glossaryModel()" (change)="glossaryModel.set($any($event.target).value)" [disabled]="isGenerating()" class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border disabled:cursor-not-allowed">
+                <select id="glossaryModel" [value]="glossaryModel()" (change)="glossaryModel.set($any($event.target).value)" [disabled]="isGenerating() || !!glossaryTask()" class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border disabled:cursor-not-allowed">
                   <option value="gemini-flash-latest">Flash (Nhanh & Tiết kiệm)</option>
                   <option value="gemini-pro-latest">Pro (Tư duy sâu & Chuẩn xác)</option>
                 </select>
               </div>
             </div>
             
-            <button 
-              (click)="generateGlossary()"
-              [disabled]="isGenerating()"
-              class="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
-            >
-              @if (isGenerating()) {
-                <mat-icon class="animate-spin mr-2 !w-5 !h-5 !text-[20px]">sync</mat-icon>
-                Đang phân tích sách và tạo bảng thuật ngữ (có thể mất nhiều phút)...
-              } @else if (draftTable().trim().length > 0) {
-                <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
-                Tạo lại bảng dữ liệu Thuật ngữ
+            <div class="space-y-3">
+              @if (glossaryTask() && !isGenerating()) {
+                <div class="text-sm text-amber-700 bg-amber-50 rounded-lg p-4 border border-amber-200">
+                  <p class="font-medium mb-1">Tiến trình bị gián đoạn</p>
+                  <p class="text-amber-600">Bạn có một tiến trình tạo bảng thuật ngữ đang dở dang (đã hoàn thành {{ completedChunksCount() }}/{{ glossaryTask()?.totalChunks }} phần). Bạn có thể tiếp tục hoặc hủy bỏ để bắt đầu lại.</p>
+                </div>
+                <div class="flex gap-3">
+                  <button 
+                    (click)="resumeGeneration()"
+                    [disabled]="isGenerating()"
+                    class="flex-1 flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">play_circle</mat-icon>
+                    Tiếp tục quá trình tạo ({{ completedChunksCount() }}/{{ glossaryTask()?.totalChunks }})
+                  </button>
+                  <button 
+                    (click)="cancelTask()"
+                    [disabled]="isGenerating()"
+                    class="px-4 py-2 border border-red-200 text-sm font-medium rounded-lg shadow-sm text-red-600 bg-white hover:bg-red-50 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Hủy tiến trình cũ
+                  </button>
+                </div>
               } @else {
-                <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">auto_awesome</mat-icon>
-                Bắt đầu tạo bảng Thuật ngữ tự động
+                <button 
+                  (click)="startGeneration()"
+                  [disabled]="isGenerating()"
+                  class="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  @if (isGenerating()) {
+                    <mat-icon class="animate-spin mr-2 !w-5 !h-5 !text-[20px]">sync</mat-icon>
+                    {{ generationStatus() || 'Đang phân tích sách và tạo bảng thuật ngữ...' }}
+                  } @else if (draftTable().trim().length > 0) {
+                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
+                    Tạo lại bảng dữ liệu Thuật ngữ
+                  } @else {
+                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">auto_awesome</mat-icon>
+                    Bắt đầu tạo bảng Thuật ngữ tự động
+                  }
+                </button>
               }
-            </button>
+            </div>
           </div>
 
           <div class="mt-8">
@@ -134,9 +154,13 @@ export class GlossarySetup {
   toast = inject(ToastService);
 
   isGenerating = signal<boolean>(false);
+  generationStatus = signal<string>('');
   draftTable = signal<string>('');
-  glossaryExtractRatio = signal<number>(1);
-  glossaryModel = signal<string>(this.store.config().glossaryGenModel ?? 'gemini-pro-latest');
+  
+  glossaryTask = this.store.glossaryTask;
+  completedChunksCount = computed(() => this.glossaryTask()?.chunks.filter(c => c.status === 'completed').length || 0);
+
+  glossaryModel = signal<string>(this.store.glossaryTask()?.model ?? this.store.config().glossaryGenModel ?? 'gemini-pro-latest');
   isManuallyEdited = signal<boolean>(false);
 
   constructor() {
@@ -165,7 +189,11 @@ export class GlossarySetup {
     this.isManuallyEdited.set(true);
   }
 
-  async generateGlossary() {
+  cancelTask() {
+    this.store.setGlossaryTask(undefined);
+  }
+
+  getFullText() {
     let fullText = '';
     const chapters = this.store.chapters();
     if (chapters && chapters.length > 0) {
@@ -173,73 +201,120 @@ export class GlossarySetup {
     } else {
        fullText = this.store.rawMarkdown() || '';
     }
+    return fullText;
+  }
+
+  async startGeneration() {
+    const fullText = this.getFullText();
 
     if (!fullText) {
        this.toast.error(this.toast.Messages.NO_CONTENT_TO_ANALYZE);
        return;
     }
 
+    const maxWordsPerChunk = 20000;
+    const chunkTexts = smartHardSplit(fullText, maxWordsPerChunk);
+    
+    this.store.setGlossaryTask({
+      status: 'processing',
+      model: this.glossaryModel(),
+      totalChunks: chunkTexts.length,
+      chunks: chunkTexts.map((text, i) => ({
+        index: i,
+        text,
+        status: 'pending'
+      }))
+    });
+
+    await this.processGlossaryTask();
+  }
+
+  async resumeGeneration() {
+    const task = this.store.glossaryTask();
+    if (task) {
+      this.glossaryModel.set(task.model);
+      await this.processGlossaryTask();
+    }
+  }
+
+  async processGlossaryTask() {
+    const task = this.store.glossaryTask();
+    if (!task) return;
+
     try {
       this.isGenerating.set(true);
       this.store.isGeneratingMetadata.set(true);
       
       this.store.updateConfig({
-        glossaryGenRatio: this.glossaryExtractRatio(),
-        glossaryGenModel: this.glossaryModel()
+        glossaryGenModel: task.model
       });
 
-      const ratio = this.glossaryExtractRatio();
-      const lengthToTake = Math.floor(fullText.length * ratio);
-      const textToAnalyze = fullText.substring(0, lengthToTake);
-
-      const maxWordsPerChunk = 20000;
-      const chunks = smartHardSplit(textToAnalyze, maxWordsPerChunk);
-      
-      let allGlossaryItems: any[] = [];
-      const isProModel = this.glossaryModel().includes('pro');
+      const isProModel = task.model.includes('pro');
       const maxConcurrent = isProModel ? 2 : 4;
       
-      for (let i = 0; i < chunks.length; i += maxConcurrent) {
-        const batch = chunks.slice(i, i + maxConcurrent);
-        const promises = batch.map(chunk => 
-          this.gemini.generateGlossaryRaw(chunk, this.glossaryModel(), this.store.bookTitle(), this.store.author(), 0.2)
-        );
-        const results = await Promise.all(promises);
-        for (const res of results) {
-          if (Array.isArray(res)) {
-            allGlossaryItems.push(...res);
+      const chunksToProcess = task.chunks.filter(c => c.status !== 'completed');
+      
+      this.generationStatus.set(`Đang tiếp tục phân tích... (${task.chunks.length - chunksToProcess.length}/${task.totalChunks})`);
+
+      for (let i = 0; i < chunksToProcess.length; i += maxConcurrent) {
+        const batch = chunksToProcess.slice(i, i + maxConcurrent);
+        const promises = batch.map(async chunk => {
+          try {
+            const result = await this.gemini.generateGlossaryRaw(chunk.text, task.model, this.store.bookTitle(), this.store.author(), 0.2);
+            chunk.result = result;
+            chunk.status = 'completed';
+          } catch (err) {
+            chunk.status = 'error';
+            throw err;
+          }
+        });
+        
+        await Promise.all(promises);
+        
+        // Save intermediate state
+        this.store.setGlossaryTask({ ...task });
+        
+        const completedCount = task.chunks.filter(c => c.status === 'completed').length;
+        this.generationStatus.set(`Đang nhận diện Thuật ngữ (${completedCount}/${task.totalChunks})...`);
+      }
+
+      // If all completed, generate final
+      const allCompleted = task.chunks.every(c => c.status === 'completed');
+      if (allCompleted) {
+        this.generationStatus.set('Đang tổng hợp bảng thuật ngữ...');
+        const allGlossaryItems = task.chunks.flatMap(c => Array.isArray(c.result) ? c.result : []);
+        
+        // Deduplicate by english + pos
+        const uniqueItems = new Map<string, any>();
+        for (const item of allGlossaryItems) {
+          if (!item.english) continue;
+          const key = `${String(item.english).toLowerCase().trim()}_${String(item.pos || '').toLowerCase().trim()}`;
+          if (!uniqueItems.has(key)) {
+            uniqueItems.set(key, item);
           }
         }
-      }
+        
+        const deduplicatedGlossary = Array.from(uniqueItems.values());
+        deduplicatedGlossary.sort((a, b) => String(a.english).localeCompare(String(b.english)));
 
-      // Deduplicate by english + pos
-      const uniqueItems = new Map<string, any>();
-      for (const item of allGlossaryItems) {
-        if (!item.english) continue;
-        const key = `${String(item.english).toLowerCase().trim()}_${String(item.pos || '').toLowerCase().trim()}`;
-        if (!uniqueItems.has(key)) {
-          uniqueItems.set(key, item);
+        let result = '';
+        if (deduplicatedGlossary.length > 0) {
+          result = '| Tiếng Anh | Từ loại | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|---|\n';
+          for (const pt of deduplicatedGlossary) {
+            result += `| ${pt.english || ''} | ${pt.pos || ''} | ${pt.vietnamese || ''} | ${pt.contextNotes || ''} |\n`;
+          }
         }
-      }
-      
-      const deduplicatedGlossary = Array.from(uniqueItems.values());
-      deduplicatedGlossary.sort((a, b) => String(a.english).localeCompare(String(b.english)));
 
-      let result = '';
-      if (deduplicatedGlossary.length > 0) {
-        result = '| Tiếng Anh | Từ loại | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|---|\n';
-        for (const pt of deduplicatedGlossary) {
-          result += `| ${pt.english || ''} | ${pt.pos || ''} | ${pt.vietnamese || ''} | ${pt.contextNotes || ''} |\n`;
-        }
+        this.draftTable.set(result);
+        this.isManuallyEdited.set(false);
+        this.store.addGlossaryVersion(result, task.model, 0.2);
+        this.store.saveGlossaryConf(true);
+        this.store.setGlossaryTask(undefined);
+        this.toast.success(this.toast.Messages.GLOSSARY_SUCCESS);
       }
-
-      this.draftTable.set(result);
-      this.isManuallyEdited.set(false);
-      this.store.addGlossaryVersion(result, this.glossaryModel(), 0.2);
-      this.store.saveGlossaryConf(true);
-      this.toast.success(this.toast.Messages.GLOSSARY_SUCCESS);
     } catch (e: unknown) {
       console.error(e);
+      this.store.setGlossaryTask({ ...task, status: 'error' });
       this.toast.error(this.toast.Messages.GLOSSARY_ERROR(parseGeminiError(e)));
     } finally {
       this.isGenerating.set(false);
