@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.38]- 2026-05-15
 ### Fixed
 - Cập nhật SI/Prompt phiên bản mới nhất. Điều chỉnh khả năng chuyển PDF sang markdown.
+- Giảm chunk từ PDF sang markdown từ 50 trang xuống còn 30 trang mỗi lượt.
 
 ## [v1.0.37]- 2026-05-15
 ### Fixed
