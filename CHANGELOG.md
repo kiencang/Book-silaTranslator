@@ -6,14 +6,13 @@ Tất cả những thay đổi đáng chú ý của dự án kiencang/Book-silaT
 và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Yêu cầu không kiểm duyệt khi dịch (bổ sung vào SI).
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
-- Lưu trữ tạm bảng Đại từ trong quá trình phân tích để đề phòng gián đoạn.
 
 ## [v1.0.41]- 2026-05-15
 ### Fixed
 - Cập nhật SI bản mới nhất, không kiểm duyệt các từ tục trong tác phẩm Văn học.
 - Loại bỏ phần tỷ lệ trích xuất văn bản trong phần Đại từ & Từ khó, vì hiện tại chúng ta luôn lấy đầy đủ 100% nội dung.
+- Lưu trữ tạm bảng Đại từ/Từ khó trong quá trình phân tích để đề phòng gián đoạn.
 
 ## [v1.0.40]- 2026-05-15
 ### Fixed
