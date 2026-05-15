@@ -13,6 +13,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.41]- 2026-05-15
 ### Fixed
 - Cập nhật SI bản mới nhất, không kiểm duyệt các từ tục trong tác phẩm Văn học.
+- Loại bỏ phần tỷ lệ trích xuất văn bản trong phần Đại từ & Từ khó, vì hiện tại chúng ta luôn lấy đầy đủ 100% nội dung.
 
 ## [v1.0.40]- 2026-05-15
 ### Fixed
