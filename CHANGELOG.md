@@ -12,6 +12,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Điều chỉnh giao diện ở phần chia khối dịch cho rõ ràng, dễ hiểu hơn.
 - Chỉnh khoảng cách mỗi khối dịch ở trong phase Dịch thuật.
+- Vô hiệu hóa một số button trong phase Đại từ & Từ khó khi quá trình trao đổi với AI đang diễn ra.
 
 ## [v1.0.39]- 2026-05-15
 ### Fixed
