@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.40]- 2026-05-15
 ### Fixed
 - Điều chỉnh giao diện ở phần chia khối dịch cho rõ ràng, dễ hiểu hơn.
+- Chỉnh khoảng cách mỗi khối dịch ở trong phase Dịch thuật.
 
 ## [v1.0.39]- 2026-05-15
 ### Fixed
