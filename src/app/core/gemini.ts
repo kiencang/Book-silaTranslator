@@ -58,6 +58,21 @@ export class GeminiClient {
     return null;
   }
 
+  async countTokens(base64Data: string, mimeType: string = 'application/pdf', model: string = 'gemini-flash-lite-latest'): Promise<number> {
+    try {
+      const response = await this.ai.models.countTokens({
+        model: model,
+        contents: [
+          { inlineData: { data: base64Data, mimeType } }
+        ]
+      });
+      return response.totalTokens || 0;
+    } catch (e) {
+      console.error('Failed to count tokens', e);
+      return 0;
+    }
+  }
+
   async convertPdfToMarkdown(base64Data: string, model: string = 'gemini-flash-lite-latest'): Promise<string> {
     const pdfSI = await this.loadPromptText('/prompts/pdf_to_md_system_instruction.md');
     const pdfP = await this.loadPromptText('/prompts/pdf_to_md_prompt.md');

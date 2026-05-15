@@ -25,7 +25,14 @@ import { PDFDocument } from 'pdf-lib';
               <mat-icon class="!text-3xl !w-8 !h-8 !flex !items-center !justify-center">picture_as_pdf</mat-icon>
             </div>
             <h3 class="text-xl font-semibold mb-2">Chuyển đổi tài liệu PDF</h3>
-            <p class="text-sm text-zinc-500 mb-6 w-[350px] mx-auto truncate" [title]="pFile.name">{{pFile.name}}</p>
+            <p class="text-sm text-zinc-500 w-[350px] mx-auto truncate" [title]="pFile.name">{{pFile.name}}</p>
+            @if (tokenCountText() !== null) {
+              <p class="text-xs text-indigo-500 mb-6 font-medium">{{ tokenCountText() }}</p>
+            } @else {
+              <p class="text-xs text-zinc-400 mb-6 mt-1 flex justify-center items-center gap-1">
+                <mat-icon class="!w-3 !h-3 !text-[12px] animate-spin">autorenew</mat-icon> Đang đếm token...
+              </p>
+            }
             
             <div class="text-left max-w-md mx-auto mb-8 relative">
               <label class="block text-sm font-medium text-zinc-700 mb-2">Chọn model xử lý</label>
@@ -172,9 +179,11 @@ export class Uploader {
 
   pendingPdfFile = signal<File | null>(null);
   pdfModel = signal<string>('gemini-flash-lite-latest');
+  tokenCountText = signal<string | null>(null);
 
   cancelPdfPending() {
      this.pendingPdfFile.set(null);
+     this.tokenCountText.set(null);
      if (this.fileInput()) {
        this.fileInput().nativeElement.value = '';
      }
@@ -311,6 +320,22 @@ export class Uploader {
        if (this.fileInput()) {
          this.fileInput().nativeElement.value = '';
        }
+       
+       this.tokenCountText.set(null);
+       this.fileToBase64(file).then(base64 => {
+         const b64Data = base64.split(',')[1];
+         return this.gemini.countTokens(b64Data, 'application/pdf', 'gemini-flash-lite-latest');
+       }).then(count => {
+         if (count > 0) {
+           this.tokenCountText.set((count / 1000).toFixed(1) + 'K Token');
+         } else {
+           this.tokenCountText.set('Không thể đếm Token');
+         }
+       }).catch(e => {
+         console.error('Lỗi khi đếm token:', e);
+         this.tokenCountText.set('Không thể đếm Token');
+       });
+
        return;
     }
 
@@ -360,7 +385,7 @@ export class Uploader {
       const pdfDoc = await PDFDocument.load(arrayBuffer);
       const pageCount = pdfDoc.getPageCount();
 
-      if (pageCount <= 50) {
+      if (pageCount <= 30) {
         const base64 = await this.fileToBase64(file);
         const b64Data = base64.split(',')[1];
         const markdown = await this.gemini.convertPdfToMarkdown(b64Data, this.pdfModel());
@@ -368,7 +393,7 @@ export class Uploader {
         this.toast.success(this.toast.Messages.FILE_PROCESS_SUCCESS);
       } else {
         // Large PDF -> chunk
-        const CHUNK_SIZE = 50;
+        const CHUNK_SIZE = 30;
         const chunks: import('../../core/db').PdfConversionChunk[] = [];
         
         for (let i = 0; i < pageCount; i += CHUNK_SIZE) {
