@@ -212,7 +212,7 @@ export class GlossarySetup {
        return;
     }
 
-    const maxWordsPerChunk = 20000;
+    const maxWordsPerChunk = 10000;
     const chunkTexts = smartHardSplit(fullText, maxWordsPerChunk);
     
     this.store.setGlossaryTask({
