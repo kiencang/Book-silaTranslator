@@ -10,6 +10,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 - Lưu trữ tạm bảng Đại từ trong quá trình phân tích để đề phòng gián đoạn.
 
+## [v1.0.41]- 2026-05-15
+### Fixed
+- Cập nhật SI bản mới nhất, không kiểm duyệt các từ tục trong tác phẩm Văn học.
+
 ## [v1.0.40]- 2026-05-15
 ### Fixed
 - Điều chỉnh giao diện ở phần chia khối dịch cho rõ ràng, dễ hiểu hơn.
