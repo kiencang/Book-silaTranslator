@@ -13,6 +13,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Cập nhật SI bản mới nhất.
 - Hiệu ứng Glassmorphism cho Header.
 - Thêm icon chiếc bút chì (edit) báo hiệu sửa tên dự án.
+- Hiệu ứng chuyển trang (Page Transitions) cho mềm mại hơn.
 
 ## [v1.0.42]- 2026-05-16
 ### Fixed
