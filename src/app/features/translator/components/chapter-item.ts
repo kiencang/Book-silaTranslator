@@ -73,6 +73,9 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   selector: 'app-chapter-item',
   standalone: true,
   imports: [MatIconModule, DatePipe, TranslatingSkeletonComponent],
+  host: {
+    class: 'block'
+  },
   template: `
     <div class="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
       <div class="px-6 py-4 border-b border-zinc-100 flex justify-between items-center bg-zinc-50 cursor-pointer" 

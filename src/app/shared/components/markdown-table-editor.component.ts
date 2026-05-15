@@ -47,7 +47,8 @@ import { MatIconModule } from '@angular/material/icon';
             (click)="setMode('table')"
             [class.bg-white]="mode() === 'table'"
             [class.shadow-sm]="mode() === 'table'"
-            class="px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 text-zinc-700"
+            [disabled]="disabled()"
+            class="px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <mat-icon class="!w-4 !h-4 !text-[16px]">grid_on</mat-icon>
             Dạng bảng
@@ -57,7 +58,8 @@ import { MatIconModule } from '@angular/material/icon';
             (click)="setMode('raw')"
             [class.bg-white]="mode() === 'raw'"
             [class.shadow-sm]="mode() === 'raw'"
-            class="px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 text-zinc-700"
+            [disabled]="disabled()"
+            class="px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <mat-icon class="!w-4 !h-4 !text-[16px]">code</mat-icon>
             Mã nguồn
@@ -82,7 +84,7 @@ import { MatIconModule } from '@angular/material/icon';
               <div class="p-8 text-center text-zinc-500 pb-8 flex flex-col items-center">
                 <mat-icon class="!w-8 !h-8 !text-[32px] mb-2 text-zinc-300">table_view</mat-icon>
                 <p>Không tìm thấy bảng trong nội dung.</p>
-                <button (click)="createEmptyTable()" class="mt-4 px-4 py-2 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-100 transition-colors">Tạo bảng trống</button>
+                <button (click)="createEmptyTable()" [disabled]="disabled()" class="mt-4 px-4 py-2 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50 disabled:pointer-events-none">Tạo bảng trống</button>
               </div>
             } @else {
               <div class="overflow-x-auto w-full">
@@ -100,7 +102,8 @@ import { MatIconModule } from '@angular/material/icon';
                           />
                           <button 
                             (click)="removeColumn(colIndex)"
-                            class="absolute top-1/2 -translate-y-1/2 right-2 w-6 h-6 flex items-center justify-center bg-white rounded shadow border border-zinc-200 opacity-0 group-hover:opacity-100 hover:text-red-600 transition-opacity"
+                            [disabled]="disabled()"
+                            class="absolute top-1/2 -translate-y-1/2 right-2 w-6 h-6 flex items-center justify-center bg-white rounded shadow border border-zinc-200 opacity-0 group-hover:opacity-100 hover:text-red-600 transition-opacity disabled:opacity-0 disabled:pointer-events-none"
                             title="Xóa cột"
                           >
                             <mat-icon class="!w-4 !h-4 !text-[16px]">close</mat-icon>
@@ -108,7 +111,7 @@ import { MatIconModule } from '@angular/material/icon';
                         </th>
                       }
                       <th class="p-2 w-10 text-center bg-zinc-50 border-r border-zinc-200">
-                        <button (click)="addColumn()" title="Thêm cột" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-zinc-200 text-zinc-500 transition-colors">
+                        <button (click)="addColumn()" [disabled]="disabled()" title="Thêm cột" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-zinc-200 text-zinc-500 transition-colors disabled:opacity-50 disabled:pointer-events-none">
                           <mat-icon class="!w-4 !h-4 !text-[16px]">add</mat-icon>
                         </button>
                       </th>
@@ -135,7 +138,7 @@ import { MatIconModule } from '@angular/material/icon';
                           </td>
                         }
                         <td class="p-2 text-center align-middle border-r border-zinc-100">
-                          <button (click)="removeRow(rowIndex + 1)" title="Xóa hàng" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-zinc-400 hover:text-red-600 opacity-0 group-hover/row:opacity-100 transition-all mx-auto">
+                          <button (click)="removeRow(rowIndex + 1)" [disabled]="disabled()" title="Xóa hàng" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 text-zinc-400 hover:text-red-600 opacity-0 group-hover/row:opacity-100 transition-all mx-auto disabled:opacity-0 disabled:pointer-events-none">
                             <mat-icon class="!w-4 !h-4 !text-[16px]">delete</mat-icon>
                           </button>
                         </td>
@@ -145,7 +148,7 @@ import { MatIconModule } from '@angular/material/icon';
                 </table>
               </div>
               <div class="px-4 py-3 border-t border-zinc-200 bg-zinc-50 flex items-center">
-                <button (click)="addRow()" class="flex items-center space-x-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-white border border-indigo-200 px-3 py-1.5 rounded-lg shadow-sm hover:bg-indigo-50 transition-colors">
+                <button (click)="addRow()" [disabled]="disabled()" class="flex items-center space-x-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-white border border-indigo-200 px-3 py-1.5 rounded-lg shadow-sm hover:bg-indigo-50 transition-colors disabled:opacity-50 disabled:pointer-events-none text-left">
                   <mat-icon class="!w-4 !h-4 !text-[16px]">add</mat-icon>
                   <span>Thêm hàng</span>
                 </button>

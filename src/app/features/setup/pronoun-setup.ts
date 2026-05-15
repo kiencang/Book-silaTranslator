@@ -197,7 +197,8 @@ export class PronounSetup {
       const chunks = smartHardSplit(textToAnalyze, maxWordsPerChunk);
       
       const allPronounItems: any[] = [];
-      const maxConcurrent = 4;
+      const isProModel = this.pronounModel().includes('pro');
+      const maxConcurrent = isProModel ? 2 : 4;
       
       for (let i = 0; i < chunks.length; i += maxConcurrent) {
         const batch = chunks.slice(i, i + maxConcurrent);

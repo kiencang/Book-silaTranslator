@@ -54,9 +54,7 @@ import { SplitPreviewComponent } from './components/split-preview.component';
         </div>
       }
 
-      <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8 transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
-        <h3 class="text-lg font-semibold text-zinc-900 mb-6">Điều chỉnh cách phân chia</h3>
-        
+      <div class="mb-8 transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
         <app-ai-analysis
           [isAnalyzing]="isAnalyzing()"
           [totalWords]="totalWords()"
@@ -64,7 +62,11 @@ import { SplitPreviewComponent } from './components/split-preview.component';
           [(analysisModel)]="analysisModel"
           [(samplePercentage)]="samplePercentage"
           (onAnalyze)="runBookAnalysis()" />
+      </div>
 
+      <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8 transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
+        <h3 class="text-lg font-semibold text-zinc-900 mb-6">Điều chỉnh cách phân chia</h3>
+        
         <!-- Các thông số Tối thiểu và Tối đa biên độ -->
         <fieldset class="transition-opacity duration-300" [disabled]="isAnalyzing() || store.hasAnyTranslation()" [class.opacity-50]="isAnalyzing() || store.hasAnyTranslation()" [class.pointer-events-none]="isAnalyzing() || store.hasAnyTranslation()">
           <app-split-limits

@@ -6,15 +6,16 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [MatIconModule],
   template: `
-    <div class="mb-6 p-5 rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-white shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="mb-6 p-5 rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-white shadow-sm flex flex-col gap-4">
       <div>
         <h4 class="text-sm font-bold text-indigo-900 mb-1 flex items-center space-x-2">
           <mat-icon class="!text-base !w-5 !h-5 text-indigo-600">auto_awesome</mat-icon>
-          <span>Quét mã nguồn sách để chia khối (Đề xuất)</span>
+          <span>Quét mã nguồn sách để chia khối (Tùy chọn)</span>
         </h4>
-        <p class="text-xs text-indigo-700 leading-relaxed mb-3">
-          AI sẽ quét mã nguồn sách để chọn phương án chia khối chuẩn nhất, giúp việc dịch thuật sau này được liền mạch và không bị gián đoạn.
-        </p>
+        <div class="text-xs text-indigo-700 leading-relaxed mb-3 space-y-1.5">
+          <p>AI sẽ quét mã nguồn sách để chọn phương án chia khối chuẩn nhất, giúp việc dịch thuật sau này được liền mạch và không bị gián đoạn.</p>
+          <p>Hữu ích nếu bạn không rõ cách phân chia thế nào cho hợp lý. Trường hợp đã nắm rõ, bạn nên thực hiện việc phân chia thủ công trong mục "Điều chỉnh cách phân chia" bằng các tùy chọn bên dưới, điều đó sẽ giúp tiết kiệm một khoản token miễn phí dùng để phân tích. Ngay cả khi bạn đã phân tích tự động, bạn vẫn có quyền điều chỉnh lại cách chia bằng thao tác thủ công.</p>
+        </div>
         <div class="flex items-center gap-4 text-xs font-medium text-indigo-800">
           <div class="flex items-center gap-1.5 bg-white/60 px-2.5 py-1 rounded-md border border-indigo-100">
             <mat-icon class="!text-[14px] !w-3.5 !h-3.5 text-indigo-500">article</mat-icon>
@@ -42,18 +43,20 @@ import { MatIconModule } from '@angular/material/icon';
           </div>
         </div>
       </div>
-      <button 
-        (click)="onAnalyze.emit()"
-        [disabled]="isAnalyzing()"
-        class="flex-shrink-0 w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-wait">
-        @if (isAnalyzing()) {
-          <mat-icon class="animate-spin !text-base !w-5 !h-5 hidden sm:block">autorenew</mat-icon>
-          <span>Đang phân tích...</span>
-        } @else {
-          <mat-icon class="!text-base !w-5 !h-5 hidden sm:block">memory</mat-icon>
-          <span>Bắt đầu phân tích bằng AI</span>
-        }
-      </button>
+      <div class="flex justify-end mt-2">
+        <button 
+          (click)="onAnalyze.emit()"
+          [disabled]="isAnalyzing()"
+          class="flex-shrink-0 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-wait">
+          @if (isAnalyzing()) {
+            <mat-icon class="animate-spin !text-base !w-5 !h-5 hidden sm:block">autorenew</mat-icon>
+            <span>Đang phân tích...</span>
+          } @else {
+            <mat-icon class="!text-base !w-5 !h-5 hidden sm:block">memory</mat-icon>
+            <span>Bắt đầu phân tích bằng AI</span>
+          }
+        </button>
+      </div>
     </div>
   `
 })
