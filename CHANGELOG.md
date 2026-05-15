@@ -14,6 +14,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Thêm ước tính dung lượng file PDF.
 - Thêm tính năng up lại file PDF.
 - Bổ sung thêm thông tin các giới hạn của file tải lên.
+- Sửa placeholder của phần Đại từ và phần Từ khó để nó phù hợp hơn.
 
 ## [v1.0.38]- 2026-05-15
 ### Fixed
