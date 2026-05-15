@@ -11,7 +11,8 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [v1.0.42]- 2026-05-16
 ### Fixed
-- Hạ chunk tối đa của phần thuật ngữ từ khó xuống 10 ngàn từ.
+- Hạ chunk tối đa của phần thuật ngữ từ khó xuống 10 ngàn từ để nó tìm được danh sách từ khó đầy đủ hơn.
+- Loại bỏ một chỉ thị SI dịch tổng rất khó thực thi trong thực tế.
 
 ## [v1.0.41]- 2026-05-15
 ### Fixed
