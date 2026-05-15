@@ -11,6 +11,8 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.43]- 2026-05-16
 ### Fixed
 - Cập nhật SI bản mới nhất.
+- Hiệu ứng Glassmorphism cho Header.
+- Thêm icon chiếc bút chì (edit) báo hiệu sửa tên dự án.
 
 ## [v1.0.42]- 2026-05-16
 ### Fixed
