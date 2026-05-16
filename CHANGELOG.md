@@ -12,10 +12,13 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Thống nhất biến giữ chỗ.
 - Tạo thông tin tóm tắt cục bộ tại từng block nếu muốn.
+- Tích hợp bản tóm tắt vào phần dịch của khối kế tiếp.
+- Điều chỉnh lại SI/Prompt cho nhiệm vụ tóm tắt.
+- Tạo prompt động.
 
 ## [v1.0.46]- 2026-05-16
 ### Fixed
-- Tóm tắt nội dung của chương trước, để đưa vào bản dịch của chương sau, nhằm gia tăng bối cảnh.
+- Tóm tắt nội dung của chương trước, dự định để đưa vào bản dịch của chương sau, nhằm gia tăng bối cảnh.
 - Đưa thông tin sử dụng phiên bản nào của bảng đại từ vào khối dịch (tương tự như cách với từ chuyên ngành).
 
 ## [v1.0.45]- 2026-05-16
