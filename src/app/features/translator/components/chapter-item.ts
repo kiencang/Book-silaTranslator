@@ -106,7 +106,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
               [disabled]="store.isTranslatingAny() || chapter().excludeFromTranslation"
               [class.opacity-50]="store.isTranslatingAny() || chapter().excludeFromTranslation"
               [class.cursor-not-allowed]="store.isTranslatingAny() || chapter().excludeFromTranslation"
-              class="px-3 py-1.5 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 hover:border-indigo-300 rounded-lg transition-colors flex items-center space-x-1.5 shadow-sm disabled:hover:bg-white disabled:hover:border-indigo-200"
+              class="px-3 py-1.5 bg-white text-indigo-500 hover:bg-indigo-50 border border-indigo-100 hover:border-indigo-200 rounded-lg transition-colors flex items-center space-x-1.5 shadow-sm disabled:hover:bg-white disabled:hover:border-indigo-100"
               [title]="chapter().excludeFromTranslation ? 'Không thể dịch khối này' : (chapter().status === 'done' || chapter().status === 'error' ? 'Dịch lại riêng phần này' : 'Dịch riêng phần này')"
             >
               <mat-icon class="!w-4 !h-4 !text-base flex items-center justify-center">looks_one</mat-icon>
@@ -137,7 +137,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                   }
                 </div>
                 @if (getActiveVersion(chapter()); as activeV) {
-                  <div class="text-[11px] text-zinc-500 flex flex-col items-center justify-center gap-y-2 bg-zinc-50 px-3 py-2 rounded-md border border-zinc-100 w-full max-w-3xl">
+                  <div class="text-[11px] text-zinc-500 flex flex-col items-center justify-center gap-y-2 bg-zinc-50 px-3 py-2 rounded-md border border-zinc-100 w-full">
                     <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
                       <span class="flex items-center gap-1.5">
                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-indigo-500">smart_toy</mat-icon> {{ activeV.model }}
@@ -166,11 +166,11 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                       <span class="bg-zinc-200 w-[1px] h-3 mx-0"></span>
                       @if (activeV.usePronouns) {
                         <button (click)="viewPronounSnapshot(activeV.pronounSnapshot, activeV.pronounVersionNumber)" class="flex items-center gap-1 text-emerald-600 hover:underline">
-                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">assignment_ind</mat-icon> Sử dụng Bảng đại từ (v{{activeV.pronounVersionNumber || 1}})
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">assignment_ind</mat-icon> Sử dụng bảng đại từ (v{{activeV.pronounVersionNumber || 1}})
                         </button>
                       } @else {
                         <span class="flex items-center gap-1 text-zinc-400">
-                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">person_off</mat-icon> Không sử dụng Bảng đại từ
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">person_off</mat-icon> Không sử dụng bảng đại từ
                         </span>
                       }
                       <span class="bg-zinc-200 w-[1px] h-3 mx-0"></span>
@@ -180,7 +180,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                         </button>
                       } @else {
                         <span class="flex items-center gap-1 text-zinc-400">
-                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">psychology_alt</mat-icon> Không sử dụng tóm tắt
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">psychology_alt</mat-icon> Không sử dụng tóm tắt ngữ cảnh
                         </span>
                       }
                       <span class="bg-zinc-200 w-[1px] h-3 mx-0"></span>
@@ -286,7 +286,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
             </div>
 
             <!-- Close button -->
-            <button (click)="closeFullscreen()" class="fixed top-6 right-6 w-10 h-10 flex items-center justify-center bg-white/80 dark:bg-zinc-800/80 rounded-full shadow-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors backdrop-blur-sm z-50 cursor-pointer" title="Đóng chế độ toàn màn hình">
+            <button (click)="closeFullscreen()" class="fixed top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors backdrop-blur-sm z-50 cursor-pointer" [class]="getCloseBtnClass(readerStore.prefs().theme)" title="Đóng chế độ toàn màn hình">
               <mat-icon>close</mat-icon>
             </button>
 
@@ -399,11 +399,14 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
         <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 cursor-pointer animate-in fade-in duration-200" tabindex="0" (click)="triggerCloseGlossaryModal()" (keydown.escape)="triggerCloseGlossaryModal()" [class.animate-fade-out]="isClosingGlossaryModal()">
           <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden cursor-default animate-in zoom-in duration-200" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosingGlossaryModal()">
             <div class="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50/80">
-              <div>
-                <h2 class="text-xl font-bold text-zinc-900">Thuật ngữ đã dùng cho khối này</h2>
-                <p class="text-[13px] text-zinc-500 mt-1">Mỗi khối dịch sẽ trích những thuật ngữ phù hợp từ danh sách tổng thể thuật ngữ của cả cuốn sách, điều này giúp tránh dư thừa các thuật ngữ không dùng đến.</p>
+              <div class="flex flex-col">
+                <h2 class="text-xl font-bold text-zinc-900 flex items-center gap-2">
+                  <mat-icon class="text-indigo-500">menu_book</mat-icon>
+                  Thuật ngữ đã dùng cho khối này
+                </h2>
+                <p class="text-[13px] text-zinc-500 mt-1 ml-8">Mỗi khối dịch sẽ trích những thuật ngữ phù hợp từ danh sách tổng thể thuật ngữ của cả cuốn sách, điều này giúp tránh dư thừa các thuật ngữ không dùng đến.</p>
                 @if (currentGlossaryRatio() !== undefined) {
-                  <p class="text-[13px] font-medium text-indigo-600 mt-1">Khối này dùng {{ currentGlossaryRatio() }}% số thuật ngữ của toàn cuốn sách.</p>
+                  <p class="text-[13px] font-medium text-indigo-600 mt-1 ml-8">Khối này dùng {{ currentGlossaryRatio() }}% số thuật ngữ của toàn cuốn sách.</p>
                 }
               </div>
               <button (click)="triggerCloseGlossaryModal()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center self-start flex-shrink-0 ml-4">
@@ -422,11 +425,14 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
         <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 cursor-pointer animate-in fade-in duration-200" tabindex="0" (click)="triggerCloseSummaryModal()" (keydown.escape)="triggerCloseSummaryModal()" [class.animate-fade-out]="isClosingSummaryModal()">
           <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden cursor-default animate-in zoom-in duration-200" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosingSummaryModal()">
             <div class="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50/80">
-              <h2 class="text-xl font-bold text-zinc-900 flex items-center gap-2">
-                <mat-icon class="text-amber-500">auto_awesome</mat-icon>
-                Bản tóm tắt khối dịch
-              </h2>
-              <button (click)="triggerCloseSummaryModal()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center flex-shrink-0 ml-4">
+              <div class="flex flex-col">
+                <h2 class="text-xl font-bold text-zinc-900 flex items-center gap-2">
+                  <mat-icon class="text-amber-500">auto_awesome</mat-icon>
+                  Bản tóm tắt khối dịch
+                </h2>
+                <p class="text-[13px] text-zinc-500 mt-1 ml-8">Bản tóm tắt ngắn gọn của bản dịch được dùng làm bối cảnh để đưa vào khối dịch tiếp theo, giúp cải thiện chất lượng dịch.</p>
+              </div>
+              <button (click)="triggerCloseSummaryModal()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center flex-shrink-0 ml-4 self-start">
                 <span class="material-icons !text-[20px] !w-5 !h-5 !flex !items-center !justify-center leading-none">close</span>
               </button>
             </div>
@@ -461,22 +467,23 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
       @if (showPronounModal() || isClosingPronounModal()) {
         <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 cursor-pointer animate-in fade-in duration-200" tabindex="0" (click)="triggerClosePronounModal()" (keydown.escape)="triggerClosePronounModal()" [class.animate-fade-out]="isClosingPronounModal()">
-          <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden cursor-default animate-in zoom-in duration-200" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosingPronounModal()">
+          <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[80vh] flex flex-col overflow-hidden cursor-default animate-in zoom-in duration-200" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosingPronounModal()">
             <div class="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50/80">
               <div class="flex flex-col">
                  <h2 class="text-xl font-bold text-zinc-900 flex items-center gap-2">
                    <mat-icon class="text-emerald-500">assignment_ind</mat-icon>
                    Bảng đại từ nhân xưng đã dùng
                  </h2>
-                 <span class="text-xs text-zinc-500 mt-1 font-medium ml-8">Phiên bản: v{{currentPronounVersion()}}</span>
+                 <span class="text-xs text-emerald-600 mt-1 font-medium ml-8">Phiên bản: v{{currentPronounVersion()}}</span>
+                 <p class="text-[13px] text-zinc-500 mt-1 ml-8">Toàn bộ bảng đại từ này được đưa vào khi dịch khối này. Điều đó giúp công cụ dịch có đầy đủ bối cảnh hơn.</p>
               </div>
-              <button (click)="triggerClosePronounModal()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center flex-shrink-0 ml-4">
+              <button (click)="triggerClosePronounModal()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center self-start flex-shrink-0 ml-4">
                 <span class="material-icons !text-[20px] !w-5 !h-5 !flex !items-center !justify-center leading-none">close</span>
               </button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 bg-white">
                @if (parsedPronounSnapshot()) {
-                 <div class="prose prose-sm max-w-none text-zinc-700" [innerHTML]="parsedPronounSnapshot()"></div>
+                 <div class="prose prose-sm max-w-none text-zinc-700 w-full [&>table]:w-full [&>table]:min-w-full [&_th]:bg-zinc-50 [&_th]:font-semibold [&_th]:text-left [&_th]:p-3 [&_th]:border-y [&_th]:border-zinc-200 [&_td]:p-3 [&_td]:border-b [&_td]:border-zinc-100" [innerHTML]="parsedPronounSnapshot()"></div>
                } @else {
                  <div class="text-zinc-500 italic text-sm text-center py-8 bg-zinc-50 rounded-lg">Không có dữ liệu chi tiết cho bảng đại từ này.</div>
                }
@@ -831,6 +838,15 @@ export class ChapterItemComponent {
       case 'white': return '#FFFFFF';
       case 'sepia':
       default: return '#FFFFF0';
+    }
+  }
+
+  getCloseBtnClass(theme: string) {
+    switch (theme) {
+      case 'dark': return 'bg-zinc-800/90 text-zinc-400 hover:text-zinc-200 border border-zinc-700 hover:bg-zinc-700/90';
+      case 'white': return 'bg-zinc-100/90 text-zinc-500 hover:text-zinc-900 border border-zinc-200 hover:bg-zinc-200/90';
+      case 'sepia':
+      default: return 'bg-[#EAE4D3]/90 text-[#8C7A6B] hover:text-[#4A3C31] border border-[#DED6C1] hover:bg-[#DED6C1]/90';
     }
   }
 
