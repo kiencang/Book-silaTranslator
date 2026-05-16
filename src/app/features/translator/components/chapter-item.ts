@@ -251,7 +251,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
             </div>
 
             <!-- Close button -->
-            <button (click)="closeFullscreen()" class="fixed top-6 left-6 w-10 h-10 flex items-center justify-center bg-white/80 dark:bg-zinc-800/80 rounded-full shadow-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors backdrop-blur-sm z-50 cursor-pointer" title="Đóng chế độ toàn màn hình">
+            <button (click)="closeFullscreen()" class="fixed top-6 right-6 w-10 h-10 flex items-center justify-center bg-white/80 dark:bg-zinc-800/80 rounded-full shadow-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors backdrop-blur-sm z-50 cursor-pointer" title="Đóng chế độ toàn màn hình">
               <mat-icon>close</mat-icon>
             </button>
 
@@ -292,27 +292,32 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
              
           <!-- Header -->
           <div class="h-16 flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0" [class]="getToolbarClass(readerStore.prefs().theme)">
-            <div class="flex items-center gap-4">
-              <button (click)="closeBilingualFullscreen()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors" title="Đóng chế độ song ngữ">
-                <mat-icon>close</mat-icon>
-              </button>
+            <div class="flex items-center gap-6">
+              <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 bg-black/5 dark:bg-white/5 rounded-full p-1">
+                  <button (click)="changeFontSize(-2)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 dark:hover:bg-black/20 transition-colors font-medium text-[12px] opacity-80 hover:opacity-100">A-</button>
+                  <button (click)="changeFontSize(2)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 dark:hover:bg-black/20 transition-colors font-medium text-[16px] opacity-80 hover:opacity-100">A+</button>
+                </div>
+                <div class="w-[1px] h-6 bg-current opacity-20"></div>
+                <div class="flex gap-2">
+                   <button (click)="changeTheme('white')" class="w-6 h-6 rounded-full border shadow-inner transition-transform hover:scale-110" [class.ring-2]="readerStore.prefs().theme === 'white'" style="background-color: #FFFFFF; border-color: #E5E7EB;" title="Nền trắng"></button>
+                   <button (click)="changeTheme('sepia')" class="w-6 h-6 rounded-full border shadow-inner transition-transform hover:scale-110" [class.ring-2]="readerStore.prefs().theme === 'sepia'" style="background-color: #FFFFF0; border-color: #E5E7EB;" title="Nền ngà"></button>
+                   <button (click)="changeTheme('dark')" class="w-6 h-6 rounded-full border shadow-inner transition-transform hover:scale-110" [class.ring-2]="readerStore.prefs().theme === 'dark'" style="background-color: #121212; border-color: #374151;" title="Nền tối"></button>
+                </div>
+              </div>
+              
+              <div class="w-[1px] h-6 bg-current opacity-20"></div>
+              
               <div>
                 <span class="font-semibold text-[15px] opacity-90">{{ chapter().title || 'Phần ' + (index() + 1) }}</span>
                 <span class="text-[11px] opacity-70 ml-2 font-medium tracking-wider uppercase border border-current rounded px-1.5 py-0.5">Song ngữ</span>
               </div>
             </div>
             
-            <div class="flex items-center gap-3">
-              <div class="flex items-center gap-1 bg-black/5 dark:bg-white/5 rounded-full p-1">
-                <button (click)="changeFontSize(-2)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 dark:hover:bg-black/20 transition-colors font-medium text-[12px] opacity-80 hover:opacity-100">A-</button>
-                <button (click)="changeFontSize(2)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 dark:hover:bg-black/20 transition-colors font-medium text-[16px] opacity-80 hover:opacity-100">A+</button>
-              </div>
-              <div class="w-[1px] h-6 bg-current opacity-20"></div>
-              <div class="flex gap-2">
-                 <button (click)="changeTheme('white')" class="w-6 h-6 rounded-full border shadow-inner transition-transform hover:scale-110" [class.ring-2]="readerStore.prefs().theme === 'white'" style="background-color: #FFFFFF; border-color: #E5E7EB;" title="Nền trắng"></button>
-                 <button (click)="changeTheme('sepia')" class="w-6 h-6 rounded-full border shadow-inner transition-transform hover:scale-110" [class.ring-2]="readerStore.prefs().theme === 'sepia'" style="background-color: #FFFFF0; border-color: #E5E7EB;" title="Nền ngà"></button>
-                 <button (click)="changeTheme('dark')" class="w-6 h-6 rounded-full border shadow-inner transition-transform hover:scale-110" [class.ring-2]="readerStore.prefs().theme === 'dark'" style="background-color: #121212; border-color: #374151;" title="Nền tối"></button>
-              </div>
+            <div class="flex items-center gap-4">
+              <button (click)="closeBilingualFullscreen()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors" title="Đóng chế độ song ngữ">
+                <mat-icon>close</mat-icon>
+              </button>
             </div>
           </div>
 
@@ -355,9 +360,9 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
         </div>
       }
       
-      @if (showGlossaryModal()) {
-        <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 cursor-pointer" tabindex="0" (click)="closeGlossaryModal()" (keydown.escape)="closeGlossaryModal()">
-          <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden cursor-default" (click)="$event.stopPropagation()">
+      @if (showGlossaryModal() || isClosingGlossaryModal()) {
+        <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 cursor-pointer animate-in fade-in duration-200" tabindex="0" (click)="triggerCloseGlossaryModal()" (keydown.escape)="triggerCloseGlossaryModal()" [class.animate-fade-out]="isClosingGlossaryModal()">
+          <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden cursor-default animate-in zoom-in duration-200" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosingGlossaryModal()">
             <div class="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50/80">
               <div>
                 <h2 class="text-xl font-bold text-zinc-900">Thuật ngữ đã dùng cho khối này</h2>
@@ -366,7 +371,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                   <p class="text-[13px] font-medium text-indigo-600 mt-1">Khối này dùng {{ currentGlossaryRatio() }}% số thuật ngữ của toàn cuốn sách.</p>
                 }
               </div>
-              <button (click)="closeGlossaryModal()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center self-start flex-shrink-0 ml-4">
+              <button (click)="triggerCloseGlossaryModal()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center self-start flex-shrink-0 ml-4">
                 <span class="material-icons !text-[20px] !w-5 !h-5 !flex !items-center !justify-center leading-none">close</span>
               </button>
             </div>
@@ -394,6 +399,7 @@ export class ChapterItemComponent {
   isBilingualAligned = signal(false);
   
   showGlossaryModal = signal(false);
+  isClosingGlossaryModal = signal(false);
   parsedCustomGlossary = signal<SafeHtml | string>('');
   currentGlossaryRatio = signal<number | undefined>(undefined);
 
@@ -404,6 +410,14 @@ export class ChapterItemComponent {
     this.showGlossaryModal.set(true);
   }
   
+  triggerCloseGlossaryModal() {
+    this.isClosingGlossaryModal.set(true);
+    setTimeout(() => {
+      this.closeGlossaryModal();
+      this.isClosingGlossaryModal.set(false);
+    }, 200);
+  }
+
   closeGlossaryModal() {
     this.showGlossaryModal.set(false);
   }

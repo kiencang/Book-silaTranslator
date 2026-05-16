@@ -98,21 +98,21 @@ import { SplitPreviewComponent } from './components/split-preview.component';
         (onPreviewBlock)="previewBlock.set($event)"
         (onApplySplit)="applySplit()" />
 
-      @if (previewBlock()) {
-        <div role="button" tabindex="0" (keydown.enter)="previewBlock.set(null)" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm p-4 sm:p-6" (click)="previewBlock.set(null)">
-          <div role="presentation" class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all cursor-default" (click)="$event.stopPropagation()">
+      @if (previewBlock() || isClosingPreview()) {
+        <div role="button" tabindex="0" (keydown.enter)="closePreview()" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200" [class.animate-fade-out]="isClosingPreview()" (click)="closePreview()">
+          <div role="presentation" class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all cursor-default animate-in zoom-in duration-200" [class.animate-zoom-out]="isClosingPreview()" (click)="$event.stopPropagation()">
             <div class="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50/80">
               <div>
-                <h3 class="text-lg font-semibold text-zinc-900">{{ previewBlock()?.title }}</h3>
-                <p class="text-sm text-zinc-500">{{ previewBlock()?.wordCount }} từ</p>
+                <h3 class="text-lg font-semibold text-zinc-900">{{ currentPreviewData()?.title }}</h3>
+                <p class="text-sm text-zinc-500">{{ currentPreviewData()?.wordCount }} từ</p>
               </div>
-              <button class="text-zinc-400 hover:text-zinc-600 transition-colors p-2 rounded-full hover:bg-zinc-200/50 flex items-center justify-center" (click)="previewBlock.set(null)">
+              <button class="text-zinc-400 hover:text-zinc-600 transition-colors p-2 rounded-full hover:bg-zinc-200/50 flex items-center justify-center" (click)="closePreview()">
                 <mat-icon>close</mat-icon>
               </button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 bg-white">
               <div class="whitespace-pre-wrap font-mono text-sm text-zinc-700 leading-relaxed">
-                {{ previewBlock()?.originalText }}
+                {{ currentPreviewData()?.originalText }}
               </div>
             </div>
           </div>
@@ -144,6 +144,23 @@ export class Splitter {
   
   selectedMethod = signal<string | null>(null);
   previewBlock = signal<PreviewChapter | null>(null);
+  isClosingPreview = signal(false);
+  
+  // Keep track of the preview data so it doesn't disappear during animation
+  currentPreviewData = computed(() => {
+    return this.previewBlock() || this._lastPreviewBlock;
+  });
+  private _lastPreviewBlock: PreviewChapter | null = null;
+  
+  closePreview() {
+    this._lastPreviewBlock = this.previewBlock();
+    this.isClosingPreview.set(true);
+    setTimeout(() => {
+      this.previewBlock.set(null);
+      this._lastPreviewBlock = null;
+      this.isClosingPreview.set(false);
+    }, 200);
+  }
 
   totalWords = computed(() => {
     const text = this.store.rawMarkdown() || '';

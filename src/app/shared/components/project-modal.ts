@@ -9,8 +9,8 @@ import { DatePipe } from '@angular/common';
   standalone: true,
   imports: [DatePipe],
   template: `
-    <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 cursor-pointer" tabindex="0" (click)="closeModal.emit()" (keydown.escape)="closeModal.emit()">
-      <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden cursor-default" (click)="$event.stopPropagation()">
+    <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 cursor-pointer animate-fade-in" tabindex="0" (click)="triggerClose()" (keydown.escape)="triggerClose()" [class.animate-fade-out]="isClosing()">
+      <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden cursor-default animate-zoom-in" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosing()">
         <div class="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50/80">
           <h2 class="text-xl font-bold text-zinc-900">Quản lý dự án</h2>
           <div class="flex items-center gap-2">
@@ -18,7 +18,7 @@ import { DatePipe } from '@angular/common';
               <span class="material-icons text-[18px]">file_upload</span> Nhập dự án
             </button>
             <input #fileInput type="file" accept=".json" class="hidden" (change)="importProject($event)" />
-            <button (click)="closeModal.emit()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center">
+            <button (click)="triggerClose()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center">
               <span class="material-icons !text-[20px] !w-5 !h-5 !flex !items-center !justify-center leading-none">close</span>
             </button>
           </div>
@@ -140,8 +140,16 @@ export class ProjectModal implements OnInit {
   projects = signal<Project[]>([]);
   isLoading = signal(true);
   confirmingDeleteId = signal<string | null>(null);
+  isClosing = signal(false);
   
   @Output() closeModal = new EventEmitter<void>();
+
+  triggerClose() {
+    this.isClosing.set(true);
+    setTimeout(() => {
+      this.closeModal.emit();
+    }, 200); // 200ms matches the animation duration
+  }
 
   ngOnInit() {
     this.loadProjects();
@@ -158,10 +166,10 @@ export class ProjectModal implements OnInit {
 
   async loadProject(id: string) {
     if (this.store.currentProjectId() !== id) {
-      this.closeModal.emit(); // Close UI immediately to feel snappy
+      this.triggerClose(); // Close UI with animation
       await this.store.loadProject(id);
     } else {
-      this.closeModal.emit();
+      this.triggerClose();
     }
   }
 
@@ -264,7 +272,7 @@ export class ProjectModal implements OnInit {
   
   closeAndGoHome() {
     this.store.closeProject();
-    this.closeModal.emit();
+    this.triggerClose();
   }
 
   getProgress(p: Project) {

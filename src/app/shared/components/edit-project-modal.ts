@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Output, EventEmitter, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { BookStore } from '../../core/book.store';
@@ -8,14 +8,14 @@ import { BookStore } from '../../core/book.store';
   standalone: true,
   imports: [FormsModule, MatIconModule],
   template: `
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 selection:bg-indigo-100 selection:text-indigo-900">
-      <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 selection:bg-indigo-100 selection:text-indigo-900 animate-fade-in" tabindex="0" (click)="triggerClose()" (keydown.escape)="triggerClose()" [class.animate-fade-out]="isClosing()">
+      <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] animate-zoom-in cursor-default" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosing()">
         <div class="p-6 border-b border-zinc-100 flex justify-between items-start">
           <div>
             <h2 class="text-xl font-bold text-zinc-900 tracking-tight">Sửa tên dự án của bạn</h2>
             <p class="text-sm text-zinc-500 mt-1">Cập nhật thông tin tác phẩm hoặc tác giả.</p>
           </div>
-          <button (click)="closeModal.emit()" 
+          <button (click)="triggerClose()" 
                   class="text-zinc-400 hover:text-zinc-600 transition-colors p-2 -mr-2 -mt-2 rounded-full hover:bg-zinc-100 focus:outline-none flex items-center justify-center">
             <mat-icon class="text-[20px]">close</mat-icon>
           </button>
@@ -37,7 +37,7 @@ import { BookStore } from '../../core/book.store';
         </div>
         
         <div class="p-4 bg-zinc-50 border-t border-zinc-100 flex justify-end space-x-3">
-          <button (click)="closeModal.emit()" 
+          <button (click)="triggerClose()" 
                   class="px-5 py-2.5 bg-white border border-zinc-300 text-zinc-700 font-medium hover:bg-zinc-50 rounded-xl transition-colors shadow-sm focus:ring-2 focus:ring-zinc-200 focus:outline-none">
             Hủy
           </button>
@@ -59,6 +59,14 @@ export class EditProjectModal {
   
   bookTitle = this.store.bookTitle();
   author = this.store.author();
+  isClosing = signal(false);
+
+  triggerClose() {
+    this.isClosing.set(true);
+    setTimeout(() => {
+      this.closeModal.emit();
+    }, 200);
+  }
 
   canSave(): boolean {
     return this.bookTitle?.trim().length > 0 && this.author?.trim().length > 0;
@@ -68,6 +76,6 @@ export class EditProjectModal {
     if (!this.canSave()) return;
     
     this.store.updateProjectInfo(this.bookTitle.trim(), this.author?.trim() || '');
-    this.closeModal.emit();
+    this.triggerClose();
   }
 }

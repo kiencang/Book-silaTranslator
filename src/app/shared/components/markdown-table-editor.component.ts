@@ -10,8 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
   template: `
     <div class="flex flex-col space-y-4">
       @if (confirmDelete()) {
-        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-900/20 backdrop-blur-sm">
-          <div class="bg-white rounded-xl shadow-xl border border-zinc-200 max-w-sm w-full p-6 text-center animate-in fade-in zoom-in duration-200">
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-900/20 backdrop-blur-sm" [class.animate-fade-out]="isClosingModal()">
+          <div class="bg-white rounded-xl shadow-xl border border-zinc-200 max-w-sm w-full p-6 text-center animate-in fade-in zoom-in duration-200" [class.animate-zoom-out]="isClosingModal()">
             <div class="w-12 h-12 rounded-full bg-red-50 border border-red-100 flex items-center justify-center mx-auto mb-4">
               <mat-icon class="text-red-500">warning_amber</mat-icon>
             </div>
@@ -21,7 +21,7 @@ import { MatIconModule } from '@angular/material/icon';
             </p>
             <div class="flex items-center justify-center gap-3">
               <button 
-                (click)="confirmDelete.set(null)"
+                (click)="cancelDelete()"
                 class="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
               >
                 Hủy
@@ -168,6 +168,7 @@ export class MarkdownTableEditorComponent {
   mode = signal<'table' | 'raw'>('table');
   tableData = signal<string[][]>([]);
   confirmDelete = signal<{type: 'row' | 'col', index: number} | null>(null);
+  isClosingModal = signal<boolean>(false);
 
   // Flag to prevent recursive updates
   private isUpdatingInternally = false;
@@ -179,6 +180,14 @@ export class MarkdownTableEditorComponent {
         this.parseMarkdownToTable(currentVal);
       }
     });
+  }
+
+  cancelDelete() {
+    this.isClosingModal.set(true);
+    setTimeout(() => {
+      this.confirmDelete.set(null);
+      this.isClosingModal.set(false);
+    }, 200);
   }
 
   setMode(newMode: 'table' | 'raw') {
@@ -288,7 +297,11 @@ export class MarkdownTableEditorComponent {
       this.syncTableToMarkdown();
     }
     
-    this.confirmDelete.set(null);
+    this.isClosingModal.set(true);
+    setTimeout(() => {
+      this.confirmDelete.set(null);
+      this.isClosingModal.set(false);
+    }, 200);
   }
 
   createEmptyTable() {

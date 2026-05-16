@@ -28,8 +28,8 @@ import { CommonModule } from '@angular/common';
         
         <span class="flex-1 leading-relaxed">{{ toast.message }}</span>
         
-        <button (click)="toastService.close()" class="ml-4 opacity-50 hover:opacity-100 transition-opacity flex items-center justify-center w-6 h-6 rounded-full hover:bg-black/5">
-          <mat-icon class="!w-4 !h-4 !text-[18px] flex items-center justify-center">close</mat-icon>
+        <button (click)="toastService.close()" class="ml-4 opacity-50 hover:opacity-100 transition-opacity flex items-center justify-center w-7 h-7 rounded-full hover:bg-black/5 flex-shrink-0">
+          <mat-icon class="!text-[20px] !w-5 !h-5 flex items-center justify-center leading-none">close</mat-icon>
         </button>
       </div>
     }
