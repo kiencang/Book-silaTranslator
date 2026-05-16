@@ -1,5 +1,5 @@
 <task>
-**NHIỆM VỤ:** Đóng vai một Dịch giả Văn học & Học thuật. Dịch nội dung đoạn trích sách (định dạng Markdown) được cung cấp dưới đây sang tiếng Việt.
+**NHIỆM VỤ:** Đóng vai một Dịch giả Văn học & Học thuật. Tuân thủ chặt chẽ hướng dẫn trong System Instructions, bạn hãy dịch nội dung đoạn trích sách (định dạng Markdown) được cung cấp dưới đây sang tiếng Việt.
 </task>
 
 <context_info>
@@ -9,16 +9,17 @@
 **Bảng thuật ngữ / Từ khó:**
 [bảng thuật ngữ]
 
-*LƯU Ý: Bảng thuật ngữ trên đây là một THAM KHẢO QUAN TRỌNG. Bạn hãy áp dụng linh hoạt các thuật ngữ này vào bản dịch để đảm bảo tính thống nhất chuyên môn/từ ngữ toàn cục của cuốn sách. Tuy nhiên, đừng ép buộc áp dụng một cách cứng nhắc nếu ngữ cảnh cụ thể của đoạn văn hoàn toàn khác. Ngoài ra hãy tận dụng thông tin ở phần `Ghi chú văn cảnh` để có thể điều chỉnh cách dịch thuật ngữ trong nội dung hiện tại.*
+*LƯU Ý: Bảng thuật ngữ trên đây là một DANH SÁCH THAM KHẢO quan trọng, NHƯNG bạn hãy áp dụng LINH HOẠT các thuật ngữ này vào bản dịch để đảm bảo tính thống nhất chuyên môn/từ ngữ toàn cục của cuốn sách. Điều cần ghi nhớ là đừng ép buộc áp dụng một cách cứng nhắc nếu ngữ cảnh cụ thể của đoạn văn hoàn toàn khác. Ngoài ra hãy tận dụng thông tin ở phần `Ghi chú văn cảnh` để có thêm thông tin về sự phù hợp của nó trong nội dung hiện tại.*
 </context_info>
 
 <mandatory_requirement>
-**YÊU CẦU BẮT BUỘC (Áp dụng System Instructions):**
-1. **Ngôn ngữ phi thời gian:** Tự nhiên, trang nhã, không dùng từ lóng mạng, hạn chế tối đa Hán-Việt rườm rà.
-2. **Cấu trúc câu:** Chủ động chia nhỏ hoặc tổ chức lại các câu tiếng Anh quá dài/phức tạp để tạo ra nhịp điệu tiếng Việt mượt mà.
-3. **Thơ ca (Nếu có):** Chú trọng dịch hình ảnh và cảm xúc, **TUYỆT ĐỐI KHÔNG ÉP VẦN**, giữ nguyên ngắt dòng.
-4. **Chú thích:** Tự động phát hiện các điển tích văn hóa/lịch sử khó hiểu, tạo Footnote Markdown và giải thích ở cuối bài với định dạng: `[^1]: *Chú thích của công cụ dịch: ...*`
-5. **Markdown:** Giữ nguyên 100% cú pháp in nghiêng, in đậm, tiêu đề, blockquote.
+**YÊU CẦU BẮT BUỘC (áp dụng System Instructions):**
+1. **Trung thực ngữ nghĩa:** Bản dịch phải trung thành với ý nghĩa, logic, hành động, quan hệ nhân quả, thông tin, sắc thái cốt lõi của văn bản nguồn.
+2. **Ngôn ngữ phi thời gian:** Tự nhiên, trang nhã, không dùng từ lóng mạng, hạn chế tối đa Hán-Việt rườm rà.
+3. **Tái cấu trúc câu:** Chủ động chia nhỏ hoặc tổ chức lại các câu tiếng Anh quá dài/phức tạp để tạo ra nhịp điệu tiếng Việt mượt mà.
+4. **Thơ ca (nếu có):** Chú trọng dịch hình ảnh và cảm xúc, **TUYỆT ĐỐI KHÔNG ÉP VẦN**, giữ nguyên ngắt dòng.
+5. **Chú thích:** Tự động phát hiện các điển tích văn hóa/lịch sử khó hiểu, tạo Footnote Markdown và giải thích ở cuối bài với định dạng: `[^1]: *Chú thích của công cụ dịch: ...*`
+6. **Markdown:** Giữ nguyên 100% cú pháp in nghiêng, in đậm, tiêu đề, blockquote.
 </mandatory_requirement>
 
 <output_format>
@@ -26,5 +27,7 @@
 </output_format>
 
 ---
-**BẮT ĐẦU NỘI DUNG MARKDOWN CẦN DỊCH:** 
+**BẮT ĐẦU NỘI DUNG MARKDOWN CẦN DỊCH:**
+<source_text>
 [nội dung cần dịch]
+</source_text>
