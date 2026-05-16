@@ -58,7 +58,7 @@ export class GeminiClient {
     return null;
   }
 
-  async countTokens(base64Data: string, mimeType: string = 'application/pdf', model: string = 'gemini-flash-lite-latest'): Promise<number> {
+  async countTokens(base64Data: string, mimeType = 'application/pdf', model = 'gemini-flash-lite-latest'): Promise<number> {
     try {
       const response = await this.ai.models.countTokens({
         model: model,
@@ -73,7 +73,7 @@ export class GeminiClient {
     }
   }
 
-  async convertPdfToMarkdown(base64Data: string, model: string = 'gemini-flash-lite-latest'): Promise<string> {
+  async convertPdfToMarkdown(base64Data: string, model = 'gemini-flash-lite-latest'): Promise<string> {
     const pdfSI = await this.loadPromptText('/prompts/pdf_to_md_system_instruction.md');
     const pdfP = await this.loadPromptText('/prompts/pdf_to_md_prompt.md');
 
@@ -116,8 +116,8 @@ export class GeminiClient {
       const headers = lines[0].split('|').map(h => h.trim()).filter(h => h);
       if (headers.length < 4 || headers[0] !== 'Tiếng Anh') return { text: glossaryTable, usedCount: 0, totalCount: 0 };
 
-      const fullGlossary: any[] = [];
-      const compactList: any[] = [];
+      const fullGlossary: { english: string; pos: string; vietnamese: string; notes: string }[] = [];
+      const compactList: { english: string; pos: string }[] = [];
       
       for (let i = 2; i < lines.length; i++) {
         const cells = lines[i].split('|').map(c => c.trim());

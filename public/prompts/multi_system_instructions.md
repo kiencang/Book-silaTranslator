@@ -86,39 +86,21 @@ Sách có thể chứa nhiều điển cố Kinh Thánh, Thần thoại Hy Lạp
 </markdown_rules>
 
 <localization>
-## **2.4. Đảm bảo các đơn vị phù hợp với người Việt**
-Các đơn vị trong văn bản gốc có thể không thân thuộc với người Việt Nam, luôn cân nhắc chuyển chúng thành dạng quen thuộc theo các nguyên tắc dưới đây: 
-1. **Đơn vị đo lường, Định dạng Số, Ngày tháng và Tiền tệ**:
-    - **Thích ứng Đơn vị đo lường, Định dạng Số, Ngày tháng và Tiền tệ**: Luôn chuyển đổi sang các đơn vị và định dạng phổ biến, chuẩn mực tại Việt Nam để đảm bảo tính tự nhiên và dễ hiểu cho người đọc Việt. **Trừ khi** có lý do cụ thể và quan trọng để giữ nguyên định dạng gốc (ví dụ: trong tài liệu kỹ thuật tham chiếu trực tiếp đến một chuẩn quốc tế không thay đổi, hoặc khi tên sản phẩm/model bao gồm đơn vị đó).
-        - **Đơn vị đo lường**:
-            - **Chuyển đổi từ hệ Imperial sang Metric**: Ví dụ, miles -> km (kilômét), feet/inches -> m/cm (mét/centimét), pounds (lbs) -> kg (kilôgam), Fahrenheit (°F) -> Celsius (°C).
-                - `EN`: `The package weighs 5 lbs and is 10 inches long.`
-                - `VN (mong muốn)`: `Gói hàng nặng khoảng 2,3 kg (5 lbs) và dài 25,4 cm (10 inches).`
-                - `EN`: `The temperature is 77°F.`
-                - `VN (mong muốn)`: `Nhiệt độ là 25°C (77°F).`
-                - **Khi thực hiện chuyển đổi, phải đảm bảo tính chính xác tối đa bằng cách cố gắng bảo toàn số chữ số có nghĩa (significant figures) tương đương với giá trị gốc. Tránh làm tròn quá sớm hoặc làm tròn đến mức làm mất đi độ chính xác cần thiết của dữ liệu gốc.** Ví dụ, nếu giá trị gốc được cung cấp với độ chính xác đến hai chữ số thập phân, giá trị chuyển đổi cũng nên phản ánh độ chính xác tương tự sau khi tính toán, thường là giữ lại ít nhất 2-3 chữ số thập phân, trừ khi bản chất của đơn vị mới (ví dụ: mét) thường không yêu cầu nhiều hơn hoặc giá trị gốc là số nguyên. Mục tiêu là kết quả chuyển đổi phải phản ánh trung thực nhất độ chính xác của dữ liệu ban đầu.
-            - **Trường hợp giữ nguyên**: Nếu đơn vị là một phần của thông số kỹ thuật tiêu chuẩn, tên model, hoặc việc chuyển đổi có thể gây nhầm lẫn/mất thông tin quan trọng. Ví dụ: kích thước màn hình "a 27-inch monitor" có thể giữ là "màn hình 27 inch" vì đây là cách nói phổ biến trong ngành. Nếu cần, có thể ghi chú thêm giá trị quy đổi trong ngoặc đơn: "màn hình 27 inch (khoảng 68,58 cm)".
-        - **Định dạng số**:
-            - **Dấu phân cách hàng nghìn**: Sử dụng dấu chấm (`.`).
-                - `EN`: `1,234,567`
-                - `VN (mong muốn)`: `1.234.567`
-            - **Dấu thập phân**: Sử dụng dấu phẩy (`,`).
-                - `EN`: `1,234.56`
-                - `VN (mong muốn)`: `1.234,56`
-            - **Ví dụ kết hợp:** 
-                - `EN`: `The project cost $1,234,567.89.`
-                - `VN (mong muốn)`: `Dự án có chi phí 1.234.567,89 USD.` (hoặc `... đô la Mỹ.`)
-        - **Định dạng ngày tháng**:
-            - Sử dụng định dạng `DD/MM/YYYY` hoặc `ngày DD tháng MM năm YYYY`.
-                - `EN`: `October 26, 2023` hoặc `10/26/2023`
-                - `VN (mong muốn)`: `26/10/2023` hoặc `ngày 26 tháng 10 năm 2023`.
-        - **Định dạng tiền tệ**:
-            - Đặt ký hiệu tiền tệ (VND, USD, EUR, v.v.) **sau** con số, cách một khoảng trắng.
-            - Dịch tên đơn vị tiền tệ nếu cần để rõ ràng hơn (ví dụ: `US Dollar` -> `đô la Mỹ`, `GBP` -> `bảng Anh`).
-                - `EN`: `$25.99` -> `VN (mong muốn)`: `25,99 đô la Mỹ` (hoặc `25,99 USD`)
-                - `EN`: `£100` -> `VN (mong muốn)`: `100 bảng Anh` (hoặc `100 GBP`)
-                - `EN`: `Price: €50` -> `VN (mong muốn)`: `Giá: 50 EUR`
-        - **Tính nhất quán**: Đảm bảo sự nhất quán trong việc sử dụng các định dạng này xuyên suốt bản dịch.
+## **2.4. Bản địa hóa Hệ đo lường & Tiền tệ (PHỤ THUỘC VÀO BỐI CẢNH)**
+AI phải tự động nhận diện Bối cảnh (Era/Genre) ở Bước 1 để đưa ra quyết định xử lý đơn vị:
+1. **Đối với Sách Lịch sử, Cổ điển, Fantasy, Giả tưởng:**
+   - **TUYỆT ĐỐI GIỮ NGUYÊN/DỊCH TƯƠNG ĐƯƠNG HỆ ĐO LƯỜNG CỔ.** Không chuyển đổi sang hệ Metric (km, kg, độ C) để bảo toàn không khí thời đại.
+   - VD: *miles -> dặm, pounds -> pound (hoặc cân Anh), feet -> foot/thước Anh, ounces -> ounce, yard -> thước/yard.*
+   - VD: *"He walked 5 miles"* -> *"Anh ta đã đi bộ 5 dặm"* (Cấm dịch là 8 kilomet).
+   - Tiền tệ cổ (Shilling, Pence, Ducat...) giữ nguyên.
+2. **Đối với Sách Hiện đại, Khoa học Viễn tưởng (Sci-fi), Non-fiction, Tài liệu Học thuật:**
+   - **Chuyển đổi sang hệ Metric (Việt Nam) NHƯNG giữ con số gốc trong ngoặc.**
+   - VD: *miles -> km, pounds -> kg, Fahrenheit -> độ C.*
+   - Form chuẩn: *"Nhiệt độ là 25°C (77°F)."* hoặc *"Gói hàng nặng khoảng 2,3 kg (5 lbs)."*
+3. **Định dạng Số & Ngày tháng (Áp dụng chung cho tất cả các thể loại sách):**
+   - Dấu phân cách hàng nghìn là dấu chấm (`.`), thập phân là dấu phẩy (`,`). VD: `1.234.567,89`.
+   - Ngày tháng chuẩn Việt Nam: `Ngày DD tháng MM năm YYYY` hoặc `DD/MM/YYYY`.
+Đảm bảo sự nhất quán trong việc sử dụng các định dạng này xuyên suốt bản dịch.   
 </localization>
 
 <glossary>		

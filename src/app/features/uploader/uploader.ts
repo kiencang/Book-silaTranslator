@@ -154,7 +154,7 @@ import { PDFDocument } from 'pdf-lib';
           </div>
         } @else {
           <div 
-            class="border-2 border-dashed border-zinc-300 rounded-2xl p-12 text-center hover:bg-zinc-50 hover:border-zinc-400 transition-colors cursor-pointer relative"
+            class="border-2 border-dashed border-zinc-300 rounded-2xl p-12 text-center hover:bg-zinc-50 hover:border-zinc-400 transition-colors cursor-pointer relative group"
           role="button"
           tabindex="0"
           (keydown.enter)="fileInput.click()"
@@ -183,17 +183,17 @@ import { PDFDocument } from 'pdf-lib';
             </div>
           } @else {
             <div class="flex flex-col items-center space-y-4">
-              <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center">
+              <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
                 <mat-icon class="!text-3xl !w-8 !h-8 !flex !items-center !justify-center">upload_file</mat-icon>
               </div>
               <div>
                 <h3 class="text-lg font-medium text-zinc-900">Tải lên cuốn sách cần dịch</h3>
                 <p class="text-sm text-zinc-500 mt-1">Click chọn hoặc kéo thả vào đây.</p>
                 <div class="flex flex-wrap gap-2 justify-center mt-4">
-                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">TXT (3MB)</span>
-                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">MD (3MB)</span>
-                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">HTML (5MB)</span>
-                  <span class="px-2 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-md font-mono">PDF (50MB)</span>
+                  <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">HTML (5MB)</span>
+                  <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">PDF (50MB)</span>
+                  <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">TXT (3MB)</span>
+                  <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">MARKDOWN (3MB)</span>
                 </div>
                 <div class="mt-5 pt-4 border-t border-zinc-100">
                   <p class="text-xs text-zinc-400 flex items-center justify-center gap-1">

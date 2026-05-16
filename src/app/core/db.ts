@@ -31,7 +31,7 @@ export interface SplitSettings {
 export interface PronounChunk {
   index: number;
   text: string;
-  result?: any;
+  result?: unknown;
   status: 'pending' | 'completed' | 'error';
 }
 
@@ -45,7 +45,7 @@ export interface PronounGenerationTask {
 export interface GlossaryChunk {
   index: number;
   text: string;
-  result?: any;
+  result?: unknown;
   status: 'pending' | 'completed' | 'error';
 }
 

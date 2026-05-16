@@ -144,7 +144,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                       <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-orange-500">thermostat</mat-icon> Temp: {{ activeV.temperature }}
                     </span>
                     <span class="flex items-center gap-1.5">
-                      <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-green-500">schedule</mat-icon> {{ activeV.timestamp | date:'dd/MM/yyyy HH:mm' }}
+                      <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-green-500">schedule</mat-icon> {{ activeV.timestamp | date:'dd/MM/yy HH:mm' }}
                     </span>
                     @if (activeV.glossaryStatus === 'filtered') {
                       <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio)" class="flex items-center gap-1 text-indigo-600 hover:underline">
@@ -251,8 +251,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
             </div>
 
             <!-- Close button -->
-            <button (click)="closeFullscreen()" class="fixed top-6 left-6 w-10 h-10 flex items-center justify-center bg-white/80 dark:bg-zinc-800/80 rounded-full shadow-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors backdrop-blur-sm z-50 cursor-pointer" title="Thu gọn toàn màn hình">
-              <mat-icon>fullscreen_exit</mat-icon>
+            <button (click)="closeFullscreen()" class="fixed top-6 left-6 w-10 h-10 flex items-center justify-center bg-white/80 dark:bg-zinc-800/80 rounded-full shadow-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors backdrop-blur-sm z-50 cursor-pointer" title="Đóng chế độ toàn màn hình">
+              <mat-icon>close</mat-icon>
             </button>
 
             <div class="prose max-w-none transition-all duration-300 leading-relaxed" 

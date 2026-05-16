@@ -33,10 +33,11 @@ import {ToastComponent} from './shared/components/toast.component';
             <div class="text-xl font-semibold tracking-tight flex items-center">
               <span class="text-zinc-400 font-normal mx-2">/</span>
               <button 
-                  class="text-indigo-700 truncate max-w-[150px] sm:max-w-xs hover:underline focus:outline-none focus:underline bg-transparent border-none p-0 cursor-pointer" 
+                  class="text-indigo-700 max-w-[150px] sm:max-w-xs hover:underline focus:outline-none focus:underline bg-transparent border-none p-0 cursor-pointer flex items-center group" 
                   [title]="'Sửa tên dự án: ' + store.currentProjectName()"
                   (click)="showEditProjectModal.set(true)">
-                {{store.currentProjectName()}}
+                <span class="truncate">{{store.currentProjectName()}}</span>
+                <mat-icon class="!text-[16px] !w-4 !h-4 ml-1.5 opacity-30 group-hover:opacity-100 transition-opacity">edit</mat-icon>
               </button>
             </div>
           }
@@ -73,7 +74,7 @@ import {ToastComponent} from './shared/components/toast.component';
                 <button (click)="goToPhase(5)" [disabled]="store.chapters().length === 0 || store.isBusy() || store.phase() === 2" class="flex items-center hover:text-indigo-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-zinc-400" [class.text-indigo-600]="store.phase() === 5">
                   <span class="w-5 h-5 text-xs rounded-full border-2 flex items-center justify-center mr-1.5"
                         [class.border-indigo-600]="store.phase() === 5">5</span>
-                  Dịch thuật
+                  Dịch
                 </button>
               </div>
             </div>
@@ -108,7 +109,7 @@ import {ToastComponent} from './shared/components/toast.component';
 
       <footer class="shrink-0 bg-white border-t border-zinc-200 py-2.5 px-6 text-xs text-zinc-500 flex justify-center items-center">
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-zinc-600">v1.0.42</span>
+          <span class="font-medium text-zinc-600">v1.0.43</span>
           <span class="text-zinc-300">•</span>
           <a href="https://github.com/kiencang/Book-silaTranslator" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition-colors">GitHub</a>
           <span class="text-zinc-300">•</span>

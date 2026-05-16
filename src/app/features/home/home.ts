@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { BookStore } from '../../core/book.store';
 import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, MatIconModule],
   host: {
     class: 'flex-1 flex flex-col'
   },
@@ -20,15 +21,21 @@ import { FormsModule } from '@angular/forms';
       <div class="space-y-4">
         <div>
           <label for="bookTitle" class="block text-sm font-medium text-zinc-700 mb-1">Tên tác phẩm <span class="text-red-500">*</span></label>
-          <input id="bookTitle" type="text" [(ngModel)]="bookTitle" placeholder="Ví dụ: Moby Dick" 
-                 (keydown.enter)="canCreate() && createProject()"
-                 class="w-full px-4 py-3 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-lg transition-shadow">
+          <div class="relative group">
+            <mat-icon class="absolute left-4 top-1/2 -translate-y-1/2 !w-5 !h-5 !text-[20px] text-zinc-400 group-focus-within:text-indigo-600 transition-colors">menu_book</mat-icon>
+            <input id="bookTitle" type="text" [(ngModel)]="bookTitle" placeholder="Ví dụ: Moby Dick" 
+                   (keydown.enter)="canCreate() && createProject()"
+                   class="w-full pl-11 pr-4 py-3 border border-zinc-300 rounded-xl focus:ring-0 focus:border-indigo-600 focus:border-2 outline-none text-lg transition-all">
+          </div>
         </div>
         <div>
           <label for="author" class="block text-sm font-medium text-zinc-700 mb-1">Tác giả <span class="text-red-500">*</span></label>
-          <input id="author" type="text" [(ngModel)]="author" placeholder="Ví dụ: Herman Melville (hoặc Vô danh)" 
-                 (keydown.enter)="canCreate() && createProject()"
-                 class="w-full px-4 py-3 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-lg transition-shadow">
+          <div class="relative group">
+            <mat-icon class="absolute left-4 top-1/2 -translate-y-1/2 !w-5 !h-5 !text-[20px] text-zinc-400 group-focus-within:text-indigo-600 transition-colors">person</mat-icon>
+            <input id="author" type="text" [(ngModel)]="author" placeholder="Ví dụ: Herman Melville (hoặc Vô danh)" 
+                   (keydown.enter)="canCreate() && createProject()"
+                   class="w-full pl-11 pr-4 py-3 border border-zinc-300 rounded-xl focus:ring-0 focus:border-indigo-600 focus:border-2 outline-none text-lg transition-all">
+          </div>
         </div>
         
         <div class="pt-2">
