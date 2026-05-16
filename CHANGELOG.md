@@ -7,6 +7,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
+- Tóm tắt nội dung của chương trước, để đưa vào bản dịch của chương sau, nhằm gia tăng bối cảnh.
 
 ## [v1.0.45]- 2026-05-16
 ### Fixed
