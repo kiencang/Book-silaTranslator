@@ -479,4 +479,36 @@ export class GeminiClient {
     }
     return result.trim();
   }
+
+  async summarizeTranslation(translatedText: string, model: string): Promise<string> {
+    try {
+      if (!translatedText.trim()) return '';
+
+      const si = await this.loadPromptText('/prompts/summary_system_instruction.md');
+      const p = await this.loadPromptText('/prompts/summary_prompt.md');
+
+      const systemInstruction = si || 'You are an expert summarizer for a translation workflow. Your task is to summarize the provided translated chapter/block (Vietnamese text). The summary MUST be concise (not exceeding 10% of the original text length) and MUST focus on providing contextual information for translating the NEXT chapter/block (e.g., key plot progression, character state changes, new places, or important items mentioned). The summary MUST be in Vietnamese.';
+      const promptTemplate = p || 'Hãy tóm tắt nội dung bản dịch dưới đây để làm thông tin bối cảnh (context) cho việc dịch phần tiếp theo. Yêu cầu:\n- Độ dài không vượt quá 10% nội dung gốc.\n- Tập trung vào các diễn biến chính, trạng thái nhân vật, địa điểm, hoặc sự kiện quan trọng có thể ảnh hưởng đến phần sau.\n\nNội dung bản dịch:\n{{translatedText}}';
+      
+      const finalPrompt = promptTemplate.replace('{{translatedText}}', translatedText);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const configArgs: any = {
+        temperature: 0.3,
+        systemInstruction: systemInstruction,
+        thinkingConfig: { thinkingLevel: 'HIGH' }
+      };
+
+      const response = await this.ai.models.generateContent({
+        model: model,
+        contents: [ { text: finalPrompt } ],
+        config: configArgs
+      });
+      
+      return (response.text || '').trim();
+    } catch (e) {
+      console.error('Failed to summarize translation', e);
+      return '';
+    }
+  }
 }

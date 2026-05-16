@@ -14,6 +14,10 @@ export interface TranslationVersion {
   customGlossary?: string;
   glossaryStatus?: 'none' | 'full' | 'filtered';
   glossaryRatio?: number;
+  summary?: string;
+  usePronouns?: boolean;
+  pronounSnapshot?: string;
+  pronounVersionNumber?: number;
 }
 
 export interface Chapter {
@@ -36,6 +40,7 @@ export interface TranslationConfig {
   pronounGenModel?: string;
   glossaryGenModel?: string;
   analysisModel?: string;
+  generateSummary?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -59,6 +64,16 @@ export class BookStore {
       if (v) return v.content;
     }
     return versions[versions.length - 1].content;
+  });
+  readonly activePronounVersionNumber = computed(() => {
+    const versions = this.pronounVersions();
+    if (!versions.length) return undefined;
+    const activeId = this.activePronounVersionId();
+    if (activeId) {
+      const v = versions.find(v => v.id === activeId);
+      if (v) return v.versionNumber;
+    }
+    return versions[versions.length - 1].versionNumber;
   });
   readonly usePronouns = signal<boolean>(false);
   
@@ -96,7 +111,8 @@ export class BookStore {
   readonly isBusy = computed(() => this.isConverting() || this.isGeneratingMetadata() || this.isTranslatingAny() || this.isAnalyzingSplits());
   readonly config = signal<TranslationConfig>({
     model: 'gemini-pro-latest',
-    temperature: 0.5
+    temperature: 0.5,
+    generateSummary: true
   });
   readonly splitSettings = signal<SplitSettings | undefined>(undefined);
 

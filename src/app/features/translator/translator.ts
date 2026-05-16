@@ -188,6 +188,11 @@ export class Translator {
         validChaptersCount > 3
       );
       
+      let summaryText: string | undefined = undefined;
+      if (config.generateSummary !== false) {
+        summaryText = await this.gemini.summarizeTranslation(translatedText, config.model);
+      }
+      
       const newVersionNumber = (chapter.latestVersionNumber || 0) + 1;
       const newVersion = {
         versionNumber: newVersionNumber,
@@ -197,7 +202,11 @@ export class Translator {
         timestamp: Date.now(),
         customGlossary: customGlossary,
         glossaryStatus: glossaryStatus,
-        glossaryRatio: glossaryRatio
+        glossaryRatio: glossaryRatio,
+        summary: summaryText,
+        usePronouns: this.store.usePronouns(),
+        pronounSnapshot: this.store.usePronouns() ? this.store.pronounTable() : undefined,
+        pronounVersionNumber: this.store.usePronouns() ? this.store.activePronounVersionNumber() : undefined
       };
       
       const versions = [...(chapter.versions || []), newVersion].slice(-3);
