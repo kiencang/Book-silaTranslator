@@ -24,9 +24,9 @@ import {ToastComponent} from './shared/components/toast.component';
                [class.cursor-default]="store.isBusy()"
                title="Quay về trang chủ" 
                (click)="!store.isBusy() && store.closeProject()">
-            <div class="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center text-white font-bold text-xl">B</div>
-            <div class="text-xl font-semibold text-zinc-900 tracking-tight flex items-center">
-              <span class="hidden sm:inline">Book silaTranslator</span>
+            <div class="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center text-white font-bold text-xl font-courier tracking-widest">B</div>
+            <div class="text-2xl font-bold text-zinc-900 tracking-tight flex items-center font-courier">
+              <span class="hidden sm:inline">silaBook</span>
             </div>
           </button>
           @if (store.currentProjectName()) {
@@ -109,7 +109,7 @@ import {ToastComponent} from './shared/components/toast.component';
 
       <footer class="shrink-0 bg-white border-t border-zinc-200 py-2.5 px-6 text-xs text-zinc-500 flex justify-center items-center">
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-zinc-600">v1.0.48</span>
+          <span class="font-medium text-zinc-600">v1.0.49</span>
           <span class="text-zinc-300">•</span>
           <a href="https://github.com/kiencang/Book-silaTranslator" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition-colors">GitHub</a>
           <span class="text-zinc-300">•</span>

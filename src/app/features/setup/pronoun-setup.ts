@@ -23,70 +23,73 @@ import { smartHardSplit } from '../splitter/splitter.util';
 
       <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8">
         <div class="space-y-6">
-          <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-200 space-y-4">
-            <div class="flex flex-col sm:flex-row gap-4">
-              <div class="flex-1">
+          <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-200">
+            @if (pronounTask() && !isGeneratingPronouns()) {
+              <div class="text-sm text-amber-700 bg-amber-50 rounded-lg p-4 border border-amber-200 mb-4">
+                <p class="font-medium mb-1">Tiến trình bị gián đoạn</p>
+                <p class="text-amber-600">Bạn có một tiến trình tạo bảng đại từ đang dở dang (đã hoàn thành {{ completedChunksCount() }}/{{ pronounTask()?.totalChunks }} phần). Bạn có thể tiếp tục hoặc hủy bỏ để bắt đầu lại.</p>
+              </div>
+            }
+            <div class="flex flex-col lg:flex-row gap-4 lg:items-end">
+              <div class="w-full lg:w-1/2">
                 <label for="pronounModel" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2">Mô hình nhận diện</label>
-                <select id="pronounModel" [value]="pronounModel()" (change)="pronounModel.set($any($event.target).value)" [disabled]="isGeneratingPronouns() || !!pronounTask()" class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg border disabled:cursor-not-allowed">
+                <select id="pronounModel" [value]="pronounModel()" (change)="pronounModel.set($any($event.target).value)" [disabled]="isGeneratingPronouns() || !!pronounTask()" class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg border disabled:cursor-not-allowed">
                   <option value="gemini-flash-latest">Flash (Nhanh & Tiết kiệm)</option>
                   <option value="gemini-pro-latest">Pro (Tư duy sâu & Chuẩn xác)</option>
                 </select>
               </div>
-            </div>
-            
-            <div class="space-y-3">
-              @if (pronounTask() && !isGeneratingPronouns()) {
-                <div class="text-sm text-amber-700 bg-amber-50 rounded-lg p-4 border border-amber-200">
-                  <p class="font-medium mb-1">Tiến trình bị gián đoạn</p>
-                  <p class="text-amber-600">Bạn có một tiến trình tạo bảng đại từ đang dở dang (đã hoàn thành {{ completedChunksCount() }}/{{ pronounTask()?.totalChunks }} phần). Bạn có thể tiếp tục hoặc hủy bỏ để bắt đầu lại.</p>
-                </div>
-                <div class="flex gap-3">
+              
+              <div class="w-full lg:w-1/2">
+                @if (pronounTask() && !isGeneratingPronouns()) {
+                  <div class="flex gap-3">
+                    <button 
+                      (click)="resumeGeneration()"
+                      [disabled]="isGeneratingPronouns()"
+                      class="flex-1 flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">play_circle</mat-icon>
+                      Tiếp tục quá trình tạo ({{ completedChunksCount() }}/{{ pronounTask()?.totalChunks }})
+                    </button>
+                    <button 
+                      (click)="cancelTask()"
+                      [disabled]="isGeneratingPronouns()"
+                      class="px-4 py-2 border border-red-200 text-sm font-medium rounded-lg shadow-sm text-red-600 bg-white hover:bg-red-50 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Hủy tiến trình cũ
+                    </button>
+                  </div>
+                } @else {
                   <button 
-                    (click)="resumeGeneration()"
+                    (click)="startGeneration()"
                     [disabled]="isGeneratingPronouns()"
-                    class="flex-1 flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
+                    class="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
                   >
-                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">play_circle</mat-icon>
-                    Tiếp tục quá trình tạo ({{ completedChunksCount() }}/{{ pronounTask()?.totalChunks }})
+                    @if (isGeneratingPronouns()) {
+                      <mat-icon class="animate-spin mr-2 !w-5 !h-5 !text-[20px]">sync</mat-icon>
+                      {{ generationStatus() || 'Đang phân tích...' }}
+                    } @else if (draftPronounTable().trim().length > 0) {
+                      <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
+                      Tạo lại bảng dữ liệu Đại từ
+                    } @else {
+                      <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">auto_awesome</mat-icon>
+                      Bắt đầu tạo bảng Đại từ tự động
+                    }
                   </button>
-                  <button 
-                    (click)="cancelTask()"
-                    [disabled]="isGeneratingPronouns()"
-                    class="px-4 py-2 border border-red-200 text-sm font-medium rounded-lg shadow-sm text-red-600 bg-white hover:bg-red-50 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    Hủy tiến trình cũ
-                  </button>
-                </div>
-              } @else {
-                <button 
-                  (click)="startGeneration()"
-                  [disabled]="isGeneratingPronouns()"
-                  class="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
-                >
-                  @if (isGeneratingPronouns()) {
-                    <mat-icon class="animate-spin mr-2 !w-5 !h-5 !text-[20px]">sync</mat-icon>
-                    {{ generationStatus() || 'Đang phân tích...' }}
-                  } @else if (draftPronounTable().trim().length > 0) {
-                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
-                    Tạo lại bảng dữ liệu Đại từ
-                  } @else {
-                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">auto_awesome</mat-icon>
-                    Bắt đầu tạo bảng Đại từ tự động
-                  }
-                </button>
-              }
+                }
+              </div>
             </div>
           </div>
 
           <div class="mt-8">
             <app-markdown-table-editor
+              #editor
               [value]="draftPronounTable()"
               (valueChange)="onTableChange($event)"
               [disabled]="isGeneratingPronouns()"
               placeholder="Ví dụ:&#10;| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |&#10;|---|---|---|---|---|---|---|&#10;| Harry Potter | Nam | Cô nhi | Cậu bé sống sót | Cậu, hắn | Với Ron: Bồ - Mình | Tự tin hơi bốc đồng |"
             >
               @if (store.pronounVersions().length > 0) {
-                <div class="flex items-center justify-between py-2 border-b border-zinc-100 mb-2">
+                <div class="flex items-center justify-between py-2 border-b border-zinc-100 mb-2 relative">
                   <div class="flex items-center space-x-2">
                     @for (v of store.pronounVersions(); track v.id; let i = $index) {
                       <button 
@@ -103,6 +106,20 @@ import { smartHardSplit } from '../splitter/splitter.util';
                       </button>
                     }
                   </div>
+                  
+                  @if (editor.mode() === 'raw' && draftPronounTable().trim().length > 0) {
+                    <div class="absolute left-1/2 -translate-x-1/2">
+                      <button 
+                        (click)="copyRawData()"
+                        class="px-3 py-1 text-xs font-medium bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-md transition-colors flex items-center gap-1.5 border border-zinc-200"
+                        title="Copy toàn bộ bảng"
+                      >
+                        <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">content_copy</mat-icon>
+                        Copy toàn bộ bảng
+                      </button>
+                    </div>
+                  }
+
                   @if (activeVersion()) {
                     <div class="flex items-center space-x-3 text-xs text-zinc-500">
                       <span class="flex items-center" title="Model"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">model_training</mat-icon> {{ activeVersion()?.model === 'gemini-pro-latest' ? 'Pro' : 'Flash' }}</span>
@@ -187,6 +204,17 @@ export class PronounSetup {
   onTableChange(val: string) {
     this.draftPronounTable.set(val);
     this.isManuallyEdited.set(true);
+  }
+
+  async copyRawData() {
+    try {
+      if (this.draftPronounTable().trim()) {
+        await navigator.clipboard.writeText(this.draftPronounTable());
+        this.toast.success('Đã sao chép nội dung bảng!');
+      }
+    } catch (err) {
+      this.toast.error('Không thể sao chép: ' + err);
+    }
   }
 
   cancelTask() {
