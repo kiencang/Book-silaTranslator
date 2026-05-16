@@ -5,10 +5,10 @@ LƯU Ý QUAN TRỌNG:
 2. Phải trích xuất đồng đều, rà soát kỹ lưỡng cấu trúc cuốn sách từ đầu đến cuối.
 
 <metadata>
-- Tên sách: [tên sách]
-- Tác giả: [tên tác giả]
+- Tên sách: {{tên sách}}
+- Tác giả: {{tên tác giả}}
 </metadata>
 
 <source_text>
-[nội dung]
+{{nội dung}}
 </source_text>

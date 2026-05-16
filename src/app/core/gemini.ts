@@ -136,11 +136,11 @@ export class GeminiClient {
       const si = await this.loadPromptText('/prompts/filter_glossary_system_instruction.md') || 'You are an expert terminology extractor. Your task is to filter a given list of glossary terms and identify which ones are present in the provided text block. Return ONLY a valid JSON array of objects with "english" and "pos" properties.';
       let prompt = await this.loadPromptText('/prompts/filter_glossary_prompt.md');
       if (!prompt) {
-        prompt = "Glossary Terms:\n[danh sách thuật ngữ]\n\nText Block:\n[nội dung cần dịch]";
+        prompt = "Glossary Terms:\n{{danh sách thuật ngữ}}\n\nText Block:\n{{nội dung cần dịch}}";
       }
       
-      prompt = prompt.replace('[danh sách thuật ngữ]', JSON.stringify(compactList));
-      prompt = prompt.replace('[nội dung cần dịch]', text);
+      prompt = prompt.replace('{{danh sách thuật ngữ}}', JSON.stringify(compactList));
+      prompt = prompt.replace('{{nội dung cần dịch}}', text);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filterConfig: any = {
@@ -200,13 +200,13 @@ export class GeminiClient {
       const si = await this.loadPromptText('/prompts/normalize_pronouns_system_instructions.md') || 'You are an expert context analyzer. Your task is to normalize and refine the provided raw pronoun table based on the full book content.';
       let prompt = await this.loadPromptText('/prompts/normalize_pronouns_prompt.md');
       if (!prompt) {
-        prompt = "Raw Pronoun Table:\n[bảng đại từ]\n\nFull Book Content:\n[nội dung]\n\nPlease normalize it.";
+        prompt = "Raw Pronoun Table:\n{{bảng đại từ}}\n\nFull Book Content:\n{{nội dung}}\n\nPlease normalize it.";
       }
       
-      prompt = prompt.replace('[tên sách]', bookTitle || 'Không rõ');
-      prompt = prompt.replace('[tên tác giả]', author || 'Vô danh');
-      prompt = prompt.replace('[bảng đại từ]', rawPronounTable);
-      prompt = prompt.replace('[nội dung]', text);
+      prompt = prompt.replace('{{tên sách}}', bookTitle || 'Không rõ');
+      prompt = prompt.replace('{{tên tác giả}}', author || 'Vô danh');
+      prompt = prompt.replace('{{bảng đại từ}}', rawPronounTable);
+      prompt = prompt.replace('{{nội dung}}', text);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filterConfig: any = {
@@ -237,7 +237,7 @@ export class GeminiClient {
     }
   }
 
-  async translateChapter(text: string, model: string, temperature: number, bookTitle = '', author = '', pronounTable = '', usePronouns = false, glossaryTable = '', useGlossary = false, shouldFilterGlossary = true): Promise<{text: string, customGlossary?: string, glossaryStatus?: 'none' | 'full' | 'filtered', glossaryRatio?: number}> {
+  async translateChapter(text: string, model: string, temperature: number, bookTitle = '', author = '', pronounTable = '', usePronouns = false, glossaryTable = '', useGlossary = false, shouldFilterGlossary = true, contextSummary?: string): Promise<{text: string, customGlossary?: string, glossaryStatus?: 'none' | 'full' | 'filtered', glossaryRatio?: number}> {
     
     let activeGlossary = '';
     let glossaryStatus: 'none' | 'full' | 'filtered' = 'none';
@@ -258,47 +258,40 @@ export class GeminiClient {
         }
     }
     
-    let systemInstruction = null;
-    let finalPrompt = '';
+    let systemInstruction = await this.loadPromptText('/prompts/multi_system_instructions.md');
+    let finalPrompt = await this.loadPromptText('/prompts/multi_prompt.md') || '';
     
-    if (usePronouns && pronounTable && activeGlossary) {
-       systemInstruction = await this.loadPromptText('/prompts/multi_system_instructions.md');
-       finalPrompt = await this.loadPromptText('/prompts/multi_pronouns_glossary_prompt.md') || '';
-       if (finalPrompt) {
-         finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
-         finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
-         finalPrompt = finalPrompt.replace('[bảng đại từ nhân xưng]', pronounTable);
-         finalPrompt = finalPrompt.replace('[bảng thuật ngữ]', activeGlossary);
-         finalPrompt = finalPrompt.replace('[nội dung cần dịch]', '\n' + text);
-       }
-    } else if (activeGlossary) {
-       systemInstruction = await this.loadPromptText('/prompts/multi_system_instructions.md');
-       finalPrompt = await this.loadPromptText('/prompts/multi_glossary_prompt.md') || '';
-       if (finalPrompt) {
-         finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
-         finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
-         finalPrompt = finalPrompt.replace('[bảng thuật ngữ]', activeGlossary);
-         finalPrompt = finalPrompt.replace('[nội dung cần dịch]', '\n' + text);
-       }
-    } else if (usePronouns && pronounTable) {
-       systemInstruction = await this.loadPromptText('/prompts/multi_system_instructions.md');
-       finalPrompt = await this.loadPromptText('/prompts/multi_pronouns_prompt.md') || '';
-       if (finalPrompt) {
-         finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
-         finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
-         finalPrompt = finalPrompt.replace('[bảng đại từ nhân xưng]', pronounTable);
-         finalPrompt = finalPrompt.replace('[nội dung cần dịch]', '\n' + text);
-       }
+    if (finalPrompt) {
+      finalPrompt = finalPrompt.replace('{{tên sách}}', bookTitle || 'Không rõ');
+      finalPrompt = finalPrompt.replace('{{tên tác giả}}', author || 'Vô danh');
+      
+      if (usePronouns && pronounTable) {
+        const pronounBlock = `**Bảng đại từ nhân xưng:**\n${pronounTable}\n\n*LƯU Ý: Ở trên là Bảng đại từ nhân xưng tham chiếu. Bạn BẮT BUỘC phải sử dụng cấu trúc xưng hô này cho cách người kể chuyện gọi nhân vật (ngôi thứ 3) và trong các cuộc hội thoại thông thường. TUY NHIÊN, bạn được phép điều chỉnh linh hoạt cách xưng hô (ngôi thứ 1 & 2) nếu bối cảnh cảm xúc của câu chuyện thực sự đòi hỏi sự chuyển đổi.*`;
+        finalPrompt = finalPrompt.replace('{{đại từ nhân xưng}}', pronounBlock);
+      } else {
+        finalPrompt = finalPrompt.replace('{{đại từ nhân xưng}}', '');
+      }
+
+      if (activeGlossary) {
+        const glossaryBlock = `**Bảng thuật ngữ / Từ khó:**\n${activeGlossary}\n\n*LƯU Ý: Bảng thuật ngữ trên đây là một DANH SÁCH THAM KHẢO quan trọng, NHƯNG bạn hãy áp dụng LINH HOẠT các thuật ngữ này vào bản dịch để đảm bảo tính thống nhất chuyên môn/từ ngữ toàn cục của cuốn sách. Điều cần ghi nhớ là đừng ép buộc áp dụng một cách cứng nhắc nếu ngữ cảnh cụ thể của đoạn văn hoàn toàn khác.*`;
+        finalPrompt = finalPrompt.replace('{{thuật ngữ}}', glossaryBlock);
+      } else {
+        finalPrompt = finalPrompt.replace('{{thuật ngữ}}', '');
+      }
+
+      if (contextSummary) {
+         const contextBlock = `**Tóm tắt bối cảnh từ phần trước để tham khảo:**\n${contextSummary}\n\n*LƯU Ý: Đây là tóm tắt từ khối văn bản ngay trước đó để giúp bạn nắm bắt mạch truyện, địa điểm, sự vật đang diễn ra. Bạn chỉ dùng để hiểu ngữ cảnh, KHÔNG cần phải lặp lại nội dung của tóm tắt này vào bản dịch.*`;
+         finalPrompt = finalPrompt.replace('{{tóm tắt bối cảnh}}', contextBlock);
+      } else {
+         finalPrompt = finalPrompt.replace('{{tóm tắt bối cảnh}}', '');
+      }
+
+      finalPrompt = finalPrompt.replace('{{nội dung cần dịch}}', '\n' + text);
+      
+      // Clean up multiple newlines that might arise from empty replacements
+      finalPrompt = finalPrompt.replace(/\n\s*\n\s*\n/g, '\n\n');
     } else {
-       systemInstruction = await this.loadPromptText('/prompts/multi_system_instructions.md');
-       finalPrompt = await this.loadPromptText('/prompts/multi_prompt.md') || '';
-       if (finalPrompt) {
-         finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
-         finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
-         finalPrompt = finalPrompt.replace('[nội dung cần dịch]', '\n' + text);
-       } else {
-         finalPrompt = `Translate the following text into Vietnamese. Maintain the original Markdown formatting and structure. Do not add any conversational text.\n\n${text}`;
-       }
+      finalPrompt = `Translate the following text into Vietnamese. Maintain the original Markdown formatting and structure. Do not add any conversational text.\n\n${text}`;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -335,11 +328,11 @@ export class GeminiClient {
     const psi = await this.loadPromptText('/prompts/pronouns_system_instructions.md');
     const pp = await this.loadPromptText('/prompts/pronouns_prompt.md');
 
-    let finalPrompt = pp || `Hãy phân tích đoạn văn bản nguồn dưới đây và lập Bảng đại từ nhân xưng chuẩn xác nhất.\n\n<metadata>\n- Tên sách: [tên sách]\n- Tác giả: [tên tác giả]\n</metadata>\n\n<source_text>\n[nội dung]\n</source_text>`;
+    let finalPrompt = pp || `Hãy phân tích đoạn văn bản nguồn dưới đây và lập Bảng đại từ nhân xưng chuẩn xác nhất.\n\n<metadata>\n- Tên sách: {{tên sách}}\n- Tác giả: {{tên tác giả}}\n</metadata>\n\n<source_text>\n{{nội dung}}\n</source_text>`;
     
-    finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
-    finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
-    finalPrompt = finalPrompt.replace('[nội dung]', text);
+    finalPrompt = finalPrompt.replace('{{tên sách}}', bookTitle || 'Không rõ');
+    finalPrompt = finalPrompt.replace('{{tên tác giả}}', author || 'Vô danh');
+    finalPrompt = finalPrompt.replace('{{nội dung}}', text);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
@@ -391,11 +384,11 @@ export class GeminiClient {
     const gsi = await this.loadPromptText('/prompts/glossary_system_instructions.md');
     const gp = await this.loadPromptText('/prompts/glossary_prompt.md');
 
-    let finalPrompt = gp || `Hãy phân tích nội dung và trích xuất Bảng thuật ngữ chuyên ngành/Từ khó dịch tiếng Anh - Việt.\n\n<metadata>\n- Tên sách: [tên sách]\n- Tác giả: [tên tác giả]\n</metadata>\n\n<source_text>\n[nội dung]\n</source_text>`;
+    let finalPrompt = gp || `Hãy phân tích nội dung và trích xuất Bảng thuật ngữ chuyên ngành/Từ khó dịch tiếng Anh - Việt.\n\n<metadata>\n- Tên sách: {{tên sách}}\n- Tác giả: {{tên tác giả}}\n</metadata>\n\n<source_text>\n{{nội dung}}\n</source_text>`;
     
-    finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
-    finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
-    finalPrompt = finalPrompt.replace('[nội dung]', text);
+    finalPrompt = finalPrompt.replace('{{tên sách}}', bookTitle || 'Không rõ');
+    finalPrompt = finalPrompt.replace('{{tên tác giả}}', author || 'Vô danh');
+    finalPrompt = finalPrompt.replace('{{nội dung}}', text);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
@@ -448,11 +441,11 @@ export class GeminiClient {
     const si = await this.loadPromptText('/prompts/book_analysis_system_instructions.md');
     const p = await this.loadPromptText('/prompts/book_analysis_prompt.md');
 
-    let finalPrompt = p || `Phân tích văn bản và trả về JSON cấu hình theo yêu cầu.\n\n<source_text>\n[nội dung]\n</source_text>`;
+    let finalPrompt = p || `Phân tích văn bản và trả về JSON cấu hình theo yêu cầu.\n\n<source_text>\n{{nội dung}}\n</source_text>`;
     
-    finalPrompt = finalPrompt.replace('[tên sách]', bookTitle || 'Không rõ');
-    finalPrompt = finalPrompt.replace('[tên tác giả]', author || 'Vô danh');
-    finalPrompt = finalPrompt.replace('[nội dung]', text);
+    finalPrompt = finalPrompt.replace('{{tên sách}}', bookTitle || 'Không rõ');
+    finalPrompt = finalPrompt.replace('{{tên tác giả}}', author || 'Vô danh');
+    finalPrompt = finalPrompt.replace('{{nội dung}}', text);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
@@ -488,9 +481,9 @@ export class GeminiClient {
       const p = await this.loadPromptText('/prompts/summary_prompt.md');
 
       const systemInstruction = si || 'You are an expert summarizer for a translation workflow. Your task is to summarize the provided translated chapter/block (Vietnamese text). The summary MUST be concise (not exceeding 10% of the original text length) and MUST focus on providing contextual information for translating the NEXT chapter/block (e.g., key plot progression, character state changes, new places, or important items mentioned). The summary MUST be in Vietnamese.';
-      const promptTemplate = p || 'Hãy tóm tắt nội dung bản dịch dưới đây để làm thông tin bối cảnh (context) cho việc dịch phần tiếp theo. Yêu cầu:\n- Độ dài không vượt quá 10% nội dung gốc.\n- Tập trung vào các diễn biến chính, trạng thái nhân vật, địa điểm, hoặc sự kiện quan trọng có thể ảnh hưởng đến phần sau.\n\nNội dung bản dịch:\n{{translatedText}}';
+      const promptTemplate = p || 'Hãy tóm tắt nội dung bản dịch dưới đây để làm thông tin bối cảnh (context) cho việc dịch phần tiếp theo. Yêu cầu:\n- Độ dài không vượt quá 10% nội dung gốc.\n- Tập trung vào các diễn biến chính, trạng thái nhân vật, địa điểm, hoặc sự kiện quan trọng có thể ảnh hưởng đến phần sau.\n\nNội dung bản dịch:\n{{nội dung}}';
       
-      const finalPrompt = promptTemplate.replace('{{translatedText}}', translatedText);
+      const finalPrompt = promptTemplate.replace('{{nội dung}}', translatedText);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const configArgs: any = {

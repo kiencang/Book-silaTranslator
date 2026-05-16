@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal, ViewChildren, QueryList } from '@angular/core';
-import { BookStore, Chapter } from '../../core/book.store';
+import { BookStore, Chapter, TranslationVersion } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
 import { GeminiClient, parseGeminiError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
@@ -175,6 +175,24 @@ export class Translator {
       const chapters = this.store.chapters() || [];
       const validChaptersCount = chapters.filter((c: Chapter) => !c.excludeFromTranslation).length;
 
+      const chapterIndex = chapters.findIndex(c => c.id === chapter.id);
+      let contextSummarySnapshot: string | undefined = undefined;
+      let contextSummaryChapterTitle: string | undefined = undefined;
+      
+      if (config.generateSummary !== false && chapterIndex > 0) {
+        const prevChapter = chapters[chapterIndex - 1];
+        if (prevChapter) {
+            const activeVersionNumber = prevChapter.activeVersionNumber || prevChapter.latestVersionNumber;
+            if (activeVersionNumber) {
+              const activeVersion = prevChapter.versions?.find(v => v.versionNumber === activeVersionNumber);
+              if (activeVersion && activeVersion.summary) {
+                contextSummarySnapshot = activeVersion.summary;
+                contextSummaryChapterTitle = prevChapter.title;
+              }
+            }
+        }
+      }
+
       const { text: translatedText, customGlossary, glossaryStatus, glossaryRatio } = await this.gemini.translateChapter(
         chapter.originalText, 
         config.model, 
@@ -185,7 +203,8 @@ export class Translator {
         this.store.usePronouns(),
         this.store.glossaryTable(),
         this.store.useGlossary(),
-        validChaptersCount > 3
+        validChaptersCount > 3,
+        contextSummarySnapshot
       );
       
       let summaryText: string | undefined = undefined;
@@ -194,7 +213,7 @@ export class Translator {
       }
       
       const newVersionNumber = (chapter.latestVersionNumber || 0) + 1;
-      const newVersion = {
+      const newVersion: TranslationVersion = {
         versionNumber: newVersionNumber,
         text: translatedText,
         model: config.model,
@@ -206,7 +225,10 @@ export class Translator {
         summary: summaryText,
         usePronouns: this.store.usePronouns(),
         pronounSnapshot: this.store.usePronouns() ? this.store.pronounTable() : undefined,
-        pronounVersionNumber: this.store.usePronouns() ? this.store.activePronounVersionNumber() : undefined
+        pronounVersionNumber: this.store.usePronouns() ? this.store.activePronounVersionNumber() : undefined,
+        useContextSummary: !!contextSummarySnapshot,
+        contextSummarySnapshot: contextSummarySnapshot,
+        contextSummaryChapterTitle: contextSummaryChapterTitle
       };
       
       const versions = [...(chapter.versions || []), newVersion].slice(-3);

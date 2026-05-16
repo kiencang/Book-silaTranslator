@@ -3,8 +3,11 @@
 </task>
 
 <context_info>
-**Tên sách:** [tên sách]
-**Tác giả:** [tên tác giả]
+**Tên sách:** {{tên sách}}
+**Tác giả:** {{tên tác giả}}
+{{đại từ nhân xưng}}
+{{thuật ngữ}}
+{{tóm tắt bối cảnh}}
 </context_info>
 
 <mandatory_requirement>
@@ -24,5 +27,5 @@
 ---
 **BẮT ĐẦU NỘI DUNG MARKDOWN CẦN DỊCH:** 
 <source_text>
-[nội dung cần dịch]
+{{nội dung cần dịch}}
 </source_text>

@@ -3,12 +3,12 @@
 Đầu vào là tài liệu cần xử lý. Hãy phân tích nội dung và trích xuất Bảng thuật ngữ chuyên ngành/Từ khó dịch tiếng Anh - Việt, tuân thủ tuyệt đối toàn bộ quy định trong System Instruction. Bảng này sẽ làm chuẩn để dịch toàn bộ sách.
 
 <metadata>
-- Tên sách: [tên sách]
-- Tác giả: [tên tác giả]
+- Tên sách: {{tên sách}}
+- Tác giả: {{tên tác giả}}
 </metadata>
 
 <source_text>
-[nội dung]
+{{nội dung}}
 </source_text>
 
 **TRÌNH TỰ THỰC THI BẮT BUỘC CỦA BẠN:**

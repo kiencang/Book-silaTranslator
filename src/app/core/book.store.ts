@@ -18,6 +18,9 @@ export interface TranslationVersion {
   usePronouns?: boolean;
   pronounSnapshot?: string;
   pronounVersionNumber?: number;
+  useContextSummary?: boolean;
+  contextSummarySnapshot?: string;
+  contextSummaryChapterTitle?: string;
 }
 
 export interface Chapter {

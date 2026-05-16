@@ -62,10 +62,11 @@ export class TranslatingSkeletonComponent implements OnInit, OnDestroy {
 }
 import { DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { BookStore, Chapter } from '../../../core/book.store';
+import { BookStore, Chapter, TranslationVersion } from '../../../core/book.store';
 import { ToastService } from '../../../core/toast.service';
 import { getConfiguredMarked } from '../../../core/marked-setup';
 import { ReaderStore } from '../../../core/reader.store';
+import { GeminiClient } from '../../../core/gemini';
 import { OFFLINE_READER_SCRIPT, OFFLINE_READER_STYLES, OFFLINE_READER_TOOLBAR_HTML } from '../../../core/html-export.util';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
@@ -136,49 +137,63 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                   }
                 </div>
                 @if (getActiveVersion(chapter()); as activeV) {
-                  <div class="text-[11px] text-zinc-500 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 bg-zinc-50 px-3 py-1.5 rounded-md border border-zinc-100">
-                    <span class="flex items-center gap-1.5">
-                      <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-indigo-500">smart_toy</mat-icon> {{ activeV.model }}
-                    </span>
-                    <span class="flex items-center gap-1.5">
-                      <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-orange-500">thermostat</mat-icon> Temp: {{ activeV.temperature }}
-                    </span>
-                    <span class="flex items-center gap-1.5">
-                      <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-green-500">schedule</mat-icon> {{ activeV.timestamp | date:'dd/MM/yy HH:mm' }}
-                    </span>
-                    @if (activeV.glossaryStatus === 'filtered') {
-                      <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio)" class="flex items-center gap-1 text-indigo-600 hover:underline">
-                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">menu_book</mat-icon> Sử dụng danh sách thuật ngữ đã lọc
-                      </button>
-                    } @else if (activeV.glossaryStatus === 'full') {
-                      <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio)" class="flex items-center gap-1 text-indigo-600 hover:underline">
-                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">library_books</mat-icon> Sử dụng đầy đủ danh sách thuật ngữ
-                      </button>
-                    } @else {
-                      <span class="flex items-center gap-1 text-zinc-400">
-                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">book</mat-icon> Không sử dụng danh sách thuật ngữ
+                  <div class="text-[11px] text-zinc-500 flex flex-col items-center justify-center gap-y-2 bg-zinc-50 px-3 py-2 rounded-md border border-zinc-100 w-full max-w-3xl">
+                    <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+                      <span class="flex items-center gap-1.5">
+                        <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-indigo-500">smart_toy</mat-icon> {{ activeV.model }}
                       </span>
-                    }
-                    <span class="bg-zinc-200 w-[1px] h-4 mx-1"></span>
-                    @if (activeV.usePronouns) {
-                      <button (click)="viewPronounSnapshot(activeV.pronounSnapshot, activeV.pronounVersionNumber)" class="flex items-center gap-1 text-emerald-600 hover:underline">
-                        <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">assignment_ind</mat-icon> Sử dụng Bảng đại từ (v{{activeV.pronounVersionNumber || 1}})
-                      </button>
-                    } @else {
-                      <span class="flex items-center gap-1 text-zinc-400">
-                        <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">person_off</mat-icon> Không sử dụng Bảng đại từ
+                      <span class="flex items-center gap-1.5">
+                        <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-orange-500">thermostat</mat-icon> Temp: {{ activeV.temperature }}
                       </span>
-                    }
-                    <span class="bg-zinc-200 w-[1px] h-4 mx-1"></span>
-                    @if (activeV.summary) {
-                      <button (click)="viewSummary(activeV.summary)" class="flex items-center gap-1 text-amber-600 hover:underline" title="Xem bản tóm tắt">
-                        <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">auto_awesome</mat-icon> Có tóm tắt
-                      </button>
-                    } @else {
-                      <span class="flex items-center gap-1 text-zinc-400">
-                        <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">auto_awesome_mosaic</mat-icon> Không có tóm tắt
+                      <span class="flex items-center gap-1.5">
+                        <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-green-500">schedule</mat-icon> {{ activeV.timestamp | date:'dd/MM/yy HH:mm' }}
                       </span>
-                    }
+                    </div>
+                    <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+                      @if (activeV.glossaryStatus === 'filtered') {
+                        <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio)" class="flex items-center gap-1 text-indigo-600 hover:underline">
+                           <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">menu_book</mat-icon> Sử dụng danh sách thuật ngữ đã lọc
+                        </button>
+                      } @else if (activeV.glossaryStatus === 'full') {
+                        <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio)" class="flex items-center gap-1 text-indigo-600 hover:underline">
+                           <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">library_books</mat-icon> Sử dụng đầy đủ danh sách thuật ngữ
+                        </button>
+                      } @else {
+                        <span class="flex items-center gap-1 text-zinc-400">
+                           <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">book</mat-icon> Không sử dụng danh sách thuật ngữ
+                        </span>
+                      }
+                      <span class="bg-zinc-200 w-[1px] h-3 mx-0"></span>
+                      @if (activeV.usePronouns) {
+                        <button (click)="viewPronounSnapshot(activeV.pronounSnapshot, activeV.pronounVersionNumber)" class="flex items-center gap-1 text-emerald-600 hover:underline">
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">assignment_ind</mat-icon> Sử dụng Bảng đại từ (v{{activeV.pronounVersionNumber || 1}})
+                        </button>
+                      } @else {
+                        <span class="flex items-center gap-1 text-zinc-400">
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">person_off</mat-icon> Không sử dụng Bảng đại từ
+                        </span>
+                      }
+                      <span class="bg-zinc-200 w-[1px] h-3 mx-0"></span>
+                      @if (activeV.useContextSummary) {
+                        <button (click)="viewContextSummary(activeV.contextSummarySnapshot, activeV.contextSummaryChapterTitle)" class="flex items-center gap-1 text-cyan-600 hover:underline">
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">psychology</mat-icon> Sử dụng tóm tắt ngữ cảnh
+                        </button>
+                      } @else {
+                        <span class="flex items-center gap-1 text-zinc-400">
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">psychology_alt</mat-icon> Không sử dụng tóm tắt
+                        </span>
+                      }
+                      <span class="bg-zinc-200 w-[1px] h-3 mx-0"></span>
+                      @if (activeV.summary) {
+                        <button (click)="viewSummary(activeV.summary)" class="flex items-center gap-1 text-amber-600 hover:underline" title="Xem bản tóm tắt">
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">auto_awesome</mat-icon> Có tóm tắt
+                        </button>
+                      } @else {
+                        <button (click)="confirmCreateSummary(activeV)" [disabled]="isGeneratingSummary()" class="flex items-center gap-1 text-zinc-400 hover:text-amber-600 transition-colors cursor-pointer disabled:cursor-not-allowed" title="Nhấp để tạo bản tóm tắt">
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]" [class.animate-spin]="isGeneratingSummary()">{{ isGeneratingSummary() ? 'sync' : 'auto_awesome_mosaic' }}</mat-icon> {{ isGeneratingSummary() ? 'Đang tạo tóm tắt...' : 'Không có tóm tắt' }}
+                        </button>
+                      }
+                    </div>
                   </div>
                 }
             </div>
@@ -422,6 +437,28 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
         </div>
       }
 
+      @if (showContextSummaryModal() || isClosingContextSummaryModal()) {
+        <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 cursor-pointer animate-in fade-in duration-200" tabindex="0" (click)="triggerCloseContextSummaryModal()" (keydown.escape)="triggerCloseContextSummaryModal()" [class.animate-fade-out]="isClosingContextSummaryModal()">
+          <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-zinc-50 rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden cursor-default animate-in zoom-in duration-200" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosingContextSummaryModal()">
+            <div class="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-white">
+              <div>
+                <h2 class="text-xl font-bold text-zinc-900 flex items-center gap-2">
+                  <mat-icon class="text-cyan-500">psychology</mat-icon>
+                  Tóm tắt ngữ cảnh đã dùng
+                </h2>
+                <p class="text-[13px] text-zinc-500 mt-1 ml-8">Được trích xuất từ: <span class="font-medium text-cyan-600">{{ activeContextSummaryTitle() }}</span></p>
+              </div>
+              <button (click)="triggerCloseContextSummaryModal()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center flex-shrink-0 ml-4">
+                <span class="material-icons !text-[20px] !w-5 !h-5 !flex !items-center !justify-center leading-none">close</span>
+              </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 bg-white">
+               <div class="prose prose-sm max-w-none text-zinc-700" [innerHTML]="parseMarkdown(activeContextSummary())"></div>
+            </div>
+          </div>
+        </div>
+      }
+
       @if (showPronounModal() || isClosingPronounModal()) {
         <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 cursor-pointer animate-in fade-in duration-200" tabindex="0" (click)="triggerClosePronounModal()" (keydown.escape)="triggerClosePronounModal()" [class.animate-fade-out]="isClosingPronounModal()">
           <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden cursor-default animate-in zoom-in duration-200" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosingPronounModal()">
@@ -447,6 +484,29 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
           </div>
         </div>
       }
+
+      @if (showConfirmCreateSummary()) {
+        <div class="fixed inset-0 bg-zinc-900/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-300 border border-zinc-100">
+             <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                   <mat-icon class="!w-8 !h-8 !text-[32px]">auto_awesome</mat-icon>
+                </div>
+                <h3 class="text-xl font-bold text-zinc-900 mb-3">Tạo bản tóm tắt</h3>
+                <p class="text-zinc-600 leading-relaxed mb-8">Khối dịch này hiện chưa có bản tóm tắt bối cảnh. Bạn có muốn tạo bản tóm tắt ngay bây giờ không?</p>
+                
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                   <button (click)="cancelConfirmSummary()" class="w-full sm:w-1/2 px-6 py-3 rounded-xl border border-zinc-200 text-zinc-600 font-semibold hover:bg-zinc-50 transition-colors">
+                     Hủy bỏ
+                   </button>
+                   <button (click)="generateMissingSummary()" class="w-full sm:w-1/2 px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-lg shadow-amber-500/30 transition-all active:scale-95">
+                     Tạo ngay
+                   </button>
+                </div>
+             </div>
+          </div>
+        </div>
+      }
     </div>
   `
 })
@@ -454,6 +514,7 @@ export class ChapterItemComponent {
   store = inject(BookStore);
   toast = inject(ToastService);
   readerStore = inject(ReaderStore);
+  gemini = inject(GeminiClient);
   private sanitizer = inject(DomSanitizer);
   chapter = input.required<Chapter>();
   index = input.required<number>();
@@ -472,10 +533,70 @@ export class ChapterItemComponent {
   isClosingSummaryModal = signal(false);
   activeSummary = signal('');
 
+  showContextSummaryModal = signal(false);
+  isClosingContextSummaryModal = signal(false);
+  activeContextSummary = signal('');
+  activeContextSummaryTitle = signal('');
+
   showPronounModal = signal(false);
   isClosingPronounModal = signal(false);
   parsedPronounSnapshot = signal<SafeHtml | string>('');
   currentPronounVersion = signal<number | undefined>(undefined);
+
+  isGeneratingSummary = signal(false);
+  showConfirmCreateSummary = signal(false);
+  selectedVersionForSummary = signal<TranslationVersion | null>(null);
+
+  confirmCreateSummary(version: TranslationVersion) {
+    this.selectedVersionForSummary.set(version);
+    this.showConfirmCreateSummary.set(true);
+  }
+
+  cancelConfirmSummary() {
+    this.showConfirmCreateSummary.set(false);
+    this.selectedVersionForSummary.set(null);
+  }
+
+  async generateMissingSummary() {
+    const version = this.selectedVersionForSummary();
+    if (!version || !version.text.trim()) {
+      this.cancelConfirmSummary();
+      return;
+    }
+
+    this.showConfirmCreateSummary.set(false);
+    this.isGeneratingSummary.set(true);
+
+    try {
+      // Use the model stored in the version, or fallback to config model
+      const model = version.model || this.store.config().model;
+      const summary = await this.gemini.summarizeTranslation(version.text, model);
+      
+      if (summary) {
+        // Update the version in the chapter
+        const currentChapter = this.chapter();
+        if (currentChapter.versions) {
+          const updatedVersions = currentChapter.versions.map(v => 
+            v.versionNumber === version.versionNumber ? { ...v, summary } : v
+          );
+          
+          this.store.updateChapter(currentChapter.id, {
+            versions: updatedVersions
+          });
+          
+          this.toast.success('Đã tạo bản tóm tắt thành công.');
+        }
+      } else {
+        this.toast.error('Không thể tạo bản tóm tắt. Vui lòng thử lại.');
+      }
+    } catch (e) {
+      console.error('Failed to create missing summary', e);
+      this.toast.error('Có lỗi xảy ra khi tạo bản tóm tắt.');
+    } finally {
+      this.isGeneratingSummary.set(false);
+      this.selectedVersionForSummary.set(null);
+    }
+  }
 
   viewPronounSnapshot(snapshotText: string | undefined, version: number | undefined) {
     if (!snapshotText) {
@@ -506,6 +627,21 @@ export class ChapterItemComponent {
     setTimeout(() => {
       this.showSummaryModal.set(false);
       this.isClosingSummaryModal.set(false);
+    }, 200);
+  }
+
+  viewContextSummary(summary: string | undefined, title: string | undefined) {
+    if (!summary) return;
+    this.activeContextSummary.set(summary);
+    this.activeContextSummaryTitle.set(title || 'Chương trước');
+    this.showContextSummaryModal.set(true);
+  }
+
+  triggerCloseContextSummaryModal() {
+    this.isClosingContextSummaryModal.set(true);
+    setTimeout(() => {
+      this.showContextSummaryModal.set(false);
+      this.isClosingContextSummaryModal.set(false);
     }, 200);
   }
 

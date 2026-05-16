@@ -167,7 +167,7 @@ import { BookStore } from '../../../core/book.store';
             [class.cursor-pointer]="!store.isTranslatingAny()">
           <span class="text-zinc-700 font-medium tracking-tight">Tạo bản tóm tắt cho bản dịch kế tiếp</span>
         </label>
-        <div class="text-xs text-zinc-500">Tự động tóm tắt nội dung sau khi dịch xong.</div>
+        <div class="text-xs text-zinc-500 max-w-lg">[Mặc định Bật] - Tự động tóm tắt nội dung sau khi dịch xong một khối để đưa bối cảnh vào khối dịch kế tiếp. Hữu ích khi các chương/khối dịch là một phần của cuốn sách tổng thể. Nếu các chương/khối hoàn toàn độc lập, ví dụ như các truyện ngắn riêng biệt trong một cuốn sách lớn thì nên tắt tùy chọn này.</div>
       </div>
     </div>
   `
