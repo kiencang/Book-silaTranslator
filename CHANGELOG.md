@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.43]- 2026-05-16
 ### Fixed
 - Cập nhật SI bản mới nhất.
+- Tinh chỉnh lại giao diện.
 
 ## [v1.0.42]- 2026-05-16
 ### Fixed
