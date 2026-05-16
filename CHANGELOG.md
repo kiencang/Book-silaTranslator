@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
+## [v1.0.45]- 2026-05-16
+### Fixed
+- Cập nhật SI/Prompt phiên bản mới nhất.
+
 ## [v1.0.44]- 2026-05-16
 ### Fixed
 - Chỉnh giao diện, để các Modal xuất hiện từ từ, thay vì đột ngột.
