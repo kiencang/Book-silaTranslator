@@ -8,7 +8,11 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
-## [v1.0.47]- 2026-05-16
+## [v1.0.48]- 2026-05-17
+### Fixed
+- UI/UX Polishing.
+
+## [v1.0.47]- 2026-05-17
 ### Fixed
 - Thống nhất biến giữ chỗ.
 - Tạo thông tin tóm tắt cục bộ tại từng block nếu muốn.
