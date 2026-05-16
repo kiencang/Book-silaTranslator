@@ -8,6 +8,11 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
+## [v1.0.49]- 2026-05-17
+### Fixed
+- UI/UX Polishing.
+- Thêm nút copy mã của bảng Đại từ và Thuật ngữ.
+
 ## [v1.0.48]- 2026-05-17
 ### Fixed
 - UI/UX Polishing.
