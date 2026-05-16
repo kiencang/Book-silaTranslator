@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.44]- 2026-05-16
 ### Fixed
 - Chỉnh giao diện, để các Modal xuất hiện từ từ, thay vì đột ngột.
+- Thay đổi vị trí nút X đóng toàn màn hình từ trái sang phải.
 
 ## [v1.0.43]- 2026-05-16
 ### Fixed
