@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.47]- 2026-05-16
 ### Fixed
 - Thống nhất biến giữ chỗ.
+- Tạo thông tin tóm tắt cục bộ tại từng block nếu muốn.
 
 ## [v1.0.46]- 2026-05-16
 ### Fixed
