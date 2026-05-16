@@ -12,6 +12,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - UI/UX Polishing.
 - Thêm nút copy mã của bảng Đại từ và Thuật ngữ.
+- Đổi tên ứng dụng.
 
 ## [v1.0.48]- 2026-05-17
 ### Fixed
