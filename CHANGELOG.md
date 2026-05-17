@@ -12,6 +12,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Dừng vòng lặp dịch tại phase5 nếu API phản hồi các lỗi không thể khắc phục (ví dụ quá ngưỡng miễn phí).
 - Thêm thông tin phiên bản nào của Bảng thuật ngữ được sử dụng.
+- Nâng số phiên bản lưu trữ mặc định của bảng đại từ và từ khó từ 3 lên 5.
 
 ## [v1.0.51]- 2026-05-17
 ### Fixed
