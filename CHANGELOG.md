@@ -13,7 +13,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 - Cập nhật SI/Prompt bản mới nhất.
 - Điều chỉnh một số từ ngữ khi chèn bối cảnh tóm tắt trước đó vào prompt.
 - Sử dụng thư viện wrapper idb để giảm thiểu sai sót bộ nhớ khi thao tác trên Local DB.
-- Lưu trữ file PDF cắt ra dưới dạng Blob/ArrayBuffer thay vì Base64.
+- Lưu trữ file PDF cắt ra dưới dạng Blob/ArrayBuffer thay vì Base64 để giảm nguy cơ bị `đơ` trình duyệt với các file PDF lớn.
 
 ## [v1.0.49]- 2026-05-17
 ### Fixed
