@@ -377,10 +377,15 @@ export class Uploader {
         this.store.setPdfTask({ ...currentTaskState, chunks: updatedChunks });
         
         try {
-          if (!chunk.base64Pdf) throw new Error("Missing PDF data");
+          if (!chunk.pdfData && !(chunk as any).base64Pdf) throw new Error("Missing PDF data");
           
-          let b64Data = chunk.base64Pdf;
-          if (b64Data.includes(',')) b64Data = b64Data.split(',')[1];
+          let b64Data: string;
+          if (chunk.pdfData) {
+            b64Data = await this.uint8ArrayToBase64(chunk.pdfData);
+          } else {
+            b64Data = (chunk as any).base64Pdf;
+            if (b64Data.includes(',')) b64Data = b64Data.split(',')[1];
+          }
           
           const markdown = await this.gemini.convertPdfToMarkdown(b64Data, this.pdfModel());
           
@@ -527,11 +532,11 @@ export class Uploader {
           const chunkIndices = Array.from({ length: endPage - i + 1 }, (_, k) => k + i);
           const copiedPages = await newPdf.copyPages(pdfDoc, chunkIndices);
           copiedPages.forEach((page) => newPdf.addPage(page));
-          const chunkBase64 = await newPdf.saveAsBase64({ dataUri: true });
+          const chunkData = await newPdf.save();
           
           chunks.push({
              index: i / CHUNK_SIZE,
-             base64Pdf: chunkBase64,
+             pdfData: chunkData,
              status: 'pending'
           });
         }
@@ -562,6 +567,19 @@ export class Uploader {
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = error => reject(error);
+    });
+  }
+
+  private uint8ArrayToBase64(uint8Array: Uint8Array): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const blob = new Blob([uint8Array as unknown as BlobPart], { type: 'application/pdf' });
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        resolve(dataUrl.split(',')[1]);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
     });
   }
 }

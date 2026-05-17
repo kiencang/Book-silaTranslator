@@ -8,6 +8,7 @@ BẠN PHẢI TUÂN THỦ NGHIÊM NGẶT CÁC RÀNG BUỘC SAU:
 1. NỐI MẠCH VĂN BẢN (QUAN TRỌNG NHẤT CHO DỊCH THUẬT):
 - XÓA NGẮT DÒNG CỨNG (Hard Line Breaks): PDF thường ngắt dòng ngẫu nhiên ở cuối mỗi mép giấy. Bạn PHẢI tự động nối các câu/dòng thuộc cùng một đoạn văn (paragraph) thành một dải văn bản liên tục trên một dòng Markdown. Chuyển sang dòng mới (Enter) CHỈ KHI thực sự kết thúc một đoạn văn.
 - NỐI CÂU QUA TRANG (Cross-page Merging): Nhận diện các câu bị cắt ngang giữa cuối trang trước và đầu trang sau. Nối chúng lại thành một câu hoàn chỉnh.
+- NGOẠI LỆ: Các đoạn thơ/bài hát (thường có các dòng ngắn, thụt lề, lặp lại cấu trúc) thì PHẢI giữ nguyên ngắt dòng, chỉ nối các đoạn văn xuôi.
 - GOM bố cục nhiều cột (Multi-column) thành MỘT cột: Nếu PDF có layout nhiều cột (như báo chí, luận văn, tài liệu nghiên cứu, v.v..), hãy đọc văn bản theo đúng luồng tự nhiên (đọc từ trên xuống dưới của từng cột, hết cột trái mới sang cột phải), tuyệt đối không đọc cắt ngang các cột. Sau đó BẮT BUỘC gộp thành MỘT CỘT DUY NHẤT để dễ đọc & xử lý sau này.
 
 2. DỌN DẸP RÁC TÀI LIỆU (NOISE REMOVAL):

@@ -77,9 +77,9 @@ import { DatePipe } from '@angular/common';
                           Giai đoạn {{p.phase}}: 
                           {{p.phase === 1 ? 'Tải lên' : (p.phase === 2 ? 'Chia chương' : (p.phase === 3 ? 'Đại từ' : (p.phase === 4 ? 'Từ khó' : 'Dịch thuật')))}}
                         </span>
-                        @if (p.pdfTask) {
+                        @if (p.pdfTaskMeta) {
                            <span class="flex items-center text-orange-600 bg-orange-50 px-2 py-0.5 rounded text-xs font-medium border border-orange-100 uppercase tracking-wide">
-                             <span class="material-icons !text-[14px] !w-3.5 !h-3.5 mr-1 leading-none flex items-center justify-center">warning</span> Gián đoạn PDF
+                             <span class="material-icons !text-[14px] !w-3.5 !h-3.5 mr-1 leading-none flex items-center justify-center">warning</span> {{ p.pdfTaskMeta.chunkCount > 0 ? 'Gián đoạn PDF' : 'PDF' }}
                            </span>
                         }
                       </div>
@@ -144,6 +144,29 @@ export class ProjectModal implements OnInit {
   
   @Output() closeModal = new EventEmitter<void>();
 
+  private uint8ArrayToBase64(uint8Array: Uint8Array): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const blob = new Blob([uint8Array as unknown as BlobPart]);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        resolve(dataUrl.split(',')[1]);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  private base64ToUint8Array(base64: string): Uint8Array {
+    const binary_string = window.atob(base64);
+    const len = binary_string.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes;
+  }
+
   triggerClose() {
     this.isClosing.set(true);
     setTimeout(() => {
@@ -200,6 +223,32 @@ export class ProjectModal implements OnInit {
       this.toast.error('Dữ liệu dự án bị lỗi, không thể xuất bản');
       return;
     }
+    
+    // Convert Uint8Array back to base64 for JSON serialization
+    if (fullProject.pdfTask && fullProject.pdfTask.chunks) {
+      fullProject.pdfTask.chunks = await Promise.all(
+        fullProject.pdfTask.chunks.map(async (chunk) => {
+          if (chunk.pdfData) {
+            try {
+               let base64: string;
+               if (chunk.pdfData instanceof Uint8Array || (chunk.pdfData as any).buffer) {
+                 base64 = await this.uint8ArrayToBase64(chunk.pdfData);
+               } else {
+                 // in case it's an object format
+                 const arr = new Uint8Array(Object.values(chunk.pdfData));
+                 base64 = await this.uint8ArrayToBase64(arr);
+               }
+               return { ...chunk, pdfData: base64 as any };
+            } catch (e) {
+               console.warn('Failed to convert chunk', e);
+               return chunk;
+            }
+          }
+          return chunk;
+        })
+      );
+    }
+
     const dataStr = JSON.stringify(fullProject, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -237,6 +286,23 @@ export class ProjectModal implements OnInit {
       }
       proj.id = newProjectId;
       
+      // Restore Uint8Array for PDF chunks
+      if (proj.pdfTask && proj.pdfTask.chunks) {
+         proj.pdfTask.chunks = proj.pdfTask.chunks.map((chunk: any) => {
+           if (chunk.base64Pdf) {
+             chunk.pdfData = this.base64ToUint8Array(chunk.base64Pdf);
+             delete chunk.base64Pdf;
+           } else if (chunk.pdfData) {
+             if (typeof chunk.pdfData === 'string') {
+               chunk.pdfData = this.base64ToUint8Array(chunk.pdfData);
+             } else if (typeof chunk.pdfData === 'object') {
+               chunk.pdfData = new Uint8Array(Object.values(chunk.pdfData));
+             }
+           }
+           return chunk;
+         });
+      }
+
       // We MUST assign new unique IDs to the imported chapters, because IndexedDB uses `id` as the primary key.
       // If we don't, importing the same project again will overwrite the old project's chapters in the DB!
       if (proj.chapters) {
