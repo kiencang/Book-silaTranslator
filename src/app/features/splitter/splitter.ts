@@ -61,7 +61,7 @@ import { SplitPreviewComponent } from './components/split-preview.component';
           [estimatedTokens]="estimatedTokens()"
           [(analysisModel)]="analysisModel"
           [(samplePercentage)]="samplePercentage"
-          (onAnalyze)="runBookAnalysis()" />
+          (analyze)="runBookAnalysis()" />
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8 transition-opacity duration-300" [class.opacity-50]="store.hasAnyTranslation()" [class.pointer-events-none]="store.hasAnyTranslation()">
@@ -74,18 +74,18 @@ import { SplitPreviewComponent } from './components/split-preview.component';
             [(draftMaxWords)]="draftMaxWords"
             [activeMinWords]="activeMinWords()"
             [activeMaxWords]="activeMaxWords()"
-            (onApply)="applyWordsRange()" />
+            (apply)="applyWordsRange()" />
 
           <app-split-options
             [activeSplitMode]="activeSplitMode()"
             [draftKeywords]="draftKeywords()"
             [draftHeadingLevel]="draftHeadingLevel()"
-            (onAddKeyword)="addKeyword($event)"
-            (onRemoveKeyword)="removeKeyword($event)"
-            (onSelectKeywordMode)="applyKeywordMode()"
-            (onSelectHeadingMode)="applyHeadingModeDefault()"
-            (onHeadingLevelChange)="onHeadingLevelChange($event)"
-            (onSelectStandaloneMode)="applyStandaloneMode()" />
+            (addKeyword)="addKeyword($event)"
+            (removeKeyword)="removeKeyword($event)"
+            (selectKeywordMode)="applyKeywordMode()"
+            (selectHeadingMode)="applyHeadingModeDefault()"
+            (headingLevelChange)="onHeadingLevelChange($event)"
+            (selectStandaloneMode)="applyStandaloneMode()" />
         </fieldset>
       </div>
 
@@ -94,9 +94,9 @@ import { SplitPreviewComponent } from './components/split-preview.component';
         [selectedMethodData]="selectedMethodData()"
         [disabled]="isAnalyzing() || store.hasAnyTranslation()"
         [isAnalyzing]="isAnalyzing()"
-        (onSelectMethod)="selectMethod($event)"
-        (onPreviewBlock)="previewBlock.set($event)"
-        (onApplySplit)="applySplit()" />
+        (selectMethod)="selectMethod($event)"
+        (previewBlock)="previewBlock.set($event)"
+        (applySplit)="applySplit()" />
 
       @if (previewBlock() || isClosingPreview()) {
         <div role="button" tabindex="0" (keydown.enter)="closePreview()" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200" [class.animate-fade-out]="isClosingPreview()" (click)="closePreview()">

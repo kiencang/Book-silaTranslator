@@ -151,12 +151,12 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                     </div>
                     <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
                       @if (activeV.glossaryStatus === 'filtered') {
-                        <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio)" class="flex items-center gap-1 text-indigo-600 hover:underline">
-                           <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">menu_book</mat-icon> Sử dụng danh sách thuật ngữ đã lọc
+                        <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio, activeV.glossaryVersionNumber)" class="flex items-center gap-1 text-indigo-600 hover:underline">
+                           <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">menu_book</mat-icon> Sử dụng danh sách thuật ngữ đã lọc (v{{activeV.glossaryVersionNumber ?? '?'}})
                         </button>
                       } @else if (activeV.glossaryStatus === 'full') {
-                        <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio)" class="flex items-center gap-1 text-indigo-600 hover:underline">
-                           <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">library_books</mat-icon> Sử dụng đầy đủ danh sách thuật ngữ
+                        <button (click)="viewCustomGlossary(activeV.customGlossary, activeV.glossaryRatio, activeV.glossaryVersionNumber)" class="flex items-center gap-1 text-indigo-600 hover:underline">
+                           <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">library_books</mat-icon> Sử dụng đầy đủ danh sách thuật ngữ (v{{activeV.glossaryVersionNumber ?? '?'}})
                         </button>
                       } @else {
                         <span class="flex items-center gap-1 text-zinc-400">
@@ -166,7 +166,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                       <span class="bg-zinc-200 w-[1px] h-3 mx-0"></span>
                       @if (activeV.usePronouns) {
                         <button (click)="viewPronounSnapshot(activeV.pronounSnapshot, activeV.pronounVersionNumber)" class="flex items-center gap-1 text-emerald-600 hover:underline">
-                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">assignment_ind</mat-icon> Sử dụng bảng đại từ (v{{activeV.pronounVersionNumber || 1}})
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">assignment_ind</mat-icon> Sử dụng bảng đại từ (v{{activeV.pronounVersionNumber ?? '?'}})
                         </button>
                       } @else {
                         <span class="flex items-center gap-1 text-zinc-400">
@@ -359,7 +359,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
           <!-- Content columns -->
           <div class="flex-1 overflow-hidden grid grid-cols-2 divide-x divide-zinc-200/50 dark:divide-zinc-800/50">
             <!-- Original Column -->
-            <div class="overflow-y-auto px-8 lg:px-16 py-12 scroll-smooth" (click)="onBilingualContentClick($event, 'original')">
+            <div tabindex="0" (keydown.enter)="onBilingualContentClick($event, 'original')" class="overflow-y-auto px-8 lg:px-16 py-12 scroll-smooth" (click)="onBilingualContentClick($event, 'original')">
               <div class="max-w-2xl mx-auto">
                 <h4 class="text-xs font-semibold uppercase tracking-wider mb-8 opacity-40 text-center flex items-center justify-center gap-2">
                   <mat-icon class="!w-4 !h-4 !text-[16px]">g_translate</mat-icon> Bản gốc
@@ -376,7 +376,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
             </div>
 
             <!-- Translated Column -->
-            <div class="overflow-y-auto px-8 lg:px-16 py-12 scroll-smooth bg-black/[0.02] dark:bg-white/[0.02]" (click)="onBilingualContentClick($event, 'translated')">
+            <div tabindex="0" (keydown.enter)="onBilingualContentClick($event, 'translated')" class="overflow-y-auto px-8 lg:px-16 py-12 scroll-smooth bg-black/[0.02] dark:bg-white/[0.02]" (click)="onBilingualContentClick($event, 'translated')">
               <div class="max-w-2xl mx-auto">
                 <h4 class="text-xs font-semibold uppercase tracking-wider mb-8 opacity-40 text-center flex items-center justify-center gap-2">
                    <mat-icon class="!w-4 !h-4 !text-[16px]">translate</mat-icon> Bản dịch
@@ -402,7 +402,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
               <div class="flex flex-col">
                 <h2 class="text-xl font-bold text-zinc-900 flex items-center gap-2">
                   <mat-icon class="text-indigo-500">menu_book</mat-icon>
-                  Thuật ngữ đã dùng cho khối này
+                  Thuật ngữ đã dùng cho khối này (v{{currentGlossaryVersion() ?? '?'}})
                 </h2>
                 <p class="text-[13px] text-zinc-500 mt-1 ml-8">Mỗi khối dịch sẽ trích những thuật ngữ phù hợp từ danh sách tổng thể thuật ngữ của cả cuốn sách, điều này giúp tránh dư thừa các thuật ngữ không dùng đến.</p>
                 @if (currentGlossaryRatio() !== undefined) {
@@ -470,11 +470,10 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
           <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[80vh] flex flex-col overflow-hidden cursor-default animate-in zoom-in duration-200" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosingPronounModal()">
             <div class="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50/80">
               <div class="flex flex-col">
-                 <h2 class="text-xl font-bold text-zinc-900 flex items-center gap-2">
+                <h2 class="text-xl font-bold text-zinc-900 flex items-center gap-2">
                    <mat-icon class="text-emerald-500">assignment_ind</mat-icon>
-                   Bảng đại từ nhân xưng đã dùng
+                   Bảng đại từ nhân xưng đã dùng cho khối này (v{{currentPronounVersion() ?? '?'}})
                  </h2>
-                 <span class="text-xs text-emerald-600 mt-1 font-medium ml-8">Phiên bản: v{{currentPronounVersion()}}</span>
                  <p class="text-[13px] text-zinc-500 mt-1 ml-8">Toàn bộ bảng đại từ này được đưa vào khi dịch khối này. Điều đó giúp công cụ dịch có đầy đủ bối cảnh hơn.</p>
               </div>
               <button (click)="triggerClosePronounModal()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center self-start flex-shrink-0 ml-4">
@@ -535,6 +534,7 @@ export class ChapterItemComponent {
   isClosingGlossaryModal = signal(false);
   parsedCustomGlossary = signal<SafeHtml | string>('');
   currentGlossaryRatio = signal<number | undefined>(undefined);
+  currentGlossaryVersion = signal<number | undefined>(undefined);
 
   showSummaryModal = signal(false);
   isClosingSummaryModal = signal(false);
@@ -611,7 +611,7 @@ export class ChapterItemComponent {
     } else {
       this.parsedPronounSnapshot.set(this.parseMarkdown(snapshotText));
     }
-    this.currentPronounVersion.set(version || 1);
+    this.currentPronounVersion.set(version);
     this.showPronounModal.set(true);
   }
 
@@ -652,10 +652,11 @@ export class ChapterItemComponent {
     }, 200);
   }
 
-  viewCustomGlossary(glossaryMd: string | undefined, ratio?: number) {
+  viewCustomGlossary(glossaryMd: string | undefined, ratio?: number, version?: number) {
     if (!glossaryMd) return;
     this.parsedCustomGlossary.set(this.parseMarkdown(glossaryMd));
     this.currentGlossaryRatio.set(ratio);
+    this.currentGlossaryVersion.set(version);
     this.showGlossaryModal.set(true);
   }
   
@@ -740,7 +741,7 @@ export class ChapterItemComponent {
     }
   }
 
-  onBilingualContentClick(event: MouseEvent, source: 'original' | 'translated') {
+  onBilingualContentClick(event: Event, source: 'original' | 'translated') {
     const target = event.target as HTMLElement;
     const blockElement = target.closest('p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, table') as HTMLElement;
     if (!blockElement) return;

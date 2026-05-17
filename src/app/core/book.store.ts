@@ -18,6 +18,8 @@ export interface TranslationVersion {
   usePronouns?: boolean;
   pronounSnapshot?: string;
   pronounVersionNumber?: number;
+  useGlossary?: boolean;
+  glossaryVersionNumber?: number;
   useContextSummary?: boolean;
   contextSummarySnapshot?: string;
   contextSummaryChapterTitle?: string;
@@ -91,6 +93,16 @@ export class BookStore {
       if (v) return v.content;
     }
     return versions[versions.length - 1].content;
+  });
+  readonly activeGlossaryVersionNumber = computed(() => {
+    const versions = this.glossaryVersions();
+    if (!versions.length) return undefined;
+    const activeId = this.activeGlossaryVersionId();
+    if (activeId) {
+      const v = versions.find(v => v.id === activeId);
+      if (v) return v.versionNumber;
+    }
+    return versions[versions.length - 1].versionNumber;
   });
   readonly useGlossary = signal<boolean>(false);
   private currentProjectCreatedAt = signal<number>(Date.now());

@@ -45,7 +45,7 @@ import { MatIconModule } from '@angular/material/icon';
       </div>
       <div class="flex justify-end mt-2">
         <button 
-          (click)="onAnalyze.emit()"
+          (click)="analyze.emit()"
           [disabled]="isAnalyzing()"
           class="flex-shrink-0 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-wait">
           @if (isAnalyzing()) {
@@ -68,7 +68,7 @@ export class AiAnalysisComponent {
   analysisModel = model.required<string>();
   samplePercentage = model.required<number>();
 
-  onAnalyze = output<void>();
+  analyze = output<void>();
 
   formatNumber(val: number): string {
     if (val === 0) return '0';

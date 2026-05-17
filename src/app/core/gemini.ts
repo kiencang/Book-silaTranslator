@@ -258,7 +258,7 @@ export class GeminiClient {
         }
     }
     
-    let systemInstruction = await this.loadPromptText('/prompts/multi_system_instructions.md');
+    const systemInstruction = await this.loadPromptText('/prompts/multi_system_instructions.md');
     let finalPrompt = await this.loadPromptText('/prompts/multi_prompt.md') || '';
     
     if (finalPrompt) {

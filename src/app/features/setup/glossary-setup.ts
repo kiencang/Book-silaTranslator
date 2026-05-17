@@ -200,7 +200,7 @@ export class GlossarySetup {
 
   getModelDisplay(v: import('../../core/db').ContentVersion | null | undefined): string {
     if (!v) return '';
-    let name = v.model.includes('pro') ? 'Pro' : 'Flash';
+    const name = v.model.includes('pro') ? 'Pro' : 'Flash';
     if (v.source === 'manual') return 'Thủ công';
     if (v.source === 'ai_edited') return `${name} (Chỉnh tay)`;
     return name;

@@ -166,7 +166,7 @@ export class Translator {
     }
   }
 
-  async translateSingle(chapter: Chapter) {
+  async translateSingle(chapter: Chapter): Promise<boolean> {
     this.store.updateChapter(chapter.id, { status: 'translating' });
     this.expanded[chapter.id] = true;
     
@@ -226,6 +226,8 @@ export class Translator {
         usePronouns: this.store.usePronouns(),
         pronounSnapshot: this.store.usePronouns() ? this.store.pronounTable() : undefined,
         pronounVersionNumber: this.store.usePronouns() ? this.store.activePronounVersionNumber() : undefined,
+        useGlossary: this.store.useGlossary(),
+        glossaryVersionNumber: this.store.useGlossary() ? this.store.activeGlossaryVersionNumber() : undefined,
         useContextSummary: !!contextSummarySnapshot,
         contextSummarySnapshot: contextSummarySnapshot,
         contextSummaryChapterTitle: contextSummaryChapterTitle
@@ -240,10 +242,19 @@ export class Translator {
         latestVersionNumber: newVersionNumber,
         activeVersionNumber: newVersionNumber
       });
+      return true;
     } catch (e: unknown) {
       console.error(e);
       this.store.updateChapter(chapter.id, { status: 'error' });
       this.toast.error(this.toast.Messages.TRANSLATION_ERROR(chapter.title, parseGeminiError(e)));
+      
+      const msg = (e as Error)?.message || e?.toString() || '';
+      const lowerMsg = msg.toLowerCase();
+      if (lowerMsg.includes('quota') || lowerMsg.includes('429') || 
+          lowerMsg.includes('api key') || lowerMsg.includes('403') || lowerMsg.includes('permission_denied')) {
+        return false;
+      }
+      return true;
     }
   }
 
@@ -278,7 +289,12 @@ export class Translator {
           break;
         }
         // Do it sequentially to avoid rate limiting
-        await this.translateSingle(chapter);
+        const shouldContinue = await this.translateSingle(chapter);
+        if (!shouldContinue) {
+          this.stopRequested.set(true);
+          this.toast.error('Tiến trình dịch tự động đã dừng lại do lỗi nghiêm trọng (ví dụ: hết Quota miễn phí hoặc sai API Key).');
+          break;
+        }
       }
       if (!this.stopRequested()) {
         this.toast.success(this.toast.Messages.TRANSLATION_COMPLETED);

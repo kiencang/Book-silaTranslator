@@ -43,12 +43,14 @@ import { PDFDocument } from 'pdf-lib';
             </div>
 
             <div class="text-left mb-8 relative">
-              <label class="block text-sm font-medium text-zinc-700 mb-2">Chọn model xử lý</label>
-              <select [(ngModel)]="pdfModel" (ngModelChange)="onModelChange()" class="w-full px-4 pr-10 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors appearance-none">
-                <option value="gemini-flash-lite-latest">Lite (rẻ & nhanh nhất)</option>
-                <option value="gemini-flash-latest">Flash (cho nội dung trình bày phức tạp)</option>
-              </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 top-[28px] pl-2 pr-4 flex items-center text-zinc-500">
+              <label class="block text-sm font-medium text-zinc-700 mb-2">
+                Chọn model xử lý
+                <select [(ngModel)]="pdfModel" (ngModelChange)="onModelChange()" class="mt-2 w-full px-4 pr-10 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors appearance-none font-normal text-base">
+                  <option value="gemini-flash-lite-latest">Lite (rẻ & nhanh nhất)</option>
+                  <option value="gemini-flash-latest">Flash (cho nội dung trình bày phức tạp)</option>
+                </select>
+              </label>
+              <div class="pointer-events-none absolute inset-y-0 right-0 top-[36px] pl-2 pr-4 flex items-center text-zinc-500">
                 <mat-icon class="!w-5 !h-5 !text-[20px]">expand_more</mat-icon>
               </div>
             </div>

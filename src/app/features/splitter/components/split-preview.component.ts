@@ -19,8 +19,8 @@ import { PreviewChapter } from '../splitter.util';
           [class.bg-indigo-50]="selectedMethodData()?.keyword === method.keyword"
           [class.border-zinc-200]="selectedMethodData()?.keyword !== method.keyword"
           [class.hover:border-zinc-300]="selectedMethodData()?.keyword !== method.keyword"
-          (keydown.enter)="onSelectMethod.emit(method.keyword)"
-          (click)="onSelectMethod.emit(method.keyword)"
+          (keydown.enter)="selectMethod.emit(method.keyword)"
+          (click)="selectMethod.emit(method.keyword)"
         >
           <div class="flex justify-between items-start mb-3">
             <h3 class="font-semibold text-zinc-900">Theo {{ method.keyword }} / Khối</h3>
@@ -47,7 +47,7 @@ import { PreviewChapter } from '../splitter.util';
         </div>
         <div class="max-h-96 overflow-y-auto p-0">
           @for (chap of selectedMethodData()?.previewChapters; track $index) {
-            <div role="button" tabindex="0" (keydown.enter)="onPreviewBlock.emit(chap)" class="px-6 py-4 border-b border-zinc-100 last:border-0 hover:bg-zinc-50 transition-colors flex items-center justify-between group cursor-pointer" (click)="onPreviewBlock.emit(chap)">
+            <div role="button" tabindex="0" (keydown.enter)="previewBlock.emit(chap)" class="px-6 py-4 border-b border-zinc-100 last:border-0 hover:bg-zinc-50 transition-colors flex items-center justify-between group cursor-pointer" (click)="previewBlock.emit(chap)">
               <div class="flex-1 min-w-0 pr-4">
                 <div class="flex items-center mb-1">
                   <h4 class="font-medium text-zinc-900 truncate pr-4">{{ chap.title }}</h4>
@@ -67,7 +67,7 @@ import { PreviewChapter } from '../splitter.util';
            [class.opacity-50]="isAnalyzing()"
            [class.pointer-events-none]="isAnalyzing()">
         <button 
-          (click)="onApplySplit.emit()"
+          (click)="applySplit.emit()"
           [disabled]="selectedMethodData()?.count === 0 || isAnalyzing()"
           class="flex items-center space-x-2 bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -84,7 +84,7 @@ export class SplitPreviewComponent {
   disabled = input.required<boolean>();
   isAnalyzing = input.required<boolean>();
 
-  onSelectMethod = output<string>();
-  onPreviewBlock = output<PreviewChapter>();
-  onApplySplit = output<void>();
+  selectMethod = output<string>();
+  previewBlock = output<PreviewChapter>();
+  applySplit = output<void>();
 }

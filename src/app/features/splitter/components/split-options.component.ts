@@ -1,4 +1,4 @@
-import { Component, input, output, model } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -19,7 +19,7 @@ import { MatIconModule } from '@angular/material/icon';
         </div>
         <div class="w-full md:w-32 flex-shrink-0">
           <button 
-            (click)="onSelectKeywordMode.emit()"
+            (click)="selectKeywordMode.emit()"
             class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm"
             [class.bg-indigo-600]="activeSplitMode() === 'keyword'"
             [class.text-white]="activeSplitMode() === 'keyword'"
@@ -43,7 +43,7 @@ import { MatIconModule } from '@angular/material/icon';
         @for (kw of draftKeywords(); track kw) {
           <span class="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
             {{ kw }}
-            <button type="button" class="ml-1.5 flex-shrink-0 inline-flex rounded-full text-indigo-500 hover:text-indigo-800 hover:bg-indigo-100 transition-colors" (click)="onRemoveKeyword.emit(kw); $event.stopPropagation()">
+            <button type="button" class="ml-1.5 flex-shrink-0 inline-flex rounded-full text-indigo-500 hover:text-indigo-800 hover:bg-indigo-100 transition-colors" (click)="removeKeyword.emit(kw); $event.stopPropagation()">
               <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">close</mat-icon>
             </button>
           </span>
@@ -77,7 +77,7 @@ import { MatIconModule } from '@angular/material/icon';
         </div>
         <div class="w-full md:w-32 flex-shrink-0">
           <button 
-            (click)="onSelectHeadingMode.emit()"
+            (click)="selectHeadingMode.emit()"
             class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm"
             [class.bg-indigo-600]="activeSplitMode() === 'heading'"
             [class.text-white]="activeSplitMode() === 'heading'"
@@ -101,14 +101,14 @@ import { MatIconModule } from '@angular/material/icon';
         <label class="flex items-center gap-2 cursor-pointer p-2 -m-2 rounded-lg hover:bg-zinc-50 transition-colors">
           <input type="radio" name="headingLvl" value="h2" 
                  [checked]="activeSplitMode() === 'heading' && draftHeadingLevel() === 'h2'" 
-                 (change)="onHeadingLevelChange.emit('h2')"
+                 (change)="headingLevelChange.emit('h2')"
                  class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500">
           <span class="text-sm font-medium text-zinc-900">Thẻ H2</span>
         </label>
         <label class="flex items-center gap-2 cursor-pointer p-2 -m-2 rounded-lg hover:bg-zinc-50 transition-colors">
           <input type="radio" name="headingLvl" value="h3" 
                  [checked]="activeSplitMode() === 'heading' && draftHeadingLevel() === 'h3'" 
-                 (change)="onHeadingLevelChange.emit('h3')"
+                 (change)="headingLevelChange.emit('h3')"
                  class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500">
           <span class="text-sm font-medium text-zinc-900">Thẻ H3</span>
         </label>
@@ -134,7 +134,7 @@ import { MatIconModule } from '@angular/material/icon';
         </div>
         <div class="w-full md:w-32 flex-shrink-0">
           <button 
-            (click)="onSelectStandaloneMode.emit()"
+            (click)="selectStandaloneMode.emit()"
             class="w-full h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm"
             [class.bg-indigo-600]="activeSplitMode() === 'standalone'"
             [class.text-white]="activeSplitMode() === 'standalone'"
@@ -163,13 +163,13 @@ export class SplitOptionsComponent {
   draftKeywords = input.required<string[]>();
   draftHeadingLevel = input.required<'h2' | 'h3'>();
 
-  onAddKeyword = output<string>();
-  onRemoveKeyword = output<string>();
+  addKeyword = output<string>();
+  removeKeyword = output<string>();
   
-  onSelectKeywordMode = output<void>();
-  onSelectHeadingMode = output<void>();
-  onHeadingLevelChange = output<'h2' | 'h3'>();
-  onSelectStandaloneMode = output<void>();
+  selectKeywordMode = output<void>();
+  selectHeadingMode = output<void>();
+  headingLevelChange = output<'h2' | 'h3'>();
+  selectStandaloneMode = output<void>();
 
   focusInput(input: HTMLInputElement) {
     input.focus();
@@ -185,7 +185,7 @@ export class SplitOptionsComponent {
   addKeywordFromInput(input: HTMLInputElement) {
     const val = input.value.trim();
     if (val) {
-      this.onAddKeyword.emit(val);
+      this.addKeyword.emit(val);
       input.value = '';
     }
   }

@@ -18,7 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
                 id="draftMinWords"
                 [value]="draftMinWords()" 
                 (input)="draftMinWords.set(+$any($event.target).value)" 
-                (keydown.enter)="onApply.emit()"
+                (keydown.enter)="apply.emit()"
                 min="1000" max="7000" step="500" 
                 class="w-28 flex-shrink-0 px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
         </div>
@@ -37,7 +37,7 @@ import { MatIconModule } from '@angular/material/icon';
                 id="draftMaxWords"
                 [value]="draftMaxWords()" 
                 (input)="draftMaxWords.set(+$any($event.target).value)" 
-                (keydown.enter)="onApply.emit()"
+                (keydown.enter)="apply.emit()"
                 min="10000" max="25000" step="1000" 
                 class="w-28 flex-shrink-0 px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
         </div>
@@ -46,7 +46,7 @@ import { MatIconModule } from '@angular/material/icon';
       <!-- Nút áp dụng -->
       <div class="mt-6 flex justify-center">
         <button 
-          (click)="onApply.emit()"
+          (click)="apply.emit()"
           class="w-48 h-11 flex items-center justify-center space-x-1.5 rounded-lg font-medium transition-colors border shadow-sm text-sm"
           [class.bg-indigo-600]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
           [class.text-white]="draftMinWords() === activeMinWords() && draftMaxWords() === activeMaxWords()"
@@ -75,5 +75,5 @@ export class SplitLimitsComponent {
   activeMinWords = input.required<number>();
   activeMaxWords = input.required<number>();
 
-  onApply = output<void>();
+  apply = output<void>();
 }
