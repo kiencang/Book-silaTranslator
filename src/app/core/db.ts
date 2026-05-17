@@ -64,6 +64,7 @@ export interface ContentVersion {
   model: string;
   temperature: number;
   timestamp: number;
+  source?: 'ai' | 'ai_edited' | 'manual';
 }
 
 export interface Project {
@@ -116,12 +117,17 @@ interface AppDB extends DBSchema {
     value: ChapterEntity;
     indexes: { projectId: string };
   };
+  project_task_chunks: {
+    key: string;
+    value: { id: string; taskId: string; index: number; data: any };
+    indexes: { taskId: string };
+  };
 }
 
 @Injectable({ providedIn: 'root' })
 export class DbService {
   private dbName = 'MarkdownTranslatorDB';
-  private version = 3;
+  private version = 4;
   private platformId = inject(PLATFORM_ID);
   
   private dbPromise: Promise<IDBPDatabase<AppDB>> | null = null;
@@ -148,6 +154,10 @@ export class DbService {
           }
           if (!db.objectStoreNames.contains('settings')) {
             db.createObjectStore('settings', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('project_task_chunks')) {
+            const chunkStore = db.createObjectStore('project_task_chunks', { keyPath: 'id' });
+            chunkStore.createIndex('taskId', 'taskId', { unique: false });
           }
         },
       });
@@ -186,12 +196,13 @@ export class DbService {
   async getProject(id: string): Promise<Project | undefined> {
     try {
       const db = await this.getDB();
-      const tx = db.transaction(['projects_meta', 'project_assets', 'project_chapters'], 'readonly');
+      const tx = db.transaction(['projects_meta', 'project_assets', 'project_chapters', 'project_task_chunks'], 'readonly');
       
       const meta = await tx.objectStore('projects_meta').get(id);
       if (!meta) return undefined;
       
       const assetStore = tx.objectStore('project_assets');
+      const chunkIndex = tx.objectStore('project_task_chunks').index('taskId');
       const [
         rawMdReq, pronounsReq, glossaryReq, pVersReq, gVersReq, pdfReq, pTaskReq, gTaskReq
       ] = await Promise.all([
@@ -206,6 +217,13 @@ export class DbService {
       ]);
       
       const chapReq = await tx.objectStore('project_chapters').index('projectId').getAll(id);
+      
+      const [pdfChunksReq, pTaskChunksReq, gTaskChunksReq] = await Promise.all([
+        chunkIndex.getAll(`${id}_pdfTask`),
+        chunkIndex.getAll(`${id}_pronounTask`),
+        chunkIndex.getAll(`${id}_glossaryTask`)
+      ]);
+
       await tx.done;
       
       const asset: Partial<ProjectAsset> = {};
@@ -214,9 +232,25 @@ export class DbService {
       if (glossaryReq) asset.glossaryTable = glossaryReq.data;
       if (pVersReq) asset.pronounVersions = pVersReq.data;
       if (gVersReq) asset.glossaryVersions = gVersReq.data;
-      if (pdfReq) asset.pdfTask = pdfReq.data;
-      if (pTaskReq) asset.pronounTask = pTaskReq.data;
-      if (gTaskReq) asset.glossaryTask = gTaskReq.data;
+      
+      if (pdfReq) {
+        asset.pdfTask = pdfReq.data;
+        if (asset.pdfTask && pdfChunksReq && pdfChunksReq.length > 0) {
+          asset.pdfTask.chunks = pdfChunksReq.sort((a,b)=>a.index-b.index).map(c=>c.data);
+        }
+      }
+      if (pTaskReq) {
+        asset.pronounTask = pTaskReq.data;
+        if (asset.pronounTask && pTaskChunksReq && pTaskChunksReq.length > 0) {
+          asset.pronounTask.chunks = pTaskChunksReq.sort((a,b)=>a.index-b.index).map(c=>c.data);
+        }
+      }
+      if (gTaskReq) {
+        asset.glossaryTask = gTaskReq.data;
+        if (asset.glossaryTask && gTaskChunksReq && gTaskChunksReq.length > 0) {
+          asset.glossaryTask.chunks = gTaskChunksReq.sort((a,b)=>a.index-b.index).map(c=>c.data);
+        }
+      }
 
       const chapters = chapReq || [];
       chapters.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -248,10 +282,43 @@ export class DbService {
     }
   }
 
+  private async _saveTask(tx: any, projectId: string, assetName: string, data: any) {
+    if (!data) {
+      await tx.objectStore('project_assets').delete(`${projectId}_${assetName}`);
+      const chunkStore = tx.objectStore('project_task_chunks');
+      const keys = await chunkStore.index('taskId').getAllKeys(`${projectId}_${assetName}`);
+      await Promise.all(keys.map((k: any) => chunkStore.delete(k)));
+      return;
+    }
+    const { chunks, ...meta } = data;
+    await tx.objectStore('project_assets').put({ id: `${projectId}_${assetName}`, data: meta });
+    if (chunks && Array.isArray(chunks)) {
+      const chunkStore = tx.objectStore('project_task_chunks');
+      // Delete old chunks first
+      const oldKeys = await chunkStore.index('taskId').getAllKeys(`${projectId}_${assetName}`);
+      await Promise.all(oldKeys.map((k: any) => chunkStore.delete(k)));
+      // Put new chunks
+      await Promise.all(chunks.map((c: any, i: number) => chunkStore.put({
+        id: `${projectId}_${assetName}_${i}`,
+        taskId: `${projectId}_${assetName}`,
+        index: i,
+        data: c
+      })));
+    }
+  }
+
   async saveProjectAsset(projectId: string, assetName: string, data: unknown): Promise<void> {
     try {
       const db = await this.getDB();
-      await db.put('project_assets', { id: `${projectId}_${assetName}`, data } as any);
+      const isTask = assetName === 'pdfTask' || assetName === 'pronounTask' || assetName === 'glossaryTask';
+      
+      if (isTask) {
+        const tx = db.transaction(['project_assets', 'project_task_chunks'], 'readwrite');
+        await this._saveTask(tx, projectId, assetName, data);
+        await tx.done;
+      } else {
+        await db.put('project_assets', { id: `${projectId}_${assetName}`, data } as any);
+      }
     } catch (e) {
       console.error('saveProjectAsset error', e);
     }
@@ -318,7 +385,7 @@ export class DbService {
   async saveProject(project: Project): Promise<void> {
     try {
       const db = await this.getDB();
-      const tx = db.transaction(['projects_meta', 'project_assets', 'project_chapters'], 'readwrite');
+      const tx = db.transaction(['projects_meta', 'project_assets', 'project_chapters', 'project_task_chunks'], 'readwrite');
       
       let totalWords = 0;
       let translatedWords = 0;
@@ -355,9 +422,10 @@ export class DbService {
       await assetStore.put({ id: `${project.id}_glossaryTable`, data: project.glossaryTable } as any);
       await assetStore.put({ id: `${project.id}_pronounVersions`, data: project.pronounVersions } as any);
       await assetStore.put({ id: `${project.id}_glossaryVersions`, data: project.glossaryVersions } as any);
-      await assetStore.put({ id: `${project.id}_pdfTask`, data: project.pdfTask } as any);
-      await assetStore.put({ id: `${project.id}_pronounTask`, data: project.pronounTask } as any);
-      await assetStore.put({ id: `${project.id}_glossaryTask`, data: project.glossaryTask } as any);
+      
+      await this._saveTask(tx, project.id, 'pdfTask', project.pdfTask);
+      await this._saveTask(tx, project.id, 'pronounTask', project.pronounTask);
+      await this._saveTask(tx, project.id, 'glossaryTask', project.glossaryTask);
 
       const chapStore = tx.objectStore('project_chapters');
       const idx = chapStore.index('projectId');
@@ -379,7 +447,7 @@ export class DbService {
   async deleteProject(id: string): Promise<void> {
     try {
       const db = await this.getDB();
-      const tx = db.transaction(['projects_meta', 'project_assets', 'project_chapters'], 'readwrite');
+      const tx = db.transaction(['projects_meta', 'project_assets', 'project_chapters', 'project_task_chunks'], 'readwrite');
       await tx.objectStore('projects_meta').delete(id);
       
       const assetStore = tx.objectStore('project_assets');
@@ -389,14 +457,15 @@ export class DbService {
       await assetStore.delete(`${id}_glossaryTable`);
       await assetStore.delete(`${id}_pronounVersions`);
       await assetStore.delete(`${id}_glossaryVersions`);
-      await assetStore.delete(`${id}_pdfTask`);
-      await assetStore.delete(`${id}_pronounTask`);
-      await assetStore.delete(`${id}_glossaryTask`);
+      
+      await this._saveTask(tx, id, 'pdfTask', null);
+      await this._saveTask(tx, id, 'pronounTask', null);
+      await this._saveTask(tx, id, 'glossaryTask', null);
       
       const chapStore = tx.objectStore('project_chapters');
-      const idx = chapStore.index('projectId');
-      const keys = await idx.getAllKeys(IDBKeyRange.only(id));
-      await Promise.all(keys.map(key => chapStore.delete(key)));
+      const chapIdx = chapStore.index('projectId');
+      const chapKeys = await chapIdx.getAllKeys(IDBKeyRange.only(id));
+      await Promise.all(chapKeys.map(key => chapStore.delete(key)));
 
       await tx.done;
     } catch (e) {

@@ -16,8 +16,10 @@ import { smartHardSplit } from '../splitter/splitter.util';
     <div class="max-w-7xl mx-auto py-8 lg:px-8 px-4">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h2 class="text-2xl font-bold text-zinc-900">Thiết lập Đại từ Nhân xưng (Tùy chọn)</h2>
-          <p class="text-zinc-500 mt-1">Sử dụng mô hình AI mạnh để phân tích nội dung truyện giúp xây dựng bảng đại từ nhân xưng hoàn chỉnh, nhằm đảm bảo nhất quán khi dịch & phù hợp hơn với văn hóa người Việt. Đặc biệt cần thiết cho thể loại tiểu thuyết, truyện ngắn. Các loại sách khác có thể không cần thiết.</p>
+          <h2 class="text-2xl font-bold text-zinc-900">Thiết lập Bảng Đại từ Nhân xưng (Tùy chọn)</h2>
+          <p class="text-zinc-500 mt-1">Sử dụng mô hình AI mạnh để phân tích nội dung truyện giúp xây dựng bảng đại từ nhân xưng hoàn chỉnh, nhằm đảm bảo nhất quán khi dịch & phù hợp hơn với văn hóa người Việt. Đặc biệt cần thiết cho thể loại tiểu thuyết, truyện ngắn. Các loại sách khác có thể không cần thiết (click vào "Bỏ qua phần này").</p>
+          <p class="text-zinc-500 mt-2">Nếu cần dùng, nên chọn model Pro để phân tích, vì đây là mục rất quan trọng, cần độ chính xác cao nhất có thể. Các sách không quá dài, không quá phức tạp có thể dùng model Flash.</p>
+          <p class="text-zinc-500 mt-2">Trong quá trình phân tích nếu hết ngưỡng miễn phí, gây gián đoạn, hãy phân tích lại vào ngày hôm sau (khi ngưỡng miễn phí ngày được khôi phục lại), hoặc xuất dự án, rồi đẩy nó vào tài khoản khác vẫn còn ngưỡng miễn phí và phân tích tiếp.</p>
         </div>
       </div>
 
@@ -122,8 +124,10 @@ import { smartHardSplit } from '../splitter/splitter.util';
 
                   @if (activeVersion()) {
                     <div class="flex items-center space-x-3 text-xs text-zinc-500">
-                      <span class="flex items-center" title="Model"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">model_training</mat-icon> {{ activeVersion()?.model === 'gemini-pro-latest' ? 'Pro' : 'Flash' }}</span>
-                      <span class="flex items-center" title="Temperature"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">thermostat</mat-icon> {{ activeVersion()?.temperature }}</span>
+                      <span class="flex items-center" title="Model"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">model_training</mat-icon> {{ getModelDisplay(activeVersion()) }}</span>
+                      @if (activeVersion()?.source !== 'manual') {
+                        <span class="flex items-center" title="Temperature"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">thermostat</mat-icon> {{ activeVersion()?.temperature }}</span>
+                      }
                       <span class="flex items-center" title="Thời gian"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">schedule</mat-icon> {{ activeVersion()?.timestamp | date:'HH:mm:ss dd/MM' }}</span>
                     </div>
                   }
@@ -193,6 +197,14 @@ export class PronounSetup {
     const id = this.store.activePronounVersionId();
     if (!id) return null;
     return this.store.pronounVersions().find(v => v.id === id);
+  }
+
+  getModelDisplay(v: import('../../core/db').ContentVersion | null | undefined): string {
+    if (!v) return '';
+    let name = v.model.includes('pro') ? 'Pro' : 'Flash';
+    if (v.source === 'manual') return 'Thủ công';
+    if (v.source === 'ai_edited') return `${name} (Chỉnh tay)`;
+    return name;
   }
 
   selectVersion(v: import('../../core/db').ContentVersion) {
@@ -343,9 +355,11 @@ export class PronounSetup {
   saveChanges() {
     if (this.isManuallyEdited()) {
       const active = this.activeVersion();
+      const isFromAi = active && active.source !== 'manual';
       const model = active ? active.model : this.pronounModel();
       const temp = active ? active.temperature : 0.1;
-      this.store.addPronounVersion(this.draftPronounTable(), model, temp);
+      const source: 'ai_edited' | 'manual' = isFromAi ? 'ai_edited' : 'manual';
+      this.store.addPronounVersion(this.draftPronounTable(), model, temp, source);
       this.store.savePronounsConf(true);
       this.isManuallyEdited.set(false);
       this.toast.success('Đã lưu version mới');

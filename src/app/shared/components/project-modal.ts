@@ -306,9 +306,9 @@ export class ProjectModal implements OnInit {
       // We MUST assign new unique IDs to the imported chapters, because IndexedDB uses `id` as the primary key.
       // If we don't, importing the same project again will overwrite the old project's chapters in the DB!
       if (proj.chapters) {
-        proj.chapters = proj.chapters.map(c => ({
+        proj.chapters = proj.chapters.map((c, idx) => ({
           ...c,
-          id: `${newProjectId}_${c.id}`
+          id: Date.now().toString() + Math.random().toString(36).substring(2, 9) + idx
         }));
       }
       

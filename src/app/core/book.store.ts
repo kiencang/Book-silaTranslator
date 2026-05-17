@@ -366,7 +366,7 @@ export class BookStore {
     this.useGlossary.set(use);
   }
 
-  addPronounVersion(content: string, model: string, temperature: number) {
+  addPronounVersion(content: string, model: string, temperature: number, source: 'ai' | 'ai_edited' | 'manual' = 'ai') {
     if (!content.trim()) return;
     const versions = [...this.pronounVersions()];
     const lastVersion = versions.length > 0 ? (versions[versions.length - 1].versionNumber ?? versions.length) : 0;
@@ -376,7 +376,8 @@ export class BookStore {
       content,
       model,
       temperature,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      source
     };
     versions.push(newVersion);
     if (versions.length > 3) {
@@ -390,7 +391,7 @@ export class BookStore {
     this.activePronounVersionId.set(id);
   }
 
-  addGlossaryVersion(content: string, model: string, temperature: number) {
+  addGlossaryVersion(content: string, model: string, temperature: number, source: 'ai' | 'ai_edited' | 'manual' = 'ai') {
     if (!content.trim()) return;
     const versions = [...this.glossaryVersions()];
     const lastVersion = versions.length > 0 ? (versions[versions.length - 1].versionNumber ?? versions.length) : 0;
@@ -400,7 +401,8 @@ export class BookStore {
       content,
       model,
       temperature,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      source
     };
     versions.push(newVersion);
     if (versions.length > 3) {

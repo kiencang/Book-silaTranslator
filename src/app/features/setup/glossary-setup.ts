@@ -18,6 +18,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
         <div>
           <h2 class="text-2xl font-bold text-zinc-900">Thiết lập Bảng Thuật Ngữ / Từ Khó (Tùy chọn)</h2>
           <p class="text-zinc-500 mt-1">Sử dụng mô hình AI mạnh để quét cuốn sách và trích xuất bảng thuật ngữ/từ khó dịch. Giúp bản dịch có chất lượng cao và thống nhất hơn. Đặc biệt cần thiết với sách khó dịch. Mặc dù đây là tùy chọn, không bắt buộc, nhưng khi tạo thường cho kết quả tốt hơn với bất kỳ thể loại sách nào.</p>
+          <p class="text-zinc-500 mt-2">Việc phân tích đầy đủ cả cuốn sách thường tốn thời gian từ 5 - 15 phút, tùy độ dài. Nó cũng đặc biệt tốn token, nên nếu bạn model Pro sẽ hết ngưỡng miễn phí sớm, bạn có thể dùng model Flash cho nhiệm vụ này. Đối với phân tích từ khó model Flash cho chất lượng rất tốt, không kém nhiều so với model Pro.</p>
         </div>
       </div>
 
@@ -122,8 +123,10 @@ import { smartHardSplit } from '../splitter/splitter.util';
 
                   @if (activeVersion()) {
                     <div class="flex items-center space-x-3 text-xs text-zinc-500">
-                      <span class="flex items-center" title="Model"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">model_training</mat-icon> {{ activeVersion()?.model === 'gemini-pro-latest' ? 'Pro' : 'Flash' }}</span>
-                      <span class="flex items-center" title="Temperature"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">thermostat</mat-icon> {{ activeVersion()?.temperature }}</span>
+                      <span class="flex items-center" title="Model"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">model_training</mat-icon> {{ getModelDisplay(activeVersion()) }}</span>
+                      @if (activeVersion()?.source !== 'manual') {
+                        <span class="flex items-center" title="Temperature"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">thermostat</mat-icon> {{ activeVersion()?.temperature }}</span>
+                      }
                       <span class="flex items-center" title="Thời gian"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">schedule</mat-icon> {{ activeVersion()?.timestamp | date:'HH:mm:ss dd/MM' }}</span>
                     </div>
                   }
@@ -193,6 +196,14 @@ export class GlossarySetup {
     const id = this.store.activeGlossaryVersionId();
     if (!id) return null;
     return this.store.glossaryVersions().find(v => v.id === id);
+  }
+
+  getModelDisplay(v: import('../../core/db').ContentVersion | null | undefined): string {
+    if (!v) return '';
+    let name = v.model.includes('pro') ? 'Pro' : 'Flash';
+    if (v.source === 'manual') return 'Thủ công';
+    if (v.source === 'ai_edited') return `${name} (Chỉnh tay)`;
+    return name;
   }
 
   selectVersion(v: import('../../core/db').ContentVersion) {
@@ -353,9 +364,11 @@ export class GlossarySetup {
   saveChanges() {
     if (this.isManuallyEdited()) {
       const active = this.activeVersion();
+      const isFromAi = active && active.source !== 'manual';
       const model = active ? active.model : this.glossaryModel();
       const temp = active ? active.temperature : 0.2;
-      this.store.addGlossaryVersion(this.draftTable(), model, temp);
+      const source: 'ai_edited' | 'manual' = isFromAi ? 'ai_edited' : 'manual';
+      this.store.addGlossaryVersion(this.draftTable(), model, temp, source);
       this.store.saveGlossaryConf(true);
       this.isManuallyEdited.set(false);
       this.toast.success('Đã lưu version mới');
