@@ -12,6 +12,8 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - UI/UX Polishing.
 - Thêm thông tin có người chỉnh sửa thêm hoặc bản được tạo thủ công ngay từ đầu vào Bảng Đại từ & Từ khó cho rõ ràng minh bạch.
+- Chia nhỏ Store cho các Task.
+- Chống phình to ID do kiểu đặt tên nối tiếp dẫn đến tên ngày càng dài.
 
 ## [v1.0.50]- 2026-05-17
 ### Fixed
