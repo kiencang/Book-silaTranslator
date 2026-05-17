@@ -11,7 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.51]- 2026-05-17
 ### Fixed
 - UI/UX Polishing.
-- Thêm thông tin có người chỉnh sửa thêm hoặc bản được tạo thủ công ngay từ đầu vào Bảng Đại từ & Từ khó.
+- Thêm thông tin có người chỉnh sửa thêm hoặc bản được tạo thủ công ngay từ đầu vào Bảng Đại từ & Từ khó cho rõ ràng minh bạch.
 
 ## [v1.0.50]- 2026-05-17
 ### Fixed
