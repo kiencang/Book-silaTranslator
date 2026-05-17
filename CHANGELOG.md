@@ -8,9 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
-## [v1.0.52]- 2026-05-17
+## [v1.0.52]- 2026-05-18
 ### Fixed
 - Dừng vòng lặp dịch tại phase5 nếu API phản hồi các lỗi không thể khắc phục (ví dụ quá ngưỡng miễn phí).
+- Thêm thông tin phiên bản nào của Bảng thuật ngữ được sử dụng.
 
 ## [v1.0.51]- 2026-05-17
 ### Fixed
