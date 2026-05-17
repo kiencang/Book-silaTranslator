@@ -88,7 +88,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
               [value]="draftPronounTable()"
               (valueChange)="onTableChange($event)"
               [disabled]="isGeneratingPronouns()"
-              placeholder="Ví dụ:&#10;| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |&#10;|---|---|---|---|---|---|---|&#10;| Harry Potter | Nam | Cô nhi | Cậu bé sống sót | Cậu, hắn | Với Ron: Bồ - Mình | Tự tin hơi bốc đồng |"
+              placeholder="Ví dụ:&#10;| Nhân vật (Original) | Giới tính | Ước lượng độ tuổi | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Lý do | Ghi chú |&#10;|---|---|---|---|---|---|---|---|---|&#10;| Harry Potter | Nam | Thiếu niên | Cô nhi | Cậu bé sống sót | Cậu, hắn | Với Ron: Bồ - Mình | Nội dung văn bản | Tự tin hơi bốc đồng |"
             >
               @if (store.pronounVersions().length > 0) {
                 <div class="flex items-center justify-between py-2 border-b border-zinc-100 mb-2 relative">
@@ -324,9 +324,9 @@ export class PronounSetup {
         const allPronounItems = task.chunks.flatMap(c => Array.isArray(c.result) ? c.result : []);
         let rawResult = '';
         if (allPronounItems.length > 0) {
-          rawResult = '| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |\n|---|---|---|---|---|---|---|\n';
+          rawResult = '| Nhân vật (Original) | Giới tính | Ước lượng độ tuổi | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Lý do | Ghi chú |\n|---|---|---|---|---|---|---|---|---|\n';
           for (const pt of allPronounItems) {
-            rawResult += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.notes || ''} |\n`;
+            rawResult += `| ${pt.originalName || ''} | ${pt.gender || ''} | ${pt.ageGroup || ''} | ${pt.role || ''} | ${pt.translatedTitles || ''} | ${pt.narratorPronoun || ''} | ${pt.dialoguePronouns || ''} | ${pt.reasoning || ''} | ${pt.notes || ''} |\n`;
           }
         }
 

@@ -9,7 +9,7 @@ Based on the Full Book Content, your goal is to:
 4. Output a refined, clean, and consistent Markdown table.
 
 The output MUST be a valid Markdown table with exactly these columns:
-| Nhân vật (Original) | Giới tính | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Ghi chú / Sắc thái |
+| Nhân vật (Original) | Giới tính | Ước lượng độ tuổi | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Lý do | Ghi chú |
 
 Rules:
 - Do NOT output any conversational text or explanations.
