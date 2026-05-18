@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.55]- 2026-05-19
 ### Fixed
 - Sử dụng `web worker` cho phần liên quan đến PDF (ví dụ khi chia cắt) để nó không ảnh hưởng đến luồng chính (đại khái là để trình duyệt không bị giật, lag).
+- Cải tiến phần xuất nhập dự án, mục đích cũng là chống giật, lag khi làm việc với các cuốn sách lớn.
 
 ## [v1.0.54]- 2026-05-18
 ### Fixed
