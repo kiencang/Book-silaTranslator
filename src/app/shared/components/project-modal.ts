@@ -231,6 +231,7 @@ export class ProjectModal implements OnInit {
           if (chunk.pdfData) {
             try {
                let base64: string;
+               // eslint-disable-next-line @typescript-eslint/no-explicit-any
                if (chunk.pdfData instanceof Uint8Array || (chunk.pdfData as any).buffer) {
                  base64 = await this.uint8ArrayToBase64(chunk.pdfData);
                } else {
@@ -238,6 +239,7 @@ export class ProjectModal implements OnInit {
                  const arr = new Uint8Array(Object.values(chunk.pdfData));
                  base64 = await this.uint8ArrayToBase64(arr);
                }
+               // eslint-disable-next-line @typescript-eslint/no-explicit-any
                return { ...chunk, pdfData: base64 as any };
             } catch (e) {
                console.warn('Failed to convert chunk', e);
@@ -288,6 +290,7 @@ export class ProjectModal implements OnInit {
       
       // Restore Uint8Array for PDF chunks
       if (proj.pdfTask && proj.pdfTask.chunks) {
+         // eslint-disable-next-line @typescript-eslint/no-explicit-any
          proj.pdfTask.chunks = proj.pdfTask.chunks.map((chunk: any) => {
            if (chunk.base64Pdf) {
              chunk.pdfData = this.base64ToUint8Array(chunk.base64Pdf);

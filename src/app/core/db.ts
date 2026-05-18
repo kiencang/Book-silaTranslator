@@ -1,6 +1,6 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { openDB, IDBPDatabase, DBSchema } from 'idb';
+import { openDB, IDBPDatabase, DBSchema, IDBPTransaction, StoreNames } from 'idb';
 import type { Chapter, TranslationConfig } from './book.store';
 
 export interface ChapterEntity extends Chapter {
@@ -110,7 +110,7 @@ interface AppDB extends DBSchema {
   };
   project_assets: {
     key: string;
-    value: { id: string; data: unknown } | any;
+    value: { id: string; data: unknown };
   };
   project_chapters: {
     key: string;
@@ -119,7 +119,7 @@ interface AppDB extends DBSchema {
   };
   project_task_chunks: {
     key: string;
-    value: { id: string; taskId: string; index: number; data: any };
+    value: { id: string; taskId: string; index: number; data: unknown };
     indexes: { taskId: string };
   };
 }
@@ -139,8 +139,8 @@ export class DbService {
     if (!this.dbPromise) {
       this.dbPromise = openDB<AppDB>(this.dbName, this.version, {
         upgrade(db) {
-          if (db.objectStoreNames.contains('projects' as any)) {
-            db.deleteObjectStore('projects' as any);
+          if ((db.objectStoreNames as unknown as DOMStringList).contains('projects')) {
+            (db as unknown as IDBPDatabase<unknown>).deleteObjectStore('projects');
           }
           if (!db.objectStoreNames.contains('projects_meta')) {
             db.createObjectStore('projects_meta', { keyPath: 'id' });
@@ -227,28 +227,28 @@ export class DbService {
       await tx.done;
       
       const asset: Partial<ProjectAsset> = {};
-      if (rawMdReq) asset.rawMarkdown = rawMdReq.data;
-      if (pronounsReq) asset.pronounTable = pronounsReq.data;
-      if (glossaryReq) asset.glossaryTable = glossaryReq.data;
-      if (pVersReq) asset.pronounVersions = pVersReq.data;
-      if (gVersReq) asset.glossaryVersions = gVersReq.data;
+      if (rawMdReq) asset.rawMarkdown = rawMdReq.data as typeof asset.rawMarkdown;
+      if (pronounsReq) asset.pronounTable = pronounsReq.data as typeof asset.pronounTable;
+      if (glossaryReq) asset.glossaryTable = glossaryReq.data as typeof asset.glossaryTable;
+      if (pVersReq) asset.pronounVersions = pVersReq.data as typeof asset.pronounVersions;
+      if (gVersReq) asset.glossaryVersions = gVersReq.data as typeof asset.glossaryVersions;
       
       if (pdfReq) {
-        asset.pdfTask = pdfReq.data;
+        asset.pdfTask = pdfReq.data as typeof asset.pdfTask;
         if (asset.pdfTask && pdfChunksReq && pdfChunksReq.length > 0) {
-          asset.pdfTask.chunks = pdfChunksReq.sort((a,b)=>a.index-b.index).map(c=>c.data);
+          asset.pdfTask.chunks = pdfChunksReq.sort((a,b)=>a.index-b.index).map(c=>c.data) as typeof asset.pdfTask.chunks;
         }
       }
       if (pTaskReq) {
-        asset.pronounTask = pTaskReq.data;
+        asset.pronounTask = pTaskReq.data as typeof asset.pronounTask;
         if (asset.pronounTask && pTaskChunksReq && pTaskChunksReq.length > 0) {
-          asset.pronounTask.chunks = pTaskChunksReq.sort((a,b)=>a.index-b.index).map(c=>c.data);
+          asset.pronounTask.chunks = pTaskChunksReq.sort((a,b)=>a.index-b.index).map(c=>c.data) as typeof asset.pronounTask.chunks;
         }
       }
       if (gTaskReq) {
-        asset.glossaryTask = gTaskReq.data;
+        asset.glossaryTask = gTaskReq.data as typeof asset.glossaryTask;
         if (asset.glossaryTask && gTaskChunksReq && gTaskChunksReq.length > 0) {
-          asset.glossaryTask.chunks = gTaskChunksReq.sort((a,b)=>a.index-b.index).map(c=>c.data);
+          asset.glossaryTask.chunks = gTaskChunksReq.sort((a,b)=>a.index-b.index).map(c=>c.data) as typeof asset.glossaryTask.chunks;
         }
       }
 
@@ -275,36 +275,53 @@ export class DbService {
   async saveProjectMeta(meta: ProjectMeta): Promise<void> {
     try {
       const db = await this.getDB();
-      const existing = await db.get('projects_meta', meta.id) || {} as any;
-      await db.put('projects_meta', { ...existing, ...meta } as any);
+      const existing = (await db.get('projects_meta', meta.id)) || {};
+      await db.put('projects_meta', { ...existing, ...meta } as ProjectMeta);
     } catch (e) {
       console.error('saveProjectMeta error', e);
     }
   }
 
-  private async _saveTask(tx: any, projectId: string, assetName: string, data: any) {
+  private async _saveTask(tx: IDBPTransaction<AppDB, StoreNames<AppDB>[], "readwrite">, projectId: string, assetName: string, data: unknown) {
     if (!data) {
       await tx.objectStore('project_assets').delete(`${projectId}_${assetName}`);
       const chunkStore = tx.objectStore('project_task_chunks');
       const keys = await chunkStore.index('taskId').getAllKeys(`${projectId}_${assetName}`);
-      await Promise.all(keys.map((k: any) => chunkStore.delete(k)));
+      await Promise.all(keys.map((k: string) => chunkStore.delete(k)));
       return;
     }
-    const { chunks, ...meta } = data;
+    const { chunks, ...meta } = data as { chunks?: unknown[], [key: string]: unknown };
     await tx.objectStore('project_assets').put({ id: `${projectId}_${assetName}`, data: meta });
     if (chunks && Array.isArray(chunks)) {
       const chunkStore = tx.objectStore('project_task_chunks');
       // Delete old chunks first
       const oldKeys = await chunkStore.index('taskId').getAllKeys(`${projectId}_${assetName}`);
-      await Promise.all(oldKeys.map((k: any) => chunkStore.delete(k)));
+      await Promise.all(oldKeys.map((k: string) => chunkStore.delete(k)));
       // Put new chunks
-      await Promise.all(chunks.map((c: any, i: number) => chunkStore.put({
+      await Promise.all(chunks.map((c: unknown, i: number) => chunkStore.put({
         id: `${projectId}_${assetName}_${i}`,
         taskId: `${projectId}_${assetName}`,
         index: i,
         data: c
       })));
     }
+  }
+
+  async updateTaskChunks(projectId: string, taskName: string, chunksMap: Record<number, unknown>): Promise<void> {
+    const db = await this.getDB();
+    const tx = db.transaction('project_task_chunks', 'readwrite');
+    const chunkStore = tx.objectStore('project_task_chunks');
+    
+    await Promise.all(Object.entries(chunksMap).map(([indexStr, chunkData]) => {
+      const index = parseInt(indexStr, 10);
+      return chunkStore.put({
+        id: `${projectId}_${taskName}_${index}`,
+        taskId: `${projectId}_${taskName}`,
+        index,
+        data: chunkData
+      });
+    }));
+    await tx.done;
   }
 
   async saveProjectAsset(projectId: string, assetName: string, data: unknown): Promise<void> {
@@ -317,7 +334,7 @@ export class DbService {
         await this._saveTask(tx, projectId, assetName, data);
         await tx.done;
       } else {
-        await db.put('project_assets', { id: `${projectId}_${assetName}`, data } as any);
+        await db.put('project_assets', { id: `${projectId}_${assetName}`, data } as { id: string; data: unknown });
       }
     } catch (e) {
       console.error('saveProjectAsset error', e);
@@ -327,7 +344,7 @@ export class DbService {
   async saveProjectAssets(id: string, assets: ProjectAsset): Promise<void> {
     try {
       const db = await this.getDB();
-      await db.put('project_assets', { id, ...assets } as any);
+      await db.put('project_assets', { id, ...assets } as unknown as { id: string; data: unknown });
     } catch (e) {
       console.error('saveProjectAssets error', e);
     }
@@ -394,7 +411,7 @@ export class DbService {
          if (c.status === 'done') translatedWords += c.wordCount || 0;
       });
 
-      const meta: any = {
+      const meta: ProjectMeta = {
         id: project.id,
         name: project.name,
         createdAt: project.createdAt,
@@ -417,11 +434,11 @@ export class DbService {
       await tx.objectStore('projects_meta').put(meta);
 
       const assetStore = tx.objectStore('project_assets');
-      await assetStore.put({ id: `${project.id}_rawMarkdown`, data: project.rawMarkdown } as any);
-      await assetStore.put({ id: `${project.id}_pronounTable`, data: project.pronounTable } as any);
-      await assetStore.put({ id: `${project.id}_glossaryTable`, data: project.glossaryTable } as any);
-      await assetStore.put({ id: `${project.id}_pronounVersions`, data: project.pronounVersions } as any);
-      await assetStore.put({ id: `${project.id}_glossaryVersions`, data: project.glossaryVersions } as any);
+      await assetStore.put({ id: `${project.id}_rawMarkdown`, data: project.rawMarkdown } as { id: string; data: unknown });
+      await assetStore.put({ id: `${project.id}_pronounTable`, data: project.pronounTable } as { id: string; data: unknown });
+      await assetStore.put({ id: `${project.id}_glossaryTable`, data: project.glossaryTable } as { id: string; data: unknown });
+      await assetStore.put({ id: `${project.id}_pronounVersions`, data: project.pronounVersions } as { id: string; data: unknown });
+      await assetStore.put({ id: `${project.id}_glossaryVersions`, data: project.glossaryVersions } as { id: string; data: unknown });
       
       await this._saveTask(tx, project.id, 'pdfTask', project.pdfTask);
       await this._saveTask(tx, project.id, 'pronounTask', project.pronounTask);

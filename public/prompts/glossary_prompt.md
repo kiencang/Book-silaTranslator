@@ -12,5 +12,7 @@
 </source_text>
 
 **TRÌNH TỰ THỰC THI BẮT BUỘC CỦA BẠN:**
-1. Dựa vào thông tin tên sách, tác giả và nội dung cuốn sách, hãy phân tích ngữ cảnh, thể loại sách, bối cảnh, và lọc các từ khó.
-2. XUẤT TRỰC TIẾP KẾT QUẢ TRẢ VỀ Ở ĐỊNH DẠNG JSON ARRAY, không giải thích, không chào hỏi.
+1. **Bước 1 (Phân tích):** Đọc toàn bộ nội dung, xác định Thể loại (Genre), Đối tượng độc giả (Target Audience) và Văn phong (Tone of voice).
+2. **Bước 2 (Trích xuất nháp):** Lọc ra các từ thuộc Tier 1 và Tier 2.
+3. **Bước 3 (Tinh lọc):** Kiểm tra lại danh sách. Nếu từ nào có thể hiểu theo nghĩa phổ thông trong ngữ cảnh này, hãy loại bỏ. Nếu là cụm từ chuyên biệt (N-grams), hãy giữ cả cụm.
+4. **Bước 4 (Định dạng):** Chuyển đổi sang JSON. Đảm bảo các từ loại (pos) và ghi chú (contextNotes) hỗ trợ tối đa cho việc dịch thuật sau này.

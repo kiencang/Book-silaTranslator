@@ -13,8 +13,8 @@ import { smartHardSplit } from '../splitter/splitter.util';
   standalone: true,
   imports: [CommonModule, MatIconModule, FormsModule, MarkdownTableEditorComponent],
   template: `
-    <div class="max-w-7xl mx-auto py-8 lg:px-8 px-4">
-      <div class="flex items-center justify-between mb-8">
+    <div class="py-8">
+      <div class="max-w-7xl mx-auto lg:px-8 px-4 flex items-center justify-between mb-8">
         <div>
           <h2 class="text-2xl font-bold text-zinc-900">Thiết lập Bảng Thuật Ngữ / Từ Khó (Tùy chọn)</h2>
           <p class="text-zinc-500 mt-1">Sử dụng mô hình AI mạnh để quét cuốn sách và trích xuất bảng thuật ngữ/từ khó dịch. Giúp bản dịch có chất lượng cao và thống nhất hơn. Đặc biệt cần thiết với sách khó dịch. Mặc dù đây là tùy chọn, không bắt buộc, nhưng khi tạo thường cho kết quả tốt hơn với bất kỳ thể loại sách nào.</p>
@@ -22,66 +22,68 @@ import { smartHardSplit } from '../splitter/splitter.util';
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8">
-        <div class="space-y-6">
-          <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-200">
-            @if (glossaryTask() && !isGenerating()) {
-              <div class="text-sm text-amber-700 bg-amber-50 rounded-lg p-4 border border-amber-200 mb-4">
-                <p class="font-medium mb-1">Tiến trình bị gián đoạn</p>
-                <p class="text-amber-600">Bạn có một tiến trình tạo bảng thuật ngữ đang dở dang (đã hoàn thành {{ completedChunksCount() }}/{{ glossaryTask()?.totalChunks }} phần). Bạn có thể tiếp tục hoặc hủy bỏ để bắt đầu lại.</p>
-              </div>
-            }
-            <div class="flex flex-col lg:flex-row gap-4 lg:items-end">
-              <div class="w-full lg:w-1/2">
-                <label for="glossaryModel" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2">Mô hình nhận diện</label>
-                <select id="glossaryModel" [value]="glossaryModel()" (change)="glossaryModel.set($any($event.target).value)" [disabled]="isGenerating() || !!glossaryTask()" class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg border disabled:cursor-not-allowed">
-                  <option value="gemini-flash-latest">Flash (Nhanh & Tiết kiệm)</option>
-                  <option value="gemini-pro-latest">Pro (Tư duy sâu & Chuẩn xác)</option>
-                </select>
-              </div>
-              
-              <div class="w-full lg:w-1/2">
-                @if (glossaryTask() && !isGenerating()) {
-                  <div class="flex gap-3">
-                    <button 
-                      (click)="resumeGeneration()"
-                      [disabled]="isGenerating()"
-                      class="flex-1 flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">play_circle</mat-icon>
-                      Tiếp tục quá trình tạo ({{ completedChunksCount() }}/{{ glossaryTask()?.totalChunks }})
-                    </button>
-                    <button 
-                      (click)="cancelTask()"
-                      [disabled]="isGenerating()"
-                      class="px-4 py-2 border border-red-200 text-sm font-medium rounded-lg shadow-sm text-red-600 bg-white hover:bg-red-50 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Hủy tiến trình cũ
-                    </button>
-                  </div>
-                } @else {
+      <div class="max-w-7xl mx-auto lg:px-8 px-4 space-y-6 mb-8">
+        <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-200">
+          @if (glossaryTask() && !isGenerating()) {
+            <div class="text-sm text-amber-700 bg-amber-50 rounded-lg p-4 border border-amber-200 mb-4">
+              <p class="font-medium mb-1">Tiến trình bị gián đoạn</p>
+              <p class="text-amber-600">Bạn có một tiến trình tạo bảng thuật ngữ đang dở dang (đã hoàn thành {{ completedChunksCount() }}/{{ glossaryTask()?.totalChunks }} phần). Bạn có thể tiếp tục hoặc hủy bỏ để bắt đầu lại.</p>
+            </div>
+          }
+          <div class="flex flex-col lg:flex-row gap-4 lg:items-end">
+            <div class="w-full lg:w-1/2">
+              <label for="glossaryModel" class="block text-xs font-semibold text-zinc-700 uppercase tracking-widest mb-2">Mô hình nhận diện</label>
+              <select id="glossaryModel" [value]="glossaryModel()" (change)="glossaryModel.set($any($event.target).value)" [disabled]="isGenerating() || !!glossaryTask()" class="w-full pl-3 pr-8 py-2 text-sm border-zinc-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg border disabled:cursor-not-allowed">
+                <option value="gemini-flash-latest">Flash (Nhanh & Tiết kiệm)</option>
+                <option value="gemini-pro-latest">Pro (Tư duy sâu & Chuẩn xác)</option>
+              </select>
+            </div>
+            
+            <div class="w-full lg:w-1/2">
+              @if (glossaryTask() && !isGenerating()) {
+                <div class="flex gap-3">
                   <button 
-                    (click)="startGeneration()"
+                    (click)="resumeGeneration()"
                     [disabled]="isGenerating()"
-                    class="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
+                    class="flex-1 flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
                   >
-                    @if (isGenerating()) {
-                      <mat-icon class="animate-spin mr-2 !w-5 !h-5 !text-[20px]">sync</mat-icon>
-                      {{ generationStatus() || 'Đang phân tích sách và tạo bảng thuật ngữ...' }}
-                    } @else if (draftTable().trim().length > 0) {
-                      <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
-                      Tạo lại bảng dữ liệu Thuật ngữ
-                    } @else {
-                      <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">auto_awesome</mat-icon>
-                      Bắt đầu tạo bảng Thuật ngữ tự động
-                    }
+                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">play_circle</mat-icon>
+                    Tiếp tục quá trình tạo ({{ completedChunksCount() }}/{{ glossaryTask()?.totalChunks }})
                   </button>
-                }
-              </div>
+                  <button 
+                    (click)="cancelTask()"
+                    [disabled]="isGenerating()"
+                    class="px-4 py-2 border border-red-200 text-sm font-medium rounded-lg shadow-sm text-red-600 bg-white hover:bg-red-50 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Hủy tiến trình cũ
+                  </button>
+                </div>
+              } @else {
+                <button 
+                  (click)="startGeneration()"
+                  [disabled]="isGenerating()"
+                  class="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  @if (isGenerating()) {
+                    <mat-icon class="animate-spin mr-2 !w-5 !h-5 !text-[20px]">sync</mat-icon>
+                    {{ generationStatus() || 'Đang phân tích sách và tạo bảng thuật ngữ...' }}
+                  } @else if (draftTable().trim().length > 0) {
+                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">refresh</mat-icon>
+                    Tạo lại bảng dữ liệu Thuật ngữ
+                  } @else {
+                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">auto_awesome</mat-icon>
+                    Bắt đầu tạo bảng Thuật ngữ tự động
+                  }
+                </button>
+              }
             </div>
           </div>
+        </div>
+      </div>
 
-          <div class="mt-8">
+      <div class="w-full max-w-[2000px] mx-auto px-2 lg:px-4 mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-4 lg:p-6">
+          <div class="w-full">
             <app-markdown-table-editor
               #editor
               [value]="draftTable()"
@@ -137,7 +139,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
         </div>
       </div>
 
-      <div class="flex justify-between items-center">
+      <div class="w-full max-w-[2000px] mx-auto px-2 lg:px-4 flex justify-between items-center">
         <button 
           (click)="skipAndContinue()"
           [disabled]="isGenerating()"
@@ -311,7 +313,7 @@ export class GlossarySetup {
         await Promise.all(promises);
         
         // Save intermediate state
-        this.store.setGlossaryTask({ ...task });
+        this.store.updateTaskBatch('glossaryTask', { ...task }, batch.map(c => c.index));
         
         const completedCount = task.chunks.filter(c => c.status === 'completed').length;
         this.generationStatus.set(`Đang nhận diện Thuật ngữ (${completedCount}/${task.totalChunks})...`);

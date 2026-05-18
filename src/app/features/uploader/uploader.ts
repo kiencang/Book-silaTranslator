@@ -376,7 +376,7 @@ export class Uploader {
         // processing
         const updatedChunks = [...currentTaskState.chunks];
         updatedChunks[i] = { ...chunk, status: 'processing', error: undefined };
-        this.store.setPdfTask({ ...currentTaskState, chunks: updatedChunks });
+        this.store.updateTaskBatch('pdfTask', { ...currentTaskState, chunks: updatedChunks }, [i]);
         
         try {
           if (!chunk.pdfData && !(chunk as any).base64Pdf) throw new Error("Missing PDF data");
@@ -395,7 +395,7 @@ export class Uploader {
           if (successTaskState) {
             const newChunks = [...successTaskState.chunks];
              newChunks[i] = { ...newChunks[i], status: 'completed', markdown, error: undefined };
-            this.store.setPdfTask({ ...successTaskState, chunks: newChunks });
+            this.store.updateTaskBatch('pdfTask', { ...successTaskState, chunks: newChunks }, [i]);
           }
         } catch (e: unknown) {
            console.error(e);
@@ -404,7 +404,7 @@ export class Uploader {
            if (failTaskState) {
              const newChunks = [...failTaskState.chunks];
              newChunks[i] = { ...newChunks[i], status: 'failed', error: msg };
-             this.store.setPdfTask({ ...failTaskState, chunks: newChunks });
+             this.store.updateTaskBatch('pdfTask', { ...failTaskState, chunks: newChunks }, [i]);
            }
            this.store.setConverting(false);
            return; // Break processing on first error

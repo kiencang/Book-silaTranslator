@@ -22,7 +22,7 @@ import { BookStore } from '../../../core/book.store';
                 [checked]="store.config().model === 'gemini-flash-latest'"
                 (change)="store.updateConfig({model: 'gemini-flash-latest'})"
                 class="w-4 h-4 text-indigo-600 border-zinc-300 focus:ring-indigo-500 disabled:cursor-not-allowed">
-              <span class="text-sm text-zinc-700 font-medium tracking-tight">[Nhanh & Tiết kiệm] - flash</span>
+              <span class="text-sm text-zinc-700 font-medium tracking-tight">[Nhanh & Tiết kiệm] - Flash</span>
             </label>
             <label class="flex items-center space-x-3 transition-opacity"
                     [class.cursor-pointer]="!store.isTranslatingAny()"
@@ -33,7 +33,7 @@ import { BookStore } from '../../../core/book.store';
                 [checked]="store.config().model === 'gemini-pro-latest'"
                 (change)="store.updateConfig({model: 'gemini-pro-latest'})"
                 class="w-4 h-4 text-red-600 border-zinc-300 focus:ring-red-500 disabled:cursor-not-allowed">
-              <span class="text-sm text-zinc-700 font-medium tracking-tight">[Tư duy sâu] - pro</span>
+              <span class="text-sm text-zinc-700 font-medium tracking-tight">[Tư duy sâu] - Pro</span>
             </label>
           </div>
         </div>

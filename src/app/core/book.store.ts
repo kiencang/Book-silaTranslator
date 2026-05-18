@@ -200,42 +200,6 @@ export class BookStore {
         }
       });
     });
-
-    effect(() => {
-      const projectId = this.currentProjectId();
-      if (!projectId) return;
-
-      const pdfTask = this.pdfTask();
-      untracked(() => {
-        if (isPlatformBrowser(this.platformId)) {
-          this.db.saveProjectAsset(projectId, 'pdfTask', pdfTask);
-        }
-      });
-    });
-
-    effect(() => {
-      const projectId = this.currentProjectId();
-      if (!projectId) return;
-
-      const pronounTask = this.pronounTask();
-      untracked(() => {
-        if (isPlatformBrowser(this.platformId)) {
-          this.db.saveProjectAsset(projectId, 'pronounTask', pronounTask);
-        }
-      });
-    });
-
-    effect(() => {
-      const projectId = this.currentProjectId();
-      if (!projectId) return;
-
-      const glossaryTask = this.glossaryTask();
-      untracked(() => {
-        if (isPlatformBrowser(this.platformId)) {
-          this.db.saveProjectAsset(projectId, 'glossaryTask', glossaryTask);
-        }
-      });
-    });
   }
 
   private async saveCurrentProjectState(meta: ProjectMeta) {
@@ -337,14 +301,57 @@ export class BookStore {
 
   setPdfTask(task: import('./db').PdfConversionTask | undefined) {
     this.pdfTask.set(task);
+    const projectId = this.currentProjectId();
+    if (projectId && isPlatformBrowser(this.platformId)) {
+      if (task) {
+        this.db.saveProjectAsset(projectId, 'pdfTask', task).catch(console.error);
+      } else {
+        this.db.saveProjectAsset(projectId, 'pdfTask', undefined).catch(console.error);
+      }
+    }
   }
 
   setPronounTask(task: import('./db').PronounGenerationTask | undefined) {
     this.pronounTask.set(task);
+    const projectId = this.currentProjectId();
+    if (projectId && isPlatformBrowser(this.platformId)) {
+       if (task) {
+        this.db.saveProjectAsset(projectId, 'pronounTask', task).catch(console.error);
+      } else {
+        this.db.saveProjectAsset(projectId, 'pronounTask', undefined).catch(console.error);
+      }
+    }
   }
 
   setGlossaryTask(task: import('./db').GlossaryGenerationTask | undefined) {
     this.glossaryTask.set(task);
+    const projectId = this.currentProjectId();
+    if (projectId && isPlatformBrowser(this.platformId)) {
+       if (task) {
+        this.db.saveProjectAsset(projectId, 'glossaryTask', task).catch(console.error);
+      } else {
+        this.db.saveProjectAsset(projectId, 'glossaryTask', undefined).catch(console.error);
+      }
+    }
+  }
+
+  updateTaskBatch(taskName: 'pdfTask' | 'pronounTask' | 'glossaryTask', taskState: { chunks: unknown[] } & Record<string, unknown>, updatedIndices: number[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (taskName === 'pdfTask') this.pdfTask.set({ ...taskState } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    else if (taskName === 'pronounTask') this.pronounTask.set({ ...taskState } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    else if (taskName === 'glossaryTask') this.glossaryTask.set({ ...taskState } as any);
+
+    const projectId = this.currentProjectId();
+    if (projectId && isPlatformBrowser(this.platformId)) {
+      this.db.saveProjectAsset(projectId, taskName, { ...taskState, chunks: undefined }).catch(console.error);
+      const chunksMap: Record<number, unknown> = {};
+      updatedIndices.forEach(i => {
+        chunksMap[i] = taskState.chunks[i];
+      });
+      this.db.updateTaskChunks(projectId, taskName, chunksMap).catch(console.error);
+    }
   }
 
   setMarkdown(md: string, name: string) {
