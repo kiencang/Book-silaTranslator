@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
+## [v1.0.55]- 2026-05-19
+### Fixed
+- Sử dụng `web worker` cho phần liên quan đến PDF (ví dụ khi chia cắt) để nó không ảnh hưởng đến luồng chính (đại khái là để trình duyệt không bị giật, lag).
+
 ## [v1.0.54]- 2026-05-18
 ### Fixed
 - Cập nhật SI phiên bản mới nhất.
