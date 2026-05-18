@@ -11,7 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.54]- 2026-05-18
 ### Fixed
 - Cập nhật SI phiên bản mới nhất.
-- Thay đổi logic cách cập nhật chunk.
+- Thay đổi logic cách cập nhật chunk trong phần PDF, Đại từ và Từ khó.
 
 ## [v1.0.53]- 2026-05-18
 ### Fixed
