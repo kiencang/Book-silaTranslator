@@ -12,6 +12,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Cập nhật SI phiên bản mới nhất.
 - Điều chỉnh cơ chế cập nhận chunk để nó chỉ cập nhật chunk có kết quả không ghi lại các chunk chưa thao tác.
+- Điều chỉnh lại độ rộng của bảng Đại từ và Từ khó.
 
 ## [v1.0.53]- 2026-05-18
 ### Fixed
