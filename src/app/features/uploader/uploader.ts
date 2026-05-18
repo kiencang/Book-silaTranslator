@@ -6,7 +6,6 @@ import { ToastService } from '../../core/toast.service';
 import { GeminiClient, parseGeminiError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
 import TurndownService from 'turndown';
-import { PDFDocument } from 'pdf-lib';
 
 @Component({
   selector: 'app-uploader',
@@ -217,6 +216,27 @@ export class Uploader {
   gemini = inject(GeminiClient);
   toast = inject(ToastService);
   fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
+
+  private pdfWorker = new Worker(new URL('./pdf.worker', import.meta.url), { type: 'module' });
+  private workerId = 0;
+
+  private runWorkerTask(type: string, payload: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const id = ++this.workerId;
+      const handler = (event: MessageEvent) => {
+        if (event.data.id === id) {
+          this.pdfWorker.removeEventListener('message', handler);
+          if (event.data.type === 'SUCCESS') {
+            resolve(event.data.payload);
+          } else {
+            reject(new Error(event.data.payload.error));
+          }
+        }
+      };
+      this.pdfWorker.addEventListener('message', handler);
+      this.pdfWorker.postMessage({ type, payload, id });
+    });
+  }
   
   isDragging = false;
   turndownService = new TurndownService().remove(['style', 'script', 'head', 'meta', 'title', 'noscript']);
@@ -280,7 +300,6 @@ export class Uploader {
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
       
       const start = Math.max(1, this.pdfStartPage());
       const end = Math.min(this.pdfTotalPages(), this.pdfEndPage());
@@ -291,14 +310,8 @@ export class Uploader {
         return;
       }
 
-      const newPdf = await PDFDocument.create();
-      const pageIndices = Array.from({ length: end - start + 1 }, (_, i) => start - 1 + i);
-      const copiedPages = await newPdf.copyPages(pdfDoc, pageIndices);
-      copiedPages.forEach((page) => newPdf.addPage(page));
-      
-      const b64Data = await newPdf.saveAsBase64();
-      
-      const count = await this.gemini.countTokens(b64Data, 'application/pdf', this.pdfModel());
+      const result = await this.runWorkerTask('EXTRACT_TOKEN_PAGES', { arrayBuffer, start, end });
+      const count = await this.gemini.countTokens(result.b64Data, 'application/pdf', this.pdfModel());
       this.tokenCount.set(count);
     } catch (e) {
       console.error('Lỗi khi đếm token:', e);
@@ -447,8 +460,8 @@ export class Uploader {
        }
        
        this.isCountingTokens.set(true);
-       file.arrayBuffer().then(buffer => PDFDocument.load(buffer)).then(pdfDoc => {
-         const count = pdfDoc.getPageCount();
+       file.arrayBuffer().then(buffer => this.runWorkerTask('COUNT_PAGES', { arrayBuffer: buffer })).then(result => {
+         const count = result.count;
          this.pdfTotalPages.set(count);
          this.pdfStartPage.set(1);
          this.pdfEndPage.set(count);
@@ -505,47 +518,22 @@ export class Uploader {
       }
 
       const arrayBuffer = await file.arrayBuffer();
-      const originalPdfDoc = await PDFDocument.load(arrayBuffer);
       
       const start = Math.max(1, this.pdfStartPage());
       const end = Math.min(this.pdfTotalPages(), this.pdfEndPage());
       
-      const pdfDoc = await PDFDocument.create();
-      const pageIndices = Array.from({ length: end - start + 1 }, (_, i) => start - 1 + i);
-      const copiedPages = await pdfDoc.copyPages(originalPdfDoc, pageIndices);
-      copiedPages.forEach((page) => pdfDoc.addPage(page));
-      
-      const pageCount = pdfDoc.getPageCount();
+      const result = await this.runWorkerTask('CHUNK_PDF', { arrayBuffer, start, end, chunkSize: 30 });
 
-      if (pageCount <= 30) {
-        const base64 = await pdfDoc.saveAsBase64();
-        const b64Data = base64.includes(',') ? base64.split(',')[1] : base64;
-        const markdown = await this.gemini.convertPdfToMarkdown(b64Data, this.pdfModel());
+      if (result.resultType === 'single') {
+        const markdown = await this.gemini.convertPdfToMarkdown(result.b64Data, this.pdfModel());
         this.store.setMarkdown(markdown, file.name);
         this.toast.success(this.toast.Messages.FILE_PROCESS_SUCCESS);
       } else {
         // Large PDF -> chunk
-        const CHUNK_SIZE = 30;
-        const chunks: import('../../core/db').PdfConversionChunk[] = [];
-        
-        for (let i = 0; i < pageCount; i += CHUNK_SIZE) {
-          const endPage = Math.min(i + CHUNK_SIZE, pageCount) - 1;
-          const newPdf = await PDFDocument.create();
-          const chunkIndices = Array.from({ length: endPage - i + 1 }, (_, k) => k + i);
-          const copiedPages = await newPdf.copyPages(pdfDoc, chunkIndices);
-          copiedPages.forEach((page) => newPdf.addPage(page));
-          const chunkData = await newPdf.save();
-          
-          chunks.push({
-             index: i / CHUNK_SIZE,
-             pdfData: chunkData,
-             status: 'pending'
-          });
-        }
         
         this.store.setPdfTask({
            fileName: file.name,
-           chunks
+           chunks: result.chunks.map((c: any) => ({ ...c, status: 'pending' }))
         });
         
         shouldResumePdf = true;

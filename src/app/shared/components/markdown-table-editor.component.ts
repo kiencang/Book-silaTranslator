@@ -206,12 +206,14 @@ export class MarkdownTableEditorComponent {
     this.isUpdatingInternally = false;
   }
 
+  private syncTimeout: any;
+
   updateCell(rowIndex: number, colIndex: number, event: Event) {
     const val = (event.target as HTMLInputElement | HTMLTextAreaElement).value;
     const currentData = [...this.tableData()];
     currentData[rowIndex][colIndex] = val;
     this.tableData.set(currentData);
-    this.syncTableToMarkdown();
+    this.debouncedSyncTableToMarkdown();
   }
 
   addRow() {
@@ -220,7 +222,7 @@ export class MarkdownTableEditorComponent {
     const cols = currentData[0].length;
     currentData.push(new Array(cols).fill(''));
     this.tableData.set(currentData);
-    this.syncTableToMarkdown();
+    this.debouncedSyncTableToMarkdown();
   }
 
   removeRow(rowIndex: number) {
@@ -233,7 +235,7 @@ export class MarkdownTableEditorComponent {
       const currentData = [...this.tableData()];
       currentData.splice(rowIndex, 1);
       this.tableData.set(currentData);
-      this.syncTableToMarkdown();
+      this.debouncedSyncTableToMarkdown();
     }
   }
 
@@ -244,7 +246,7 @@ export class MarkdownTableEditorComponent {
       return newRow;
     });
     this.tableData.set(currentData);
-    this.syncTableToMarkdown();
+    this.debouncedSyncTableToMarkdown();
   }
 
   removeColumn(colIndex: number) {
@@ -270,7 +272,7 @@ export class MarkdownTableEditorComponent {
       } else {
         this.tableData.set(newData);
       }
-      this.syncTableToMarkdown();
+      this.debouncedSyncTableToMarkdown();
     }
   }
 
@@ -282,7 +284,7 @@ export class MarkdownTableEditorComponent {
       const currentData = [...this.tableData()];
       currentData.splice(toDelete.index, 1);
       this.tableData.set(currentData);
-      this.syncTableToMarkdown();
+      this.debouncedSyncTableToMarkdown();
     } else if (toDelete.type === 'col') {
       const currentData = this.tableData().map(row => {
         const newRow = [...row];
@@ -294,7 +296,7 @@ export class MarkdownTableEditorComponent {
       } else {
         this.tableData.set(currentData);
       }
-      this.syncTableToMarkdown();
+      this.debouncedSyncTableToMarkdown();
     }
     
     this.isClosingModal.set(true);
@@ -309,7 +311,14 @@ export class MarkdownTableEditorComponent {
       ['Cột 1', 'Cột 2'],
       ['', '']
     ]);
-    this.syncTableToMarkdown();
+    this.debouncedSyncTableToMarkdown();
+  }
+
+  private debouncedSyncTableToMarkdown() {
+    if (this.syncTimeout) clearTimeout(this.syncTimeout);
+    this.syncTimeout = setTimeout(() => {
+      this.syncTableToMarkdown();
+    }, 1000); // 1000ms debounce
   }
 
   private parseMarkdownToTable(markdown: string) {

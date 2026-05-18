@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, signal, effect} from '@angular/core';
 import {BookStore} from './core/book.store';
 import {Uploader} from './features/uploader/uploader';
 import {Splitter} from './features/splitter/splitter';
@@ -33,9 +33,10 @@ import {ToastComponent} from './shared/components/toast.component';
             <div class="text-xl font-semibold tracking-tight flex items-center">
               <span class="text-zinc-400 font-normal mx-2">/</span>
               <button 
-                  class="text-indigo-700 max-w-[150px] sm:max-w-xs hover:underline focus:outline-none focus:underline bg-transparent border-none p-0 cursor-pointer flex items-center group" 
+                  class="text-indigo-700 max-w-[150px] sm:max-w-xs hover:underline focus:outline-none focus:underline bg-transparent border-none p-0 cursor-pointer flex items-center group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline" 
                   [title]="'Sửa tên dự án: ' + store.currentProjectName()"
-                  (click)="showEditProjectModal.set(true)">
+                  [disabled]="store.isBusy()"
+                  (click)="!store.isBusy() && showEditProjectModal.set(true)">
                 <span class="truncate">{{store.currentProjectName()}}</span>
                 <mat-icon class="!text-[16px] !w-4 !h-4 ml-1.5 opacity-30 group-hover:opacity-100 transition-opacity">edit</mat-icon>
               </button>
@@ -109,7 +110,7 @@ import {ToastComponent} from './shared/components/toast.component';
 
       <footer class="shrink-0 bg-white border-t border-zinc-200 py-2.5 px-6 text-xs text-zinc-500 flex justify-center items-center">
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-zinc-600">v1.0.54</span>
+          <span class="font-medium text-zinc-600">v1.0.55</span>
           <span class="text-zinc-300">•</span>
           <a href="https://github.com/kiencang/silaBook" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition-colors">GitHub</a>
           <span class="text-zinc-300">•</span>
@@ -139,6 +140,22 @@ export class App {
   store = inject(BookStore);
   showProjectModal = signal<boolean>(false);
   showEditProjectModal = signal<boolean>(false);
+
+  constructor() {
+    effect(() => {
+      if (typeof window !== 'undefined') {
+        if (this.store.isTranslatingAny()) {
+          window.onbeforeunload = (e) => {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+          };
+        } else {
+          window.onbeforeunload = null;
+        }
+      }
+    });
+  }
 
   goToPhase(phase: number) {
     if (phase === 1 && this.store.phase() === 1) {
