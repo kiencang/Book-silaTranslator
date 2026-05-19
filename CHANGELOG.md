@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
+## [v1.0.58]- 2026-05-19
+### Fixed
+- Cập nhật SI phiên bản mới nhất.
+
 ## [v1.0.57]- 2026-05-19
 ### Fixed
 - Thêm tính năng chỉ thị bổ sung khi dịch.
