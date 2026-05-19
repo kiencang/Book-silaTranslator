@@ -194,6 +194,17 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                         </button>
                       }
                     </div>
+                    <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mt-1">
+                      @if (activeV.useCustomInstructions) {
+                        <button (click)="viewCustomInstructionsSnapshot(activeV.customInstructionsSnapshot)" class="flex items-center gap-1 text-fuchsia-600 hover:underline">
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">tune</mat-icon> Có sử dụng chỉ thị bổ sung
+                        </button>
+                      } @else {
+                        <span class="flex items-center gap-1 text-zinc-400">
+                          <mat-icon class="!w-3.5 !h-3.5 !text-[14px]">tune</mat-icon> Không sử dụng chỉ thị bổ sung
+                        </span>
+                      }
+                    </div>
                   </div>
                 }
             </div>
@@ -465,6 +476,32 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
         </div>
       }
 
+      @if (showCustomInstructionsModal() || isClosingCustomInstructionsModal()) {
+        <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 cursor-pointer animate-in fade-in duration-200" tabindex="0" (click)="triggerCloseCustomInstructionsModal()" (keydown.escape)="triggerCloseCustomInstructionsModal()" [class.animate-fade-out]="isClosingCustomInstructionsModal()">
+          <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-zinc-50 rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden cursor-default animate-in zoom-in duration-200" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosingCustomInstructionsModal()">
+            <div class="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-white">
+              <div>
+                <h2 class="text-xl font-bold text-zinc-900 flex items-center gap-2">
+                  <mat-icon class="text-fuchsia-500">tune</mat-icon>
+                  Chỉ thị bổ sung đã dùng cho khối dịch này
+                </h2>
+                <p class="text-[13px] text-zinc-500 mt-1 ml-8">Đây là những chỉ dẫn thêm được nạp cùng khối văn bản để điều hướng quá trình dịch thuật của AI.</p>
+              </div>
+              <button (click)="triggerCloseCustomInstructionsModal()" class="text-zinc-400 hover:text-zinc-700 w-8 h-8 rounded-full hover:bg-zinc-200 transition-colors flex items-center justify-center flex-shrink-0 ml-4 self-start">
+                <span class="material-icons !text-[20px] !w-5 !h-5 !flex !items-center !justify-center leading-none">close</span>
+              </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 bg-white">
+               @if (parsedCustomInstructionsSnapshot()) {
+                 <div class="prose prose-sm max-w-none text-zinc-700" [innerHTML]="parsedCustomInstructionsSnapshot()"></div>
+               } @else {
+                 <div class="text-zinc-500 italic text-sm text-center py-8 bg-zinc-50 rounded-lg">Không có dữ liệu chi tiết.</div>
+               }
+            </div>
+          </div>
+        </div>
+      }
+
       @if (showPronounModal() || isClosingPronounModal()) {
         <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 cursor-pointer animate-in fade-in duration-200" tabindex="0" (click)="triggerClosePronounModal()" (keydown.escape)="triggerClosePronounModal()" [class.animate-fade-out]="isClosingPronounModal()">
           <div role="presentation" tabindex="-1" (keyup.enter)="$event.stopPropagation()" class="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[80vh] flex flex-col overflow-hidden cursor-default animate-in zoom-in duration-200" (click)="$event.stopPropagation()" [class.animate-zoom-out]="isClosingPronounModal()">
@@ -550,6 +587,10 @@ export class ChapterItemComponent {
   parsedPronounSnapshot = signal<SafeHtml | string>('');
   currentPronounVersion = signal<number | undefined>(undefined);
 
+  showCustomInstructionsModal = signal(false);
+  isClosingCustomInstructionsModal = signal(false);
+  parsedCustomInstructionsSnapshot = signal<SafeHtml | string>('');
+
   isGeneratingSummary = signal(false);
   showConfirmCreateSummary = signal(false);
   selectedVersionForSummary = signal<TranslationVersion | null>(null);
@@ -620,6 +661,23 @@ export class ChapterItemComponent {
     setTimeout(() => {
       this.showPronounModal.set(false);
       this.isClosingPronounModal.set(false);
+    }, 200);
+  }
+
+  viewCustomInstructionsSnapshot(snapshotText: string | undefined) {
+    if (!snapshotText) {
+      this.parsedCustomInstructionsSnapshot.set('');
+    } else {
+      this.parsedCustomInstructionsSnapshot.set(this.parseMarkdown(snapshotText));
+    }
+    this.showCustomInstructionsModal.set(true);
+  }
+
+  triggerCloseCustomInstructionsModal() {
+    this.isClosingCustomInstructionsModal.set(true);
+    setTimeout(() => {
+      this.showCustomInstructionsModal.set(false);
+      this.isClosingCustomInstructionsModal.set(false);
     }, 200);
   }
 

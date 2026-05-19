@@ -1,11 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
 import { BookStore } from '../../../core/book.store';
 
 @Component({
   selector: 'app-translator-config',
   standalone: true,
-  imports: [MatIconModule],
+  imports: [MatIconModule, FormsModule],
   template: `
     <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 mb-8 flex flex-col gap-8 relative">
       <div class="flex flex-col md:flex-row gap-8">
@@ -169,11 +170,37 @@ import { BookStore } from '../../../core/book.store';
         </label>
         <div class="text-xs text-zinc-500 max-w-lg">[Mặc định Bật] - Tự động tóm tắt nội dung sau khi dịch xong một khối để đưa bối cảnh vào khối dịch kế tiếp. Hữu ích khi các chương/khối dịch là một phần của cuốn sách tổng thể. Nếu các chương/khối hoàn toàn độc lập, ví dụ như các truyện ngắn riêng biệt trong một cuốn sách lớn thì nên tắt tùy chọn này.</div>
       </div>
+      <!-- Custom Instructions Toggle -->
+      <div class="pt-6 border-t border-zinc-200">
+        <button 
+          (click)="isCustomInstructionsExpanded.set(!isCustomInstructionsExpanded())"
+          class="flex items-center space-x-2 text-zinc-700 font-medium tracking-tight hover:text-indigo-600 transition-colors"
+        >
+          <mat-icon class="!w-5 !h-5 !text-[20px]">{{ isCustomInstructionsExpanded() ? 'remove_circle_outline' : 'add_circle_outline' }}</mat-icon>
+          <span>Chỉ thị bổ sung khi dịch (tùy chọn)</span>
+        </button>
+        
+        @if (isCustomInstructionsExpanded()) {
+          <div class="mt-4 pl-7 pr-7">
+            <p class="text-xs text-zinc-500 mb-1 italic font-semibold">Bạn nên bỏ trống phần này trong phần lớn trường hợp!!! Mục này là tùy chọn, không bắt buộc nhập, và chỉ dành cho người dùng nâng cao, có hiểu sâu về cuốn sách định dịch.</p>
+            <p class="text-xs text-zinc-500 mb-2 italic">Chỉ thị bổ sung ngắn gọn để thêm yêu cầu khi dịch (vd: phong cách, định dạng đặc thù). Nên viết dưới dạng các gạch đầu dòng và không quá 100 từ.</p>
+            <textarea 
+              [disabled]="store.isTranslatingAny()"
+              [ngModel]="store.customInstructions()"
+              (ngModelChange)="store.customInstructions.set($event)"
+              rows="6"
+              placeholder="Ví dụ:&#10;- Thể loại: Tiểu thuyết trinh thám cổ điển đầu thế kỷ 20.&#10;- Đối tượng: Độc giả trẻ, ngôn ngữ cần hiện đại và gãy gọn.&#10;- Phong cách: Ưu tiên từ thuần Việt, tránh lạm dụng từ Hán Việt.&#10;- Lưu ý: Nhân vật chính có giọng điệu mỉa mai, châm biếm."
+              class="w-full p-3 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors text-sm min-h-[150px] resize-y disabled:opacity-50 disabled:cursor-not-allowed"
+            ></textarea>
+          </div>
+        }
+      </div>
     </div>
   `
 })
 export class TranslatorConfigComponent {
   store = inject(BookStore);
+  isCustomInstructionsExpanded = signal(!!this.store.customInstructions());
 
   toggleUsePronouns(event: Event) {
     if (!this.store.pronounTable()) return;

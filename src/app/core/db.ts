@@ -91,6 +91,7 @@ export interface Project {
   pdfTask?: PdfConversionTask;
   pronounTask?: PronounGenerationTask;
   glossaryTask?: GlossaryGenerationTask;
+  customInstructions?: string;
   totalWords?: number;
   translatedWords?: number;
   splitSettings?: SplitSettings;
@@ -427,6 +428,7 @@ export class DbService {
         useGlossary: project.useGlossary,
         activePronounVersionId: project.activePronounVersionId,
         activeGlossaryVersionId: project.activeGlossaryVersionId,
+        customInstructions: project.customInstructions,
         splitSettings: project.splitSettings,
         totalWords,
         translatedWords,

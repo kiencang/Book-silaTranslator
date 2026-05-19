@@ -9,6 +9,7 @@
 {{đại từ nhân xưng}}
 {{thuật ngữ}}
 {{tóm tắt bối cảnh}}
+{{chỉ thị bổ sung}}
 </context_info>
 
 <mandatory_requirement>

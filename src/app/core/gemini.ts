@@ -237,7 +237,7 @@ export class GeminiClient {
     }
   }
 
-  async translateChapter(text: string, model: string, temperature: number, bookTitle = '', author = '', pronounTable = '', usePronouns = false, glossaryTable = '', useGlossary = false, shouldFilterGlossary = true, contextSummary?: string): Promise<{text: string, customGlossary?: string, glossaryStatus?: 'none' | 'full' | 'filtered', glossaryRatio?: number}> {
+  async translateChapter(text: string, model: string, temperature: number, bookTitle = '', author = '', pronounTable = '', usePronouns = false, glossaryTable = '', useGlossary = false, shouldFilterGlossary = true, contextSummary?: string, customInstructions?: string): Promise<{text: string, customGlossary?: string, glossaryStatus?: 'none' | 'full' | 'filtered', glossaryRatio?: number}> {
     
     let activeGlossary = '';
     let glossaryStatus: 'none' | 'full' | 'filtered' = 'none';
@@ -284,6 +284,13 @@ export class GeminiClient {
          finalPrompt = finalPrompt.replace('{{tóm tắt bối cảnh}}', contextBlock);
       } else {
          finalPrompt = finalPrompt.replace('{{tóm tắt bối cảnh}}', '');
+      }
+
+      if (customInstructions) {
+         const instructionsBlock = `<custom_instructions>\n**Chỉ thị bổ sung khi dịch:**\n${customInstructions}\n</custom_instructions>`;
+         finalPrompt = finalPrompt.replace('{{chỉ thị bổ sung}}', instructionsBlock);
+      } else {
+         finalPrompt = finalPrompt.replace('{{chỉ thị bổ sung}}', '');
       }
 
       finalPrompt = finalPrompt.replace('{{nội dung cần dịch}}', '\n' + text);

@@ -23,6 +23,8 @@ export interface TranslationVersion {
   useContextSummary?: boolean;
   contextSummarySnapshot?: string;
   contextSummaryChapterTitle?: string;
+  useCustomInstructions?: boolean;
+  customInstructionsSnapshot?: string;
 }
 
 export interface Chapter {
@@ -131,6 +133,7 @@ export class BookStore {
     generateSummary: true
   });
   readonly splitSettings = signal<SplitSettings | undefined>(undefined);
+  readonly customInstructions = signal<string | undefined>(undefined);
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
@@ -159,6 +162,7 @@ export class BookStore {
         useGlossary: this.useGlossary(),
         activePronounVersionId: this.activePronounVersionId(),
         activeGlossaryVersionId: this.activeGlossaryVersionId(),
+        customInstructions: this.customInstructions(),
         splitSettings: this.splitSettings()
       };
       
@@ -240,6 +244,7 @@ export class BookStore {
     this.pdfTask.set(undefined);
     this.chapters.set([]);
     this.splitSettings.set(undefined);
+    this.customInstructions.set(undefined);
     this.phase.set(1);
   }
 
@@ -274,6 +279,7 @@ export class BookStore {
       this.chapters.set(adjustedChapters);
       this.config.set(proj.config);
       this.splitSettings.set(proj.splitSettings);
+      this.customInstructions.set(proj.customInstructions);
       this.phase.set(proj.phase as 0 | 1 | 2 | 3 | 4 | 5);
       
       if (isPlatformBrowser(this.platformId)) {
@@ -297,6 +303,7 @@ export class BookStore {
     this.pronounTask.set(undefined);
     this.glossaryTask.set(undefined);
     this.splitSettings.set(undefined);
+    this.customInstructions.set(undefined);
     this.phase.set(0);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('md-translator-last-id');

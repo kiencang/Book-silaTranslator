@@ -204,7 +204,8 @@ export class Translator {
         this.store.glossaryTable(),
         this.store.useGlossary(),
         validChaptersCount > 3,
-        contextSummarySnapshot
+        contextSummarySnapshot,
+        this.store.customInstructions()
       );
       
       let summaryText: string | undefined = undefined;
@@ -230,7 +231,9 @@ export class Translator {
         glossaryVersionNumber: this.store.useGlossary() ? this.store.activeGlossaryVersionNumber() : undefined,
         useContextSummary: !!contextSummarySnapshot,
         contextSummarySnapshot: contextSummarySnapshot,
-        contextSummaryChapterTitle: contextSummaryChapterTitle
+        contextSummaryChapterTitle: contextSummaryChapterTitle,
+        useCustomInstructions: !!this.store.customInstructions(),
+        customInstructionsSnapshot: this.store.customInstructions() || undefined
       };
       
       const versions = [...(chapter.versions || []), newVersion].slice(-3);
