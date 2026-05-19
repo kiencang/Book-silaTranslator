@@ -8,6 +8,11 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
+## [v1.0.60]- 2026-05-20
+### Fixed
+- Khắc phục vấn đề gom footnote lẫn lộn khi xuất toàn bộ cuốn sách.
+- Khắc phục vấn đề footnote không click được khi đọc trong ứng dụng.
+
 ## [v1.0.59]- 2026-05-20
 ### Fixed
 - Bổ sung hướng dẫn sử dụng.
