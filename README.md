@@ -81,6 +81,8 @@ Thường để dịch nguyên một cuốn sách ứng dụng cần 1 - 2 tiế
    <br><em>Đọc song ngữ với việc so sánh dễ dàng 2 khối dịch tương ứng nhau để tiện đối chiếu</em>
 </p>
 
+Bạn có thể vào dự án Gutenberg để tải các sách hết hạn bản quyền về dịch. Ví dụ 100 cuốn được tải về nhiều nhất trong tháng: https://www.gutenberg.org/browse/scores/top#books-last100
+
 ## Tuyên bố từ chối trách nhiệm
 Công cụ này có thể được sử dụng cho mục đích nghiên cứu và học tập cá nhân.
 
