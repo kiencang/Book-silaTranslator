@@ -182,7 +182,7 @@ export class GlossarySetup {
   glossaryTask = this.store.glossaryTask;
   completedChunksCount = computed(() => this.glossaryTask()?.chunks.filter(c => c.status === 'completed').length || 0);
 
-  glossaryModel = signal<string>(this.store.glossaryTask()?.model ?? this.store.config().glossaryGenModel ?? 'gemini-pro-latest');
+  glossaryModel = signal<string>(this.store.glossaryTask()?.model ?? this.store.config().glossaryGenModel ?? 'gemini-flash-latest');
   isManuallyEdited = signal<boolean>(false);
 
   constructor() {

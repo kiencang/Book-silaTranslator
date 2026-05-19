@@ -49,16 +49,12 @@ import { DatePipe } from '@angular/common';
                   
                   @if (store.currentProjectId() === p.id) {
                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
+                    <div class="absolute left-1 top-0 bg-indigo-500 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-b-md shadow-sm z-10">
+                      Đang mở
+                    </div>
                   }
                   
-                  <div class="flex-1 cursor-pointer min-w-0" role="button" tabindex="0" (keydown.enter)="loadProject(p.id)" (click)="loadProject(p.id)">
-                    @if (store.currentProjectId() === p.id) {
-                      <div class="mb-2">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                          Đang mở
-                        </span>
-                      </div>
-                    }
+                  <div class="flex-1 cursor-pointer min-w-0" [class.mt-2]="store.currentProjectId() === p.id" role="button" tabindex="0" (keydown.enter)="loadProject(p.id)" (click)="loadProject(p.id)">
                     <div class="flex items-start justify-between gap-3">
                       <h3 class="font-bold text-base text-zinc-900 mb-1 line-clamp-2" [title]="p.name">
                         {{p.name}}
@@ -66,7 +62,12 @@ import { DatePipe } from '@angular/common';
                     </div>
                     <div class="flex flex-col gap-2 w-full mt-2">
                       <div class="flex flex-wrap items-center text-sm text-zinc-500 gap-x-4 gap-y-2">
-                        <span class="flex items-center"><span class="material-icons text-[16px] mr-1">update</span> {{p.updatedAt | date:'short'}}</span>
+                        <span class="flex items-center" title="Ngày tạo ban đầu"><span class="material-icons text-[16px] mr-1 opacity-70">add_circle_outline</span> {{p.createdAt | date:'dd/MM/yy HH:mm'}}</span>
+                        @if (p.importedAt) {
+                          <span class="flex items-center text-indigo-600 font-medium" title="Ngày nhập vào máy"><span class="material-icons text-[16px] mr-1">publish</span> {{p.importedAt | date:'dd/MM/yy HH:mm'}}</span>
+                        }
+                      </div>
+                      <div class="flex flex-wrap items-center text-sm text-zinc-500 gap-x-4 gap-y-2">
                         <span class="flex items-center">
                           <span class="w-2 h-2 rounded-full mr-1.5" 
                                 [class.bg-zinc-400]="p.phase === 1"
@@ -179,8 +180,8 @@ export class ProjectModal implements OnInit {
   async loadProjects() {
     this.isLoading.set(true);
     const list = await this.db.getAllProjects();
-    // Sort by updatedAt descending
-    list.sort((a, b) => b.updatedAt - a.updatedAt);
+    // Sort by importedAt (if available) or createdAt descending
+    list.sort((a, b) => (b.importedAt ?? b.createdAt) - (a.importedAt ?? a.createdAt));
     this.projects.set(list);
     this.isLoading.set(false);
   }
@@ -282,10 +283,11 @@ export class ProjectModal implements OnInit {
       }
       
       proj.updatedAt = Date.now();
+      proj.importedAt = Date.now();
       
       await this.db.saveProject(proj);
       this.toast.success(this.toast.Messages.PROJECT_IMPORT_SUCCESS);
-      await this.loadProjects();
+      await this.loadProject(proj.id);
     } catch (e: unknown) {
       console.error(e);
       this.toast.error(this.toast.Messages.PROJECT_IMPORT_ERROR);

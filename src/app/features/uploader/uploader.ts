@@ -43,7 +43,7 @@ import TurndownService from 'turndown';
 
             <div class="text-left mb-8 relative">
               <label class="block text-sm font-medium text-zinc-700 mb-2">
-                Chọn model xử lý
+                Chọn model chuyển đổi định dạng PDF (*)
                 <select [(ngModel)]="pdfModel" (ngModelChange)="onModelChange()" class="mt-2 w-full px-4 pr-10 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors appearance-none font-normal text-base">
                   <option value="gemini-flash-lite-latest">Lite (rẻ & nhanh nhất)</option>
                   <option value="gemini-flash-latest">Flash (cho nội dung trình bày phức tạp)</option>
@@ -98,7 +98,7 @@ import TurndownService from 'turndown';
             </div>
             
             <p class="mt-6 text-[13px] text-zinc-400 italic text-left leading-relaxed">
-              Tài liệu PDF trước khi dịch sẽ được <strong class="font-medium text-zinc-500">chuyển sang định dạng thân thiện với AI hơn</strong>. Việc này có thể dễ dàng thực hiện với các model thấp để có tốc độ cao và tiết kiệm ngưỡng miễn phí (giúp bạn dùng miễn phí được nhiều hơn). Khi tiến hành dịch thuật chính thức bạn có tùy chọn với các model AI cao nhất để có chất lượng dịch tốt nhất.
+              (*) Tài liệu PDF trước khi dịch sẽ được <strong class="font-medium text-zinc-500">chuyển sang định dạng thân thiện với AI hơn</strong>. Việc này có thể dễ dàng thực hiện với các model thấp để có tốc độ cao và tiết kiệm ngưỡng miễn phí (giúp bạn dùng miễn phí được nhiều hơn). Khi tiến hành dịch thuật chính thức bạn có tùy chọn với các model AI cao nhất để có chất lượng dịch tốt nhất.
             </p>
           </div>
         } @else if (store.pdfTask(); as task) {

@@ -106,6 +106,7 @@ export class BookStore {
   });
   readonly useGlossary = signal<boolean>(false);
   private currentProjectCreatedAt = signal<number>(Date.now());
+  private currentProjectImportedAt = signal<number | undefined>(undefined);
 
   readonly phase = signal<0 | 1 | 2 | 3 | 4 | 5>(0);
   readonly fileName = signal<string | null>(null);
@@ -151,6 +152,7 @@ export class BookStore {
         config: this.config(),
         updatedAt: Date.now(),
         createdAt: untracked(() => this.currentProjectCreatedAt()),
+        importedAt: untracked(() => this.currentProjectImportedAt()),
         bookTitle: this.bookTitle(),
         author: this.author(),
         usePronouns: this.usePronouns(),
@@ -231,6 +233,7 @@ export class BookStore {
     this.activeGlossaryVersionId.set(undefined);
     this.useGlossary.set(false);
     this.currentProjectCreatedAt.set(Date.now());
+    this.currentProjectImportedAt.set(undefined);
     
     this.fileName.set(null);
     this.rawMarkdown.set(null);
@@ -257,6 +260,7 @@ export class BookStore {
       this.useGlossary.set(!!proj.useGlossary);
       
       this.currentProjectCreatedAt.set(proj.createdAt || Date.now());
+      this.currentProjectImportedAt.set(proj.importedAt);
       
       this.fileName.set(proj.fileName);
       this.rawMarkdown.set(proj.rawMarkdown);

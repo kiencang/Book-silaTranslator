@@ -72,6 +72,7 @@ export interface Project {
   name: string;
   createdAt: number;
   updatedAt: number;
+  importedAt?: number;
   phase: number;
   fileName: string | null;
   rawMarkdown: string | null;
@@ -416,6 +417,7 @@ export class DbService {
         name: project.name,
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
+        importedAt: project.importedAt,
         phase: project.phase,
         fileName: project.fileName,
         bookTitle: project.bookTitle,
