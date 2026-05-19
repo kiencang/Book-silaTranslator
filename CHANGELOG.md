@@ -8,9 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
-## [v1.0.59]- 2026-05-19
+## [v1.0.59]- 2026-05-20
 ### Fixed
 - Bổ sung hướng dẫn sử dụng.
+- Thiết kế menu cho cuốn sách.
 
 ## [v1.0.58]- 2026-05-19
 ### Fixed
