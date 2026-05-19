@@ -22,15 +22,13 @@ Chương trình sử dụng SI & Prompt từ dự án này: https://github.com/k
    <br><em>Bước 3: Chia chương/khối dịch: Ứng dụng cần chia cuốn sách ra thành các chương/khối để dịch lần lượt. Ở đây bạn sẽ có các tùy chọn chia cuốn sách theo cách thức nào.</em>
 </p>
 
-<p>
-  Có 2 cách:
+Có 2 cách:
 - Nhờ AI chia: sử dụng tín năng này nếu bạn không rõ cấu trúc của cuốn sách, không biết chia thế nào cho hợp lý.
 - Chia thủ công bằng các lựa chọn: bạn biết cấu trúc cuốn sách cơ bản thế nào, và chọn phương pháp phù hợp. Có 3 cách chia cơ bản:
     + Chia theo chương: công cụ sẽ tự động quét các từ khóa như `chapter` để tách sách thành các chương.
     + Chia theo các tiêu đề lớn: nếu sách không phân thành các chương mà dùng các tiêu đề lớn thì nên chọn cách này để chia
     + Chia đều tự động: nếu 2 cách trên đều bó tay, thì bạn áp dụng cách này, nó sẽ phân sách ra làm các phần nhỏ hơn dựa theo các dấu xuống dòng. Đây là cách tệ nhất để chia sách, chỉ dùng nếu 2 cách trên không áp dụng được.
    + Chia thủ công có tùy chọn `Số từ tối thiểu` & `Số từ tối đa`: cái này dùng để áp ngưỡng phân chia. Mỗi chương/khối sẽ bắt buộc phải nằm trong ngưỡng này. Bạn cũng nên điều chỉnh để xem sách chia thế nào. Ý tưởng cơ bản là: nếu chia sách quá vụn hoặc quá lớn thì đều khó dịch hơn.
-</p>
 
 <p align="center">
   <img src="images/h4-chia-thu-cong.png" alt="Chia thủ công">
