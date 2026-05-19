@@ -10,12 +10,14 @@ Chương trình sử dụng SI & Prompt từ dự án này: https://github.com/k
    <br><em>Bước 1: Tạo dự án: Ở đây các bạn cần nhập chính xác tên sách & tác giả. Thông tin này quan trọng, vì sách (nhất là kinh điển) thường có thông tin rất đầy đủ trên mạng, cung cấp chính xác thông tin giúp công cụ dịch tốt hơn.</em>
 </p>
 
+Lưu ý: Khi bạn tạo dự án, toàn bộ dữ liệu dịch của bạn sẽ được lưu cục bộ tại trình duyệt của bạn. Việc xóa dữ liệu trình duyệt có thể làm mất dữ liệu này. Luôn sử dụng tính năng xuất dự án nếu bạn muốn bảo vệ dữ liệu lâu dài.
+
 <p align="center">
   <img src="images/h2-tai-sach-len.png" alt="Bước 2">
    <br><em>Bước 2: Tải sách lên: Bạn tải sách gốc tiếng Anh lên. Hiện công cụ hỗ trợ 4 định dạng là HTML, PDF, TXT & Markdown.</em>
 </p>
 
-<p>Định dạng khuyến khích là HTML. PDF cũng ổn nhưng sẽ mất thêm chút thời gian để phân tích. Và các sách đang còn bản quyền thường bị AI từ chối phân tích. Các định dạng khác thì không bị như vậy.</p>
+Định dạng khuyến khích là HTML. PDF cũng ổn nhưng sẽ mất thêm chút thời gian để phân tích chuyển đổi định dạng. Và các sách đang còn bản quyền thường bị AI từ chối phân tích. Các định dạng khác thì không bị như vậy.
 
 <p align="center">
   <img src="images/h3-AI-phan-tich.png" alt="Bước 3">
@@ -40,34 +42,28 @@ Có 2 cách:
    <br><em>Bước 4: Tạo đại từ xưng hô: Đại từ xưng hô có thể nói là phần khác biệt nhất giữa tiếng Anh & tiếng Việt. Tiếng Việt có đại từ xưng hô rất phức tạp, phụ thuộc vào tuổi, giới tính, vai vế, chức vụ & cả tâm trạng!</em>
 </p>
 
-<p>
 Phần này đặc biệt quan trọng cho thể loại truyện ngắn, tiểu thuyết. Các dạng sách phi hư cấu có thể không cần thiết (bấm button `Bỏ qua phần này` nếu không muốn tạo).
   
 Bạn chỉ việc nhấn button, công cụ sẽ tự quét toàn bộ cuốn sách và tạo bảng đại từ đầy đủ. Vì đại từ rất quan trọng, bạn nên chọn model AI cao nhất để phân tích.
-</p>
 
 <p align="center">
   <img src="images/h6-tao-tu-kho.png" alt="Giao diện của công cụ dịch...">
    <br><em>Bước 5: Tạo danh sách từ khó/thuật ngữ: hầu hết các sách đều có những từ khó dịch, nên bước này bạn nên làm với bất kỳ thể loại sách nào.</em>
 </p>
 
-<p>
 Model chọn để phân tích lý tưởng nhất vẫn là model cao nhất (Pro). Tuy nhiên sách rất tốn dữ liệu nên người dùng miễn phí để không bị gián đoạn phân tích nên dùng model tầm trung (Flash) để làm.  
-</p>
 
 <p align="center">
   <img src="images/h7-dich.png" alt="Bước 6">
    <br><em>Bước 6: Dịch: Tiến hành dịch chính thức.</em>
 </p>
 
-<p>
 Sau khi có các nguyên liệu thô ở các bước trước, ứng dụng sẵn sàng dịch cả cuốn sách.
 Các thiết lập mặc định đủ tốt trong phần lớn trường hợp. Bạn chỉ việc nhất button `Dịch tất cả` (để dịch cả cuốn sách) hoặc `Dịch riêng phần này` (để dịch một chương/khối cụ thể).
   
 Nên chọn model cao nhất ở bước này. Tuy nhiên nếu muốn dịch nhanh hơn, không bị gián đoạn, có thể dùng model Flash.
   
 Thường để dịch nguyên một cuốn sách ứng dụng cần 1 - 2 tiếng. Lý do là vì nó dịch theo kiểu tuần tự để đảm bảo bối cảnh tốt nhất cho các phần tiếp theo.
-</p>
 
 <p align="center">
   <img src="images/h8-doc-ban-dich.png" alt="Đọc bản dịch ngay trong ứng dụng">
