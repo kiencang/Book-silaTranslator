@@ -142,6 +142,142 @@ img { max-width: 100%; height: auto; }
 .theme-white { background-color: #FFFFFF; border-color: #E5E7EB; color: var(--toolbar-text); }
 .theme-sepia { background-color: #FFFFF0; border-color: #E5E7EB; color: var(--toolbar-text); }
 .theme-dark { background-color: #121212; border-color: #374151; color: var(--toolbar-text); }
+
+/* TOC Button */
+.toc-toggle-btn {
+  position: fixed;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  z-index: 50;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--toolbar-border);
+  background-color: var(--toolbar-bg);
+  color: var(--toolbar-text);
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  transition: background-color 0.2s, right 0.3s ease, transform 0.2s;
+  padding: 0;
+}
+.toc-toggle-btn:hover { background-color: var(--toolbar-hover); transform: translateY(-50%) scale(1.05); }
+.toc-toggle-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+/* TOC Sidebar */
+.toc-sidebar {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  max-width: 380px;
+  min-width: 300px;
+  height: 100vh;
+  z-index: 100;
+  background-color: var(--toolbar-bg);
+  border-left: 1px solid var(--toolbar-border);
+  box-shadow: -4px 0 16px rgba(0,0,0,0.1);
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+.toc-sidebar.expanded {
+  right: 0;
+}
+.toc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--toolbar-border);
+}
+.toc-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--heading-color);
+  margin: 0;
+}
+.toc-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--toolbar-text);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+.toc-close-btn:hover { background-color: var(--toolbar-hover); }
+.toc-close-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+.toc-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+}
+/* Custom Scrollbar for TOC */
+.toc-content::-webkit-scrollbar { width: 8px; }
+.toc-content::-webkit-scrollbar-track { background: transparent; }
+.toc-content::-webkit-scrollbar-thumb { background-color: var(--toolbar-border); border-radius: 3px; }
+.toc-content::-webkit-scrollbar-thumb:hover { background-color: var(--toolbar-text); }
+
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.toc-item { 
+  margin: 0; 
+  padding: 0; 
+  border-bottom: 1px solid var(--toolbar-border);
+}
+.toc-list > .toc-item:last-child {
+  border-bottom: none;
+}
+.toc-item-h1 { font-weight: 600; font-size: 1em; color: var(--heading-color); }
+.toc-item-h2 { font-size: 0.95em; color: var(--text-color); }
+.toc-item-h3 { font-size: 0.9em; opacity: 0.8; color: var(--text-color); }
+
+.toc-item-h1 .toc-link { padding-left: 8px; padding-top: 12px; }
+.toc-item-h2 .toc-link { padding-left: 24px; }
+.toc-item-h3 .toc-link { padding-left: 40px; }
+
+.toc-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 10px 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s, color 0.2s;
+  line-height: 1.4;
+}
+.toc-link:hover {
+  background-color: var(--toolbar-hover);
+  color: var(--heading-color);
+}
+.toc-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.3);
+  z-index: 90;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+.toc-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
 `;
 
 export const OFFLINE_READER_TOOLBAR_HTML = `
@@ -171,6 +307,26 @@ export const OFFLINE_READER_TOOLBAR_HTML = `
     <button class="toolbar-btn" id="btnReset" title="Khôi phục mặc định">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
     </button>
+  </div>
+</div>
+
+<!-- Table of Contents Toggle & Sidebar -->
+<button class="toc-toggle-btn" id="tocToggleBtn" title="Mục lục">
+  <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+</button>
+
+<div class="toc-overlay" id="tocOverlay"></div>
+<div class="toc-sidebar" id="tocSidebar">
+  <div class="toc-header">
+    <h2 class="toc-title">Mục lục</h2>
+    <button class="toc-close-btn" id="tocCloseBtn" title="Đóng">
+      <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+    </button>
+  </div>
+  <div class="toc-content">
+    <ul class="toc-list" id="tocList">
+      <!-- Logic to populate this dynamically -->
+    </ul>
   </div>
 </div>
 `;
@@ -311,6 +467,106 @@ export const OFFLINE_READER_SCRIPT = `
       applyPrefs();
     });
   }
+
+  // TOC Logic
+  const tocSidebar = document.getElementById('tocSidebar');
+  const tocOverlay = document.getElementById('tocOverlay');
+  const tocList = document.getElementById('tocList');
+  
+  const openTOC = () => {
+    if (tocSidebar) tocSidebar.classList.add('expanded');
+    if (tocOverlay) tocOverlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  };
+  
+  const closeTOC = () => {
+    if (tocSidebar) tocSidebar.classList.remove('expanded');
+    if (tocOverlay) tocOverlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  };
+
+  const tocToggleBtn = document.getElementById('tocToggleBtn');
+  if (tocToggleBtn) {
+    tocToggleBtn.addEventListener('click', openTOC);
+  }
+  
+  const tocCloseBtn = document.getElementById('tocCloseBtn');
+  if (tocCloseBtn) {
+    tocCloseBtn.addEventListener('click', closeTOC);
+  }
+  
+  if (tocOverlay) {
+    tocOverlay.addEventListener('click', closeTOC);
+  }
+
+  const buildTOC = () => {
+    if (!tocList) return;
+    const headings = document.querySelectorAll('.content-wrapper h1, .content-wrapper h2, .content-wrapper h3');
+    
+    if (headings.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'toc-item';
+      li.innerHTML = '<span class="toc-link" style="opacity: 0.5;">Không có mục lục</span>';
+      tocList.appendChild(li);
+      return;
+    }
+
+    headings.forEach((heading, index) => {
+      if (!heading.id) {
+        heading.id = 'heading-' + index;
+      }
+      
+      const li = document.createElement('li');
+      li.className = 'toc-item toc-item-' + heading.tagName.toLowerCase();
+      
+      const a = document.createElement('a');
+      a.href = '#' + heading.id;
+      a.className = 'toc-link';
+      a.textContent = heading.textContent;
+      
+      a.addEventListener('click', closeTOC);
+      
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  };
+
+  buildTOC();
+
+  // Reading progress tracking
+  const getDocumentId = () => {
+    const projectIdMeta = document.querySelector('meta[name="x-sila-project-id"]');
+    const chapterIdMeta = document.querySelector('meta[name="x-sila-chapter-id"]');
+    
+    const projectId = projectIdMeta ? projectIdMeta.getAttribute('content') : 'unknown_project';
+    const chapterId = chapterIdMeta ? chapterIdMeta.getAttribute('content') : 'unknown_chapter';
+    
+    return projectId + '_' + chapterId;
+  };
+
+  const SCROLL_KEY = 'sila_scroll_' + getDocumentId();
+
+  setTimeout(() => {
+    try {
+      const savedScroll = localStorage.getItem(SCROLL_KEY);
+      if (savedScroll) {
+        window.scrollTo({
+          top: parseInt(savedScroll, 10),
+          behavior: 'smooth'
+        });
+      }
+    } catch (e) {}
+  }, 500);
+
+  let scrollTimeout;
+  window.addEventListener('scroll', () => {
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      try {
+        localStorage.setItem(SCROLL_KEY, window.scrollY.toString());
+      } catch (e) {}
+    }, 1000);
+  });
 })();
 </script>
 `;
