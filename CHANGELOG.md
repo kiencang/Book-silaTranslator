@@ -11,6 +11,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.57]- 2026-05-19
 ### Fixed
 - Thêm tính năng chỉ thị bổ sung khi dịch.
+- Phần thông tin của khối dịch cũng cho biết `Chỉ thị bổ sung` có đang được dùng hay không.
 
 ## [v1.0.56]- 2026-05-19
 ### Fixed
