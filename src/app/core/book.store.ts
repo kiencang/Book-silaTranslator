@@ -493,10 +493,12 @@ export class BookStore {
 
     let combinedMarkdown = '';
     for (const c of chaps) {
-      if (c.status === 'done' && c.translatedText) {
-        combinedMarkdown += c.translatedText + '\n\n';
-      } else {
-        combinedMarkdown += c.originalText + '\n\n';
+      let chapterMarkdown = c.status === 'done' && c.translatedText ? c.translatedText : c.originalText;
+      if (chapterMarkdown) {
+        // Preprocess footnotes to make them unique per chapter
+        // Replace [^id] with [^chapterId-id]
+        chapterMarkdown = chapterMarkdown.replace(/\[\^([^\]]+)\]/g, `[^${c.id}-$1]`);
+        combinedMarkdown += chapterMarkdown + '\n\n';
       }
     }
 

@@ -213,7 +213,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
           <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-zinc-100">
             <div class="p-6">
               <h5 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-4">Bản gốc (Markdown)</h5>
-              <div class="prose prose-sm max-w-none text-zinc-700" [innerHTML]="parseMarkdown(chapter().originalText)"></div>
+              <div class="prose prose-sm max-w-none text-zinc-700" [innerHTML]="parseMarkdown(chapter().originalText, chapter().id + '-orig')"></div>
             </div>
             <div class="p-6 bg-zinc-50 relative">
               <div class="flex items-center justify-between mb-4">
@@ -237,7 +237,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                   <span class="text-sm">Đây là nội dung bản quyền / metadata, nội dung sẽ được giữ nguyên bản gốc khi xuất file.</span>
                 </div>
               } @else if (chapter().translatedText) {
-                <div class="prose prose-sm max-w-none text-zinc-900" [innerHTML]="parseMarkdown(chapter().translatedText)"></div>
+                <div class="prose prose-sm max-w-none text-zinc-900" [innerHTML]="parseMarkdown(chapter().translatedText, chapter().id + '-trans')"></div>
               } @else if (chapter().status === 'translating') {
                 <app-translating-skeleton />
               } @else {
@@ -305,7 +305,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                  [class]="getContentClass(readerStore.prefs().theme)" 
                  [style.font-size.px]="readerStore.prefs().fontSize"
                  [style.font-family]="getFontFamily(readerStore.prefs().fontFamily)"
-                 [innerHTML]="parseMarkdown(chapter().translatedText)"></div>
+                 [innerHTML]="parseMarkdown(chapter().translatedText, chapter().id + '-transfull')"></div>
 
             <div class="mt-24 pt-8 border-t border-zinc-200/50 flex flex-col sm:flex-row items-center justify-between gap-4 max-w-2xl mx-auto pb-12">
               @if (prevTranslatedChapterIndex() !== -1) {
@@ -382,7 +382,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                      [class]="getContentClass(readerStore.prefs().theme)"
                      [style.font-size.px]="readerStore.prefs().fontSize"
                      [style.font-family]="getFontFamily(readerStore.prefs().fontFamily)"
-                     [innerHTML]="parseMarkdown(chapter().originalText)"></div>
+                     [innerHTML]="parseMarkdown(chapter().originalText, chapter().id + '-biorig')"></div>
               </div>
             </div>
 
@@ -399,7 +399,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                      [class]="getContentClass(readerStore.prefs().theme)"
                      [style.font-size.px]="readerStore.prefs().fontSize"
                      [style.font-family]="getFontFamily(readerStore.prefs().fontFamily)"
-                     [innerHTML]="parseMarkdown(chapter().translatedText)"></div>
+                     [innerHTML]="parseMarkdown(chapter().translatedText, chapter().id + '-bitrans')"></div>
               </div>
             </div>
           </div>
@@ -448,7 +448,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
               </button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 bg-white">
-               <div class="prose prose-sm max-w-none text-zinc-700" [innerHTML]="parseMarkdown(activeSummary())"></div>
+               <div class="prose prose-sm max-w-none text-zinc-700" [innerHTML]="parseMarkdown(activeSummary(), chapter().id + '-sum')"></div>
             </div>
           </div>
         </div>
@@ -470,7 +470,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
               </button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 bg-white">
-               <div class="prose prose-sm max-w-none text-zinc-700" [innerHTML]="parseMarkdown(activeContextSummary())"></div>
+               <div class="prose prose-sm max-w-none text-zinc-700" [innerHTML]="parseMarkdown(activeContextSummary(), chapter().id + '-csum')"></div>
             </div>
           </div>
         </div>
@@ -650,7 +650,7 @@ export class ChapterItemComponent {
     if (!snapshotText) {
       this.parsedPronounSnapshot.set('');
     } else {
-      this.parsedPronounSnapshot.set(this.parseMarkdown(snapshotText));
+      this.parsedPronounSnapshot.set(this.parseMarkdown(snapshotText, 'pronoun'));
     }
     this.currentPronounVersion.set(version);
     this.showPronounModal.set(true);
@@ -668,7 +668,7 @@ export class ChapterItemComponent {
     if (!snapshotText) {
       this.parsedCustomInstructionsSnapshot.set('');
     } else {
-      this.parsedCustomInstructionsSnapshot.set(this.parseMarkdown(snapshotText));
+      this.parsedCustomInstructionsSnapshot.set(this.parseMarkdown(snapshotText, 'cinst'));
     }
     this.showCustomInstructionsModal.set(true);
   }
@@ -712,7 +712,7 @@ export class ChapterItemComponent {
 
   viewCustomGlossary(glossaryMd: string | undefined, ratio?: number, version?: number) {
     if (!glossaryMd) return;
-    this.parsedCustomGlossary.set(this.parseMarkdown(glossaryMd));
+    this.parsedCustomGlossary.set(this.parseMarkdown(glossaryMd, 'cgloss'));
     this.currentGlossaryRatio.set(ratio);
     this.currentGlossaryVersion.set(version);
     this.showGlossaryModal.set(true);
@@ -981,10 +981,39 @@ ${OFFLINE_READER_SCRIPT}
     }
   }
 
-  parseMarkdown(text: string | undefined): SafeHtml | string {
+  parseMarkdown(text: string | undefined, prefix: string = ''): SafeHtml | string {
     if (!text) return '';
-    const parsed = getConfiguredMarked().parse(text) as string;
+    let processedText = text;
+    if (prefix) {
+      processedText = processedText.replace(/\[\^([^\]]+)\]/g, `[^${prefix}-$1]`);
+    }
+    const parsed = getConfiguredMarked().parse(processedText) as string;
     return this.sanitizer.bypassSecurityTrustHtml(parsed);
+  }
+
+  @HostListener('click', ['$event'])
+  onLinkClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const anchor = target.closest('a');
+    
+    if (anchor) {
+      const href = anchor.getAttribute('href');
+      if (href && href.startsWith('#fn')) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const id = href.substring(1);
+        const targetElement = document.getElementById(id);
+        
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          targetElement.classList.add('bg-yellow-100', 'dark:bg-yellow-900/30', 'transition-colors', 'duration-300', 'rounded', 'px-1');
+          setTimeout(() => {
+            targetElement.classList.remove('bg-yellow-100', 'dark:bg-yellow-900/30');
+          }, 2000);
+        }
+      }
+    }
   }
 
   getActiveVersion(chapter: Chapter) {
