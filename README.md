@@ -7,12 +7,12 @@ Chương trình sử dụng SI & Prompt từ dự án này: https://github.com/k
 
 <p align="center">
   <img src="images/h1-tao-du-an.png" alt="Bước 1">
-   <br><em>Bước 1: Tạo dự án (hình 1): Ở đây các bạn cần nhập chính xác tên sách & tác giả. Thông tin này quan trọng, vì sách (nhất là kinh điển) thường có thông tin rất đầy đủ trên mạng, cung cấp chính xác thông tin giúp công cụ dịch tốt hơn.</em>
+   <br><em>Bước 1: Tạo dự án: Ở đây các bạn cần nhập chính xác tên sách & tác giả. Thông tin này quan trọng, vì sách (nhất là kinh điển) thường có thông tin rất đầy đủ trên mạng, cung cấp chính xác thông tin giúp công cụ dịch tốt hơn.</em>
 </p>
 
 <p align="center">
   <img src="images/h2-tai-sach-len.png" alt="Bước 2">
-   <br><em>Bước 2: Tải sách lên (hình 2): Bạn tải sách gốc tiếng Anh lên. Hiện công cụ hỗ trợ 4 định dạng là HTML, PDF, TXT & Markdown.</em>
+   <br><em>Bước 2: Tải sách lên: Bạn tải sách gốc tiếng Anh lên. Hiện công cụ hỗ trợ 4 định dạng là HTML, PDF, TXT & Markdown.</em>
 </p>
 
 <p>Định dạng khuyến khích là HTML. PDF cũng ổn nhưng sẽ mất thêm chút thời gian để phân tích. Và các sách đang còn bản quyền thường bị AI từ chối phân tích. Các định dạng khác thì không bị như vậy.</p>
@@ -24,8 +24,8 @@ Chương trình sử dụng SI & Prompt từ dự án này: https://github.com/k
 
 <p>
   Có 2 cách:
-- Nhờ AI chia (hình 3): sử dụng tín năng này nếu bạn không rõ cấu trúc của cuốn sách, không biết chia thế nào cho hợp lý.
-- Chia thủ công bằng các lựa chọn (hình 4): bạn biết cấu trúc cuốn sách cơ bản thế nào, và chọn phương pháp phù hợp. Có 3 cách chia cơ bản:
+- Nhờ AI chia: sử dụng tín năng này nếu bạn không rõ cấu trúc của cuốn sách, không biết chia thế nào cho hợp lý.
+- Chia thủ công bằng các lựa chọn: bạn biết cấu trúc cuốn sách cơ bản thế nào, và chọn phương pháp phù hợp. Có 3 cách chia cơ bản:
     + Chia theo chương: công cụ sẽ tự động quét các từ khóa như `chapter` để tách sách thành các chương.
     + Chia theo các tiêu đề lớn: nếu sách không phân thành các chương mà dùng các tiêu đề lớn thì nên chọn cách này để chia
     + Chia đều tự động: nếu 2 cách trên đều bó tay, thì bạn áp dụng cách này, nó sẽ phân sách ra làm các phần nhỏ hơn dựa theo các dấu xuống dòng. Đây là cách tệ nhất để chia sách, chỉ dùng nếu 2 cách trên không áp dụng được.
@@ -39,7 +39,7 @@ Chương trình sử dụng SI & Prompt từ dự án này: https://github.com/k
 
 <p align="center">
   <img src="images/h5-tao-dai-tu.png" alt="Giao diện của công cụ dịch...">
-   <br><em>Bước 4: Tạo đại từ xưng hô (hình 5): Đại từ xưng hô có thể nói là phần khác biệt nhất giữa tiếng Anh & tiếng Việt. Tiếng Việt có đại từ xưng hô rất phức tạp, phụ thuộc vào tuổi, giới tính, vai vế, chức vụ & cả tâm trạng!</em>
+   <br><em>Bước 4: Tạo đại từ xưng hô: Đại từ xưng hô có thể nói là phần khác biệt nhất giữa tiếng Anh & tiếng Việt. Tiếng Việt có đại từ xưng hô rất phức tạp, phụ thuộc vào tuổi, giới tính, vai vế, chức vụ & cả tâm trạng!</em>
 </p>
 
 <p>
@@ -50,7 +50,7 @@ Bạn chỉ việc nhấn button, công cụ sẽ tự quét toàn bộ cuốn s
 
 <p align="center">
   <img src="images/h6-tao-tu-kho.png" alt="Giao diện của công cụ dịch...">
-   <br><em>Bước 5: Tạo danh sách từ khó/thuật ngữ (hình 6): hầu hết các sách đều có những từ khó dịch, nên bước này bạn nên làm với bất kỳ thể loại sách nào.</em>
+   <br><em>Bước 5: Tạo danh sách từ khó/thuật ngữ: hầu hết các sách đều có những từ khó dịch, nên bước này bạn nên làm với bất kỳ thể loại sách nào.</em>
 </p>
 
 <p>
@@ -59,7 +59,7 @@ Model chọn để phân tích lý tưởng nhất vẫn là model cao nhất (P
 
 <p align="center">
   <img src="images/h7-dich.png" alt="Bước 6">
-   <br><em>Bước 6: Dịch (hình 7): Tiến hành dịch chính thức.</em>
+   <br><em>Bước 6: Dịch: Tiến hành dịch chính thức.</em>
 </p>
 
 <p>
@@ -78,7 +78,7 @@ Thường để dịch nguyên một cuốn sách ứng dụng cần 1 - 2 tiế
 
 <p align="center">
   <img src="images/h9-song-ngu.png" alt="Đọc song ngữ">
-   <br><em>Đọc song ngữ với việc so sánh dễ dàng 2 khối dịch tương ứng nhau để tiện đối chiếu (hình 9)</em>
+   <br><em>Đọc song ngữ với việc so sánh dễ dàng 2 khối dịch tương ứng nhau để tiện đối chiếu</em>
 </p>
 
 ## Tuyên bố từ chối trách nhiệm
