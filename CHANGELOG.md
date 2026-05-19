@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
+## [v1.0.57]- 2026-05-19
+### Fixed
+- Thêm tính năng chỉ thị bổ sung khi dịch.
+
 ## [v1.0.56]- 2026-05-19
 ### Fixed
 - Chỉnh sửa giao diện cho phần quản lý dự án tốt hơn. Nhập dự án là tự động chuyển sang dự án đó. Thông tin ngày giờ tạo và nhập dự án.
