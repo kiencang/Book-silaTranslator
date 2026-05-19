@@ -12,6 +12,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Bổ sung hướng dẫn sử dụng.
 - Thiết kế menu cho cuốn sách.
+- Ghi nhớ vị trí đọc trong file HTML.
 
 ## [v1.0.58]- 2026-05-19
 ### Fixed
