@@ -8,6 +8,11 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
+## [v1.0.56]- 2026-05-19
+### Fixed
+- Chỉnh sửa giao diện cho phần quản lý dự án tốt hơn. Nhập dự án là tự động chuyển sang dự án đó. Thông tin ngày giờ tạo và nhập dự án.
+- Chuyển model Flash làm model mặc định cho phần phân tích từ khó.
+
 ## [v1.0.55]- 2026-05-19
 ### Fixed
 - Sử dụng `web worker` cho phần liên quan đến PDF (ví dụ khi chia cắt) để nó không ảnh hưởng đến luồng chính (đại khái là để trình duyệt không bị giật, lag).
