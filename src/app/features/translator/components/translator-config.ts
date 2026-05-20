@@ -181,17 +181,26 @@ import { BookStore } from '../../../core/book.store';
         </button>
         
         @if (isCustomInstructionsExpanded()) {
-          <div class="mt-4 pl-7 pr-7">
+          <div class="mt-4 pl-7 pr-7 relative">
             <p class="text-xs text-zinc-500 mb-1 italic font-semibold">Bạn nên bỏ trống phần này trong phần lớn trường hợp!!! Mục này là tùy chọn, không bắt buộc nhập, và chỉ dành cho người dùng nâng cao, có hiểu sâu về cuốn sách định dịch.</p>
-            <p class="text-xs text-zinc-500 mb-2 italic">Chỉ thị bổ sung ngắn gọn để thêm yêu cầu khi dịch (vd: phong cách, định dạng đặc thù). Nên viết dưới dạng các gạch đầu dòng và không quá 100 từ.</p>
-            <textarea 
-              [disabled]="store.isTranslatingAny()"
-              [ngModel]="store.customInstructions()"
-              (ngModelChange)="store.customInstructions.set($event)"
-              rows="6"
-              placeholder="Ví dụ:&#10;- Thể loại: Tiểu thuyết trinh thám cổ điển đầu thế kỷ 20.&#10;- Đối tượng: Độc giả trẻ, ngôn ngữ cần hiện đại và gãy gọn.&#10;- Phong cách: Ưu tiên từ thuần Việt, tránh lạm dụng từ Hán Việt.&#10;- Lưu ý: Nhân vật chính có giọng điệu mỉa mai, châm biếm."
-              class="w-full p-3 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors text-sm min-h-[150px] resize-y disabled:opacity-50 disabled:cursor-not-allowed"
-            ></textarea>
+            <p class="text-xs text-zinc-500 mb-2 italic">Chỉ thị bổ sung ngắn gọn để thêm yêu cầu khi dịch (vd: phong cách, định dạng đặc thù). Nên viết dưới dạng các gạch đầu dòng và không quá 100 từ. Ví dụ:</p>
+            <div class="relative">
+              <textarea 
+                [disabled]="store.isTranslatingAny()"
+                [ngModel]="instructionText()"
+                (ngModelChange)="onInstructionChange($event)"
+                maxlength="1000"
+                rows="6"
+                placeholder="- Thể loại: Tiểu thuyết trinh thám cổ điển đầu thế kỷ 20.&#10;- Đối tượng: Độc giả trẻ, ngôn ngữ cần hiện đại và gãy gọn.&#10;- Phong cách: Ưu tiên từ thuần Việt, tránh lạm dụng từ Hán Việt.&#10;- Lưu ý: Nhân vật chính có giọng điệu mỉa mai, châm biếm."
+                class="w-full p-3 pb-8 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors text-sm min-h-[150px] resize-y disabled:opacity-50 disabled:cursor-not-allowed"
+              ></textarea>
+              <div class="absolute inset-x-0 bottom-0 p-3 pointer-events-none flex items-center">
+                <div class="text-[11px] text-zinc-400 font-medium transition-colors duration-300"
+                     [class.text-red-500]="displayedWordCount() >= 100 || instructionText().length >= 1000">
+                  Còn lại {{ 100 - displayedWordCount() }} từ / {{ 1000 - instructionText().length }} ký tự
+                </div>
+              </div>
+            </div>
           </div>
         }
       </div>
@@ -201,6 +210,34 @@ import { BookStore } from '../../../core/book.store';
 export class TranslatorConfigComponent {
   store = inject(BookStore);
   isCustomInstructionsExpanded = signal(!!this.store.customInstructions());
+  
+  instructionText = signal(this.store.customInstructions() || '');
+  displayedWordCount = signal(this.countWords(this.store.customInstructions() || ''));
+  private countTimeout: any;
+
+  countWords(text: string): number {
+    const clean = text.trim();
+    return clean ? clean.split(/\s+/).length : 0;
+  }
+
+  onInstructionChange(text: string) {
+    let newText = text;
+    let wordCount = this.countWords(newText);
+     
+    if (wordCount > 100) {
+        const words = newText.trim().split(/\s+/);
+        newText = words.slice(0, 100).join(' ');
+        wordCount = 100;
+    }
+
+    this.instructionText.set(newText);
+    this.store.customInstructions.set(newText);
+
+    clearTimeout(this.countTimeout);
+    this.countTimeout = setTimeout(() => {
+      this.displayedWordCount.set(this.countWords(this.instructionText()));
+    }, 1000);
+  }
 
   toggleUsePronouns(event: Event) {
     if (!this.store.pronounTable()) return;

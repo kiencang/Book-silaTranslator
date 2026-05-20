@@ -110,7 +110,7 @@ import {ToastComponent} from './shared/components/toast.component';
 
       <footer class="shrink-0 bg-white border-t border-zinc-200 py-2.5 px-6 text-xs text-zinc-500 flex justify-center items-center">
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-zinc-600">v1.0.60</span>
+          <span class="font-medium text-zinc-600">v1.0.61</span>
           <span class="text-zinc-300">•</span>
           <a href="https://github.com/kiencang/silaBook" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition-colors">GitHub</a>
           <span class="text-zinc-300">•</span>
@@ -121,6 +121,8 @@ import {ToastComponent} from './shared/components/toast.component';
           <span>contact&#64;wpsila.com</span>
           <span class="text-zinc-300">•</span>
           <a href="https://github.com/kiencang/silaBook/blob/main/README.md" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition-colors">Hướng dẫn sử dụng</a>
+          <span class="text-zinc-300">•</span>
+          <a href="https://www.gutenberg.org/browse/scores/top#books-last100" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition-colors">Gutenberg</a>
         </div>
       </footer>
 

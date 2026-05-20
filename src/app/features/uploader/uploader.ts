@@ -191,16 +191,17 @@ import TurndownService from 'turndown';
                 <h3 class="text-lg font-medium text-zinc-900">Tải lên cuốn sách cần dịch</h3>
                 <p class="text-sm text-zinc-500 mt-1">Click chọn hoặc kéo thả vào đây.</p>
                 <div class="flex flex-wrap gap-2 justify-center mt-4">
-                  <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">HTML (5MB)</span>
+                  <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">HTML (10MB)</span>
                   <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">PDF (50MB)</span>
-                  <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">TXT (3MB)</span>
-                  <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">MARKDOWN (3MB)</span>
+                  <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">TXT (5MB)</span>
+                  <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">MARKDOWN (5MB)</span>
                 </div>
-                <div class="mt-5 pt-4 border-t border-zinc-100">
+                <div class="mt-5 pt-4 border-t border-zinc-100 flex flex-col items-center gap-1">
                   <p class="text-xs text-zinc-400 flex items-center justify-center gap-1">
                     <mat-icon class="!w-[14px] !h-[14px] !text-[14px]">info</mat-icon>
                     Giới hạn xử lý tối đa: <span class="font-medium text-zinc-500">1M Tokens</span>
                   </p>
+                  <p class="text-xs text-emerald-600 font-medium tracking-tight">Nên ưu tiên định dạng HTML nếu có thể.</p>
                 </div>
               </div>
             </div>
@@ -435,10 +436,10 @@ export class Uploader {
     
     // File size validation
     const LIMITS: Record<string, number> = {
-       'txt': 3 * 1024 * 1024,
-       'md': 3 * 1024 * 1024,
-       'html': 5 * 1024 * 1024,
-       'htm': 5 * 1024 * 1024,
+       'txt': 5 * 1024 * 1024,
+       'md': 5 * 1024 * 1024,
+       'html': 10 * 1024 * 1024,
+       'htm': 10 * 1024 * 1024,
        'pdf': 50 * 1024 * 1024,
     };
 
