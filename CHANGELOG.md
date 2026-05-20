@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
+## [v1.0.62]- 2026-05-20
+### Fixed
+- Chuyển mặc định sang model Flash, vì model Pro đang có hạn chế nhất định với tài khoản miễn phí.
+
 ## [v1.0.61]- 2026-05-20
 ### Fixed
 - Áp dụng trần cứng 100 từ / 1000 ký tự cho phần `Chỉ thị bổ sung`.
