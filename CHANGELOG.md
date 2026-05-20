@@ -8,7 +8,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
-## [v1.0.60]- 2026-05-20
+## [v1.0.61]- 2026-05-20
 ### Fixed
 - Áp dụng trần cứng 100 từ / 1000 ký tự cho phần `Chỉ thị bổ sung`.
 - Tăng dung lượng file HTML được phép tải lên là 10MB, các file txt và markdown lên 5MB.
