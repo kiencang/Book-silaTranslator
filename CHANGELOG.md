@@ -10,6 +10,11 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [v1.0.60]- 2026-05-20
 ### Fixed
+- Áp dụng trần cứng 100 từ / 1000 ký tự cho phần `Chỉ thị bổ sung`.
+- Tăng dung lượng file HTML được phép tải lên là 10MB, các file txt và markdown lên 5MB.
+
+## [v1.0.60]- 2026-05-20
+### Fixed
 - Khắc phục vấn đề gom footnote lẫn lộn khi xuất toàn bộ cuốn sách.
 - Khắc phục vấn đề footnote không click được khi đọc trong ứng dụng.
 
