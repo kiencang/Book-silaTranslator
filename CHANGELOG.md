@@ -12,6 +12,7 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Thay đổi các giá trị mặc định tối thiểu, tối đa cùng khoảng điều chỉnh cho phép để phù hợp hơn với model mới.
 - Loại bỏ khoảng trắng dư thừa giữa trong input tên tác giả và tác phẩm (khoảng trắng dư thừa giữa các từ).
+- Thay đổi ngưỡng chia chunk phân tích Đại từ từ 20 ngàn xuống 10 ngàn từ.
 
 ## [v1.0.62]- 2026-05-20
 ### Fixed
