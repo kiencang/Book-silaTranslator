@@ -128,7 +128,7 @@ export class BookStore {
   readonly isTranslatingAny = computed(() => this.chapters().some(c => c.status === 'translating'));
   readonly isBusy = computed(() => this.isConverting() || this.isGeneratingMetadata() || this.isTranslatingAny() || this.isAnalyzingSplits());
   readonly config = signal<TranslationConfig>({
-    model: 'gemini-pro-latest',
+    model: 'gemini-flash-latest',
     temperature: 0.5,
     generateSummary: true
   });
