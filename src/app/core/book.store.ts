@@ -9,7 +9,6 @@ export interface TranslationVersion {
   versionNumber: number;
   text: string;
   model: string;
-  temperature: number;
   timestamp: number;
   customGlossary?: string;
   glossaryStatus?: 'none' | 'full' | 'filtered';
@@ -43,7 +42,6 @@ export interface Chapter {
 
 export interface TranslationConfig {
   model: 'gemini-flash-latest' | 'gemini-pro-latest';
-  temperature: number;
   pronounGenModel?: string;
   glossaryGenModel?: string;
   analysisModel?: string;
@@ -129,7 +127,6 @@ export class BookStore {
   readonly isBusy = computed(() => this.isConverting() || this.isGeneratingMetadata() || this.isTranslatingAny() || this.isAnalyzingSplits());
   readonly config = signal<TranslationConfig>({
     model: 'gemini-flash-latest',
-    temperature: 0.5,
     generateSummary: true
   });
   readonly splitSettings = signal<SplitSettings | undefined>(undefined);
@@ -396,7 +393,7 @@ export class BookStore {
     this.useGlossary.set(use);
   }
 
-  addPronounVersion(content: string, model: string, temperature: number, source: 'ai' | 'ai_edited' | 'manual' = 'ai') {
+  addPronounVersion(content: string, model: string, source: 'ai' | 'ai_edited' | 'manual' = 'ai') {
     if (!content.trim()) return;
     const versions = [...this.pronounVersions()];
     const lastVersion = versions.length > 0 ? (versions[versions.length - 1].versionNumber ?? versions.length) : 0;
@@ -405,7 +402,6 @@ export class BookStore {
       versionNumber: lastVersion + 1,
       content,
       model,
-      temperature,
       timestamp: Date.now(),
       source
     };
@@ -421,7 +417,7 @@ export class BookStore {
     this.activePronounVersionId.set(id);
   }
 
-  addGlossaryVersion(content: string, model: string, temperature: number, source: 'ai' | 'ai_edited' | 'manual' = 'ai') {
+  addGlossaryVersion(content: string, model: string, source: 'ai' | 'ai_edited' | 'manual' = 'ai') {
     if (!content.trim()) return;
     const versions = [...this.glossaryVersions()];
     const lastVersion = versions.length > 0 ? (versions[versions.length - 1].versionNumber ?? versions.length) : 0;
@@ -430,7 +426,6 @@ export class BookStore {
       versionNumber: lastVersion + 1,
       content,
       model,
-      temperature,
       timestamp: Date.now(),
       source
     };

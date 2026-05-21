@@ -143,9 +143,6 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-indigo-500">smart_toy</mat-icon> {{ activeV.model }}
                       </span>
                       <span class="flex items-center gap-1.5">
-                        <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-orange-500">thermostat</mat-icon> Temp: {{ activeV.temperature }}
-                      </span>
-                      <span class="flex items-center gap-1.5">
                         <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-green-500">schedule</mat-icon> {{ activeV.timestamp | date:'dd/MM/yy HH:mm' }}
                       </span>
                     </div>

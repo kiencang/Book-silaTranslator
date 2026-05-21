@@ -126,9 +126,6 @@ import { smartHardSplit } from '../splitter/splitter.util';
                   @if (activeVersion()) {
                     <div class="flex items-center space-x-3 text-xs text-zinc-500">
                       <span class="flex items-center" title="Model"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">model_training</mat-icon> {{ getModelDisplay(activeVersion()) }}</span>
-                      @if (activeVersion()?.source !== 'manual') {
-                        <span class="flex items-center" title="Temperature"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">thermostat</mat-icon> {{ activeVersion()?.temperature }}</span>
-                      }
                       <span class="flex items-center" title="Thời gian"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">schedule</mat-icon> {{ activeVersion()?.timestamp | date:'HH:mm:ss dd/MM' }}</span>
                     </div>
                   }
@@ -301,7 +298,7 @@ export class GlossarySetup {
         const batch = chunksToProcess.slice(i, i + maxConcurrent);
         const promises = batch.map(async chunk => {
           try {
-            const result = await this.gemini.generateGlossaryRaw(chunk.text, task.model, this.store.bookTitle(), this.store.author(), 0.2);
+            const result = await this.gemini.generateGlossaryRaw(chunk.text, task.model, this.store.bookTitle(), this.store.author());
             chunk.result = result;
             chunk.status = 'completed';
           } catch (err) {
@@ -348,7 +345,7 @@ export class GlossarySetup {
 
         this.draftTable.set(result);
         this.isManuallyEdited.set(false);
-        this.store.addGlossaryVersion(result, task.model, 0.2);
+        this.store.addGlossaryVersion(result, task.model);
         this.store.saveGlossaryConf(true);
         this.store.setGlossaryTask(undefined);
         this.toast.success(this.toast.Messages.GLOSSARY_SUCCESS);
@@ -368,9 +365,8 @@ export class GlossarySetup {
       const active = this.activeVersion();
       const isFromAi = active && active.source !== 'manual';
       const model = active ? active.model : this.glossaryModel();
-      const temp = active ? active.temperature : 0.2;
       const source: 'ai_edited' | 'manual' = isFromAi ? 'ai_edited' : 'manual';
-      this.store.addGlossaryVersion(this.draftTable(), model, temp, source);
+      this.store.addGlossaryVersion(this.draftTable(), model, source);
       this.store.saveGlossaryConf(true);
       this.isManuallyEdited.set(false);
       this.toast.success('Đã lưu version mới');

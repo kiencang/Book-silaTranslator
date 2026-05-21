@@ -81,7 +81,6 @@ export class GeminiClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
-      temperature: 0.1,
       thinkingConfig: { thinkingLevel: 'HIGH' }
     };
 
@@ -145,7 +144,6 @@ export class GeminiClient {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filterConfig: any = {
         systemInstruction: si,
-        temperature: 0.1,
         thinkingConfig: { thinkingLevel: 'HIGH' },
         responseMimeType: 'application/json',
         responseSchema: {
@@ -193,7 +191,7 @@ export class GeminiClient {
     }
   }
 
-  async normalizePronouns(text: string, rawPronounTable: string, model: string, temperature: number, bookTitle: string, author: string): Promise<string> {
+  async normalizePronouns(text: string, rawPronounTable: string, model: string, bookTitle: string, author: string): Promise<string> {
     try {
       if (!rawPronounTable.trim()) return '';
       
@@ -211,7 +209,6 @@ export class GeminiClient {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filterConfig: any = {
         systemInstruction: si,
-        temperature: temperature,
         thinkingConfig: { thinkingLevel: 'HIGH' }
       };
 
@@ -237,7 +234,7 @@ export class GeminiClient {
     }
   }
 
-  async translateChapter(text: string, model: string, temperature: number, bookTitle = '', author = '', pronounTable = '', usePronouns = false, glossaryTable = '', useGlossary = false, shouldFilterGlossary = true, contextSummary?: string, customInstructions?: string): Promise<{text: string, customGlossary?: string, glossaryStatus?: 'none' | 'full' | 'filtered', glossaryRatio?: number}> {
+  async translateChapter(text: string, model: string, bookTitle = '', author = '', pronounTable = '', usePronouns = false, glossaryTable = '', useGlossary = false, shouldFilterGlossary = true, contextSummary?: string, customInstructions?: string): Promise<{text: string, customGlossary?: string, glossaryStatus?: 'none' | 'full' | 'filtered', glossaryRatio?: number}> {
     
     let activeGlossary = '';
     let glossaryStatus: 'none' | 'full' | 'filtered' = 'none';
@@ -303,7 +300,6 @@ export class GeminiClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
-      temperature: temperature,
       thinkingConfig: { thinkingLevel: 'HIGH' }
     };
 
@@ -331,7 +327,7 @@ export class GeminiClient {
     return { text: result, customGlossary: activeGlossary || undefined, glossaryStatus, glossaryRatio };
   }
 
-  async generatePronounsRaw(text: string, model: string, bookTitle = '', author = '', temperature = 0.1): Promise<any[]> {
+  async generatePronounsRaw(text: string, model: string, bookTitle = '', author = ''): Promise<any[]> {
     const psi = await this.loadPromptText('/prompts/pronouns_system_instructions.md');
     const pp = await this.loadPromptText('/prompts/pronouns_prompt.md');
 
@@ -343,7 +339,6 @@ export class GeminiClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
-      temperature: temperature,
       thinkingConfig: { thinkingLevel: 'HIGH' },
       responseMimeType: 'application/json'
     };
@@ -375,8 +370,8 @@ export class GeminiClient {
     return [];
   }
 
-  async generatePronouns(text: string, model: string, bookTitle = '', author = '', temperature = 0.1): Promise<string> {
-    const arr = await this.generatePronounsRaw(text, model, bookTitle, author, temperature);
+  async generatePronouns(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
+    const arr = await this.generatePronounsRaw(text, model, bookTitle, author);
     if (arr.length > 0) {
       let md = '| Nhân vật (Original) | Giới tính | Ước lượng độ tuổi | Đặc điểm & Vai trò | Xưng hô / Tước vị (Dịch) | Ngôi thứ 3 (Narrator) | Xưng - Hô (Với người khác) | Lý do | Ghi chú |\n|---|---|---|---|---|---|---|---|---|\n';
       for (const pt of arr) {
@@ -387,7 +382,7 @@ export class GeminiClient {
     return '';
   }
 
-  async generateGlossaryRaw(text: string, model: string, bookTitle = '', author = '', temperature = 0.2): Promise<any[]> {
+  async generateGlossaryRaw(text: string, model: string, bookTitle = '', author = ''): Promise<any[]> {
     const gsi = await this.loadPromptText('/prompts/glossary_system_instructions.md');
     const gp = await this.loadPromptText('/prompts/glossary_prompt.md');
 
@@ -399,7 +394,6 @@ export class GeminiClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
-      temperature: temperature,
       thinkingConfig: { thinkingLevel: 'HIGH' },
       responseMimeType: 'application/json'
     };
@@ -432,8 +426,8 @@ export class GeminiClient {
     return [];
   }
 
-  async generateGlossary(text: string, model: string, bookTitle = '', author = '', temperature = 0.2): Promise<string> {
-    const arr = await this.generateGlossaryRaw(text, model, bookTitle, author, temperature);
+  async generateGlossary(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
+    const arr = await this.generateGlossaryRaw(text, model, bookTitle, author);
     if (arr.length > 0) {
       let md = '| Tiếng Anh | Từ loại | Tiếng Việt | Ghi chú văn cảnh |\n|---|---|---|---|\n';
       for (const pt of arr) {
@@ -456,7 +450,6 @@ export class GeminiClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const configArgs: any = {
-      temperature: 0.1, // Low temp for more reliable JSON structure
       thinkingConfig: { thinkingLevel: 'HIGH' },
       responseMimeType: 'application/json'
     };
@@ -494,7 +487,6 @@ export class GeminiClient {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const configArgs: any = {
-        temperature: 0.3,
         systemInstruction: systemInstruction,
         thinkingConfig: { thinkingLevel: 'HIGH' }
       };

@@ -127,9 +127,6 @@ import { smartHardSplit } from '../splitter/splitter.util';
                   @if (activeVersion()) {
                     <div class="flex items-center space-x-3 text-xs text-zinc-500">
                       <span class="flex items-center" title="Model"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">model_training</mat-icon> {{ getModelDisplay(activeVersion()) }}</span>
-                      @if (activeVersion()?.source !== 'manual') {
-                        <span class="flex items-center" title="Temperature"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">thermostat</mat-icon> {{ activeVersion()?.temperature }}</span>
-                      }
                       <span class="flex items-center" title="Thời gian"><mat-icon class="!w-4 !h-4 !text-[16px] mr-1">schedule</mat-icon> {{ activeVersion()?.timestamp | date:'HH:mm:ss dd/MM' }}</span>
                     </div>
                   }
@@ -302,7 +299,7 @@ export class PronounSetup {
         const batch = chunksToProcess.slice(i, i + maxConcurrent);
         const promises = batch.map(async chunk => {
           try {
-            const result = await this.gemini.generatePronounsRaw(chunk.text, task.model, this.store.bookTitle(), this.store.author(), 0.1);
+            const result = await this.gemini.generatePronounsRaw(chunk.text, task.model, this.store.bookTitle(), this.store.author());
             chunk.result = result;
             chunk.status = 'completed';
           } catch (err) {
@@ -334,11 +331,11 @@ export class PronounSetup {
 
         this.generationStatus.set('Đang chuẩn hóa bảng đại từ...');
         const fullText = this.getFullText();
-        const result = await this.gemini.normalizePronouns(fullText, rawResult, task.model, 0.1, this.store.bookTitle(), this.store.author());
+        const result = await this.gemini.normalizePronouns(fullText, rawResult, task.model, this.store.bookTitle(), this.store.author());
 
         this.draftPronounTable.set(result);
         this.isManuallyEdited.set(false);
-        this.store.addPronounVersion(result, task.model, 0.1);
+        this.store.addPronounVersion(result, task.model);
         this.store.savePronounsConf(true);
         this.store.setPronounTask(undefined);
         this.toast.success(this.toast.Messages.PRONOUNS_SUCCESS);
@@ -359,9 +356,8 @@ export class PronounSetup {
       const active = this.activeVersion();
       const isFromAi = active && active.source !== 'manual';
       const model = active ? active.model : this.pronounModel();
-      const temp = active ? active.temperature : 0.1;
       const source: 'ai_edited' | 'manual' = isFromAi ? 'ai_edited' : 'manual';
-      this.store.addPronounVersion(this.draftPronounTable(), model, temp, source);
+      this.store.addPronounVersion(this.draftPronounTable(), model, source);
       this.store.savePronounsConf(true);
       this.isManuallyEdited.set(false);
       this.toast.success('Đã lưu version mới');

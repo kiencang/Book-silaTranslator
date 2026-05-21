@@ -62,7 +62,7 @@ export interface ContentVersion {
   versionNumber: number;
   content: string;
   model: string;
-  temperature: number;
+  temperature?: number;
   timestamp: number;
   source?: 'ai' | 'ai_edited' | 'manual';
 }

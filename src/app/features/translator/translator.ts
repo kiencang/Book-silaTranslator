@@ -196,7 +196,6 @@ export class Translator {
       const { text: translatedText, customGlossary, glossaryStatus, glossaryRatio } = await this.gemini.translateChapter(
         chapter.originalText, 
         config.model, 
-        config.temperature,
         this.store.bookTitle(),
         this.store.author(),
         this.store.pronounTable(),
@@ -218,7 +217,6 @@ export class Translator {
         versionNumber: newVersionNumber,
         text: translatedText,
         model: config.model,
-        temperature: config.temperature,
         timestamp: Date.now(),
         customGlossary: customGlossary,
         glossaryStatus: glossaryStatus,
