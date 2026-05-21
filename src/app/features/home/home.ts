@@ -60,8 +60,8 @@ export class Home {
 
   createProject() {
     if (this.canCreate()) {
-      const title = this.bookTitle().trim();
-      const author = this.author().trim();
+      const title = this.bookTitle().trim().replace(/\s+/g, ' ');
+      const author = this.author().trim().replace(/\s+/g, ' ');
       const projectName = author ? `${title} - ${author}` : title;
       this.store.createNewProject(projectName, title, author);
     }

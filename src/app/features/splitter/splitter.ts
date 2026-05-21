@@ -131,12 +131,12 @@ export class Splitter {
   samplePercentage = signal<number>(50);
 
   draftKeywords = signal<string[]>(['Chapter', 'Part', 'Section']);
-  draftMinWords = signal(5000);
-  draftMaxWords = signal(15000);
+  draftMinWords = signal(3000);
+  draftMaxWords = signal(9000);
   
   activeKeywords = signal<string[]>(['Chapter', 'Part', 'Section']);
-  activeMinWords = signal(5000);
-  activeMaxWords = signal(15000);
+  activeMinWords = signal(3000);
+  activeMaxWords = signal(9000);
   
   activeSplitMode = signal<'keyword' | 'heading' | 'standalone'>('keyword');
   draftHeadingLevel = signal<'h2' | 'h3'>('h2');
@@ -183,10 +183,10 @@ export class Splitter {
       this.draftKeywords.set(settings.activeKeywords);
       this.activeKeywords.set(settings.activeKeywords);
       
-      this.draftMinWords.set(settings.activeMinWords || 5000);
-      this.activeMinWords.set(settings.activeMinWords || 5000);
+      this.draftMinWords.set(settings.activeMinWords || 3000);
+      this.activeMinWords.set(settings.activeMinWords || 3000);
       
-      const mx = settings.activeMaxWords || 15000;
+      const mx = settings.activeMaxWords || 9000;
       this.draftMaxWords.set(mx);
       this.activeMaxWords.set(mx);
       
@@ -315,8 +315,8 @@ export class Splitter {
   }
 
   applyWordsRange() {
-    const minW = Math.max(1000, Math.min(7000, this.draftMinWords()));
-    const maxW = Math.max(10000, Math.min(25000, this.draftMaxWords()));
+    const minW = Math.max(1000, Math.min(5000, this.draftMinWords()));
+    const maxW = Math.max(7000, Math.min(15000, this.draftMaxWords()));
     this.draftMinWords.set(minW);
     this.activeMinWords.set(minW);
     this.draftMaxWords.set(maxW);

@@ -19,7 +19,7 @@ import { MatIconModule } from '@angular/material/icon';
                 [value]="draftMinWords()" 
                 (input)="draftMinWords.set(+$any($event.target).value)" 
                 (keydown.enter)="apply.emit()"
-                min="1000" max="7000" step="500" 
+                min="1000" max="5000" step="1000" 
                 class="w-28 flex-shrink-0 px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
         </div>
 
@@ -38,7 +38,7 @@ import { MatIconModule } from '@angular/material/icon';
                 [value]="draftMaxWords()" 
                 (input)="draftMaxWords.set(+$any($event.target).value)" 
                 (keydown.enter)="apply.emit()"
-                min="10000" max="25000" step="1000" 
+                min="7000" max="15000" step="1000" 
                 class="w-28 flex-shrink-0 px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-center transition-shadow">
         </div>
       </div>
