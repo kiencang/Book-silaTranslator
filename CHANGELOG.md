@@ -8,6 +8,10 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [Unreleased]
 - Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
 
+## [v1.0.65]- 2026-05-26
+### Fixed
+- Thêm tùy chọn nhập API Key cá nhân.
+
 ## [v1.0.64]- 2026-05-21
 ### Fixed
 - Loại bỏ temperature.
