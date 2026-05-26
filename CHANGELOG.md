@@ -5,9 +5,6 @@ Tất cả những thay đổi đáng chú ý của dự án kiencang/Book-silaT
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-- Mỗi khối có quyền tạo bảng đại từ & từ khó riêng.
-
 ## [v1.0.65]- 2026-05-26
 ### Fixed
 - Thêm tùy chọn nhập API Key cá nhân.
