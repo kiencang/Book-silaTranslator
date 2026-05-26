@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { BookStore } from '../../core/book.store';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-home',
@@ -51,6 +52,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class Home {
   store = inject(BookStore);
+  toast = inject(ToastService);
   bookTitle = signal('');
   author = signal('');
 
@@ -63,6 +65,14 @@ export class Home {
       const title = this.bookTitle().trim().replace(/\s+/g, ' ');
       const author = this.author().trim().replace(/\s+/g, ' ');
       const projectName = author ? `${title} - ${author}` : title;
+      
+      if (typeof window !== 'undefined') {
+        const key = localStorage.getItem('user_gemini_api_key');
+        if (!key || key.trim() === '') {
+          this.toast.error('Bạn cần nhập API Key để dịch, nó là button nằm bên trái ở chân trang.');
+        }
+      }
+
       this.store.createNewProject(projectName, title, author);
     }
   }

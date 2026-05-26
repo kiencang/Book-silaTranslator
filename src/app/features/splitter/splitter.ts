@@ -3,7 +3,7 @@ import { BookStore, Chapter } from '../../core/book.store';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../core/toast.service';
 import { analyzeAndSplitText, PreviewChapter, countWords } from './splitter.util';
-import { GeminiClient, parseGeminiError } from '../../core/gemini';
+import { GeminiClient, parseGeminiError, isQuotaError } from '../../core/gemini';
 import { AiAnalysisComponent } from './components/ai-analysis.component';
 import { SplitLimitsComponent } from './components/split-limits.component';
 import { SplitOptionsComponent } from './components/split-options.component';
@@ -307,7 +307,9 @@ export class Splitter {
       this.toast.success('Đã áp dụng các cài đặt được AI phân tích.');
 
     } catch (e) {
-      console.error('Analysis failed:', e);
+      if (!isQuotaError(e)) {
+        console.error('Analysis failed:', e);
+      }
       this.toast.error(parseGeminiError(e));
     } finally {
       this.isAnalyzing.set(false);

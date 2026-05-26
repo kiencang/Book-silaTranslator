@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { GoogleGenAI, Type } from '@google/genai';
 
+export function isQuotaError(e: unknown): boolean {
+  const msg = (e as Error)?.message || e?.toString() || '';
+  const lowerMsg = msg.toLowerCase();
+  return lowerMsg.includes('quota') || lowerMsg.includes('429') || lowerMsg.includes('resource_exhausted');
+}
+
 export function parseGeminiError(e: unknown): string {
   const msg = (e as Error)?.message || e?.toString() || '';
   if (msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('429')) {
@@ -38,7 +44,26 @@ export function parseGeminiError(e: unknown): string {
 
 @Injectable({ providedIn: 'root' })
 export class GeminiClient {
-  private ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+  private getApiKey(): string {
+    if (typeof window !== 'undefined') {
+      const userKey = localStorage.getItem('user_gemini_api_key');
+      if (userKey && userKey.trim()) {
+        return userKey.trim();
+      }
+    }
+    return GEMINI_API_KEY;
+  }
+
+  private get ai(): GoogleGenAI {
+    return new GoogleGenAI({ 
+      apiKey: this.getApiKey(),
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build'
+        }
+      }
+    });
+  }
 
   private async loadPromptText(url: string): Promise<string | null> {
     const defaultOpts: RequestInit = { 
@@ -159,8 +184,7 @@ export class GeminiClient {
         }
       };
 
-      const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-      const response = await ai.models.generateContent({
+      const response = await this.ai.models.generateContent({
         model: 'gemini-flash-lite-latest',
         contents: [ { text: prompt } ],
         config: filterConfig
@@ -212,8 +236,7 @@ export class GeminiClient {
         thinkingConfig: { thinkingLevel: 'HIGH' }
       };
 
-      const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-      const response = await ai.models.generateContent({
+      const response = await this.ai.models.generateContent({
         model: model,
         contents: [ { text: prompt } ],
         config: filterConfig

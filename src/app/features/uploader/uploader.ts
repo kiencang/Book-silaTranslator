@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { BookStore } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
-import { GeminiClient, parseGeminiError } from '../../core/gemini';
+import { GeminiClient, parseGeminiError, isQuotaError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
 import TurndownService from 'turndown';
 
@@ -412,7 +412,9 @@ export class Uploader {
             this.store.updateTaskBatch('pdfTask', { ...successTaskState, chunks: newChunks }, [i]);
           }
         } catch (e: unknown) {
-           console.error(e);
+           if (!isQuotaError(e)) {
+             console.error(e);
+           }
            const msg = parseGeminiError(e);
            const failTaskState = this.store.pdfTask();
            if (failTaskState) {
@@ -540,7 +542,9 @@ export class Uploader {
         shouldResumePdf = true;
       }
     } catch (e: unknown) {
-      console.error(e);
+      if (!isQuotaError(e)) {
+        console.error(e);
+      }
       const msg = parseGeminiError(e);
       this.toast.error(this.toast.Messages.FILE_PROCESS_ERROR(msg));
     } finally {

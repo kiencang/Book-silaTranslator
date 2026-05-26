@@ -2,7 +2,7 @@ import { Component, inject, signal, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BookStore } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
-import { GeminiClient, parseGeminiError } from '../../core/gemini';
+import { GeminiClient, parseGeminiError, isQuotaError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { MarkdownTableEditorComponent } from '../../shared/components/markdown-table-editor.component';
@@ -351,7 +351,9 @@ export class GlossarySetup {
         this.toast.success(this.toast.Messages.GLOSSARY_SUCCESS);
       }
     } catch (e: unknown) {
-      console.error(e);
+      if (!isQuotaError(e)) {
+        console.error(e);
+      }
       this.store.setGlossaryTask({ ...task, status: 'error' });
       this.toast.error(this.toast.Messages.GLOSSARY_ERROR(parseGeminiError(e)));
     } finally {

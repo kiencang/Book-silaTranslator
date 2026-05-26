@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal, ViewChildren, QueryList } from '@angular/core';
 import { BookStore, Chapter, TranslationVersion } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
-import { GeminiClient, parseGeminiError } from '../../core/gemini';
+import { GeminiClient, parseGeminiError, isQuotaError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { TokenEstimationComponent } from './components/token-estimation';
@@ -245,7 +245,9 @@ export class Translator {
       });
       return true;
     } catch (e: unknown) {
-      console.error(e);
+      if (!isQuotaError(e)) {
+        console.error(e);
+      }
       this.store.updateChapter(chapter.id, { status: 'error' });
       this.toast.error(this.toast.Messages.TRANSLATION_ERROR(chapter.title, parseGeminiError(e)));
       

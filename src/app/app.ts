@@ -10,11 +10,12 @@ import {ProjectModal} from './shared/components/project-modal';
 import {EditProjectModal} from './shared/components/edit-project-modal';
 import {MatIconModule} from '@angular/material/icon';
 import {ToastComponent} from './shared/components/toast.component';
+import {ApiKeyModal} from './shared/components/api-key-modal';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
-  imports: [Uploader, Splitter, PronounSetup, GlossarySetup, Translator, Home, ProjectModal, EditProjectModal, ToastComponent, MatIconModule],
+  imports: [Uploader, Splitter, PronounSetup, GlossarySetup, Translator, Home, ProjectModal, EditProjectModal, ToastComponent, MatIconModule, ApiKeyModal],
   template: `
     <div class="h-screen bg-zinc-50 flex flex-col font-sans overflow-hidden">
       <header class="bg-white border-b border-zinc-200 shrink-0 w-full py-4 px-6 flex items-center justify-between shadow-sm">
@@ -108,9 +109,15 @@ import {ToastComponent} from './shared/components/toast.component';
         </div>
       </main>
 
-      <footer class="shrink-0 bg-white border-t border-zinc-200 py-2.5 px-6 text-xs text-zinc-500 flex justify-center items-center">
+      <footer class="shrink-0 bg-white border-t border-zinc-200 py-2.5 px-6 text-xs text-zinc-500 flex flex-col sm:flex-row justify-between items-center gap-y-2">
+        <button (click)="showApiKeyModal.set(true)" 
+                class="flex items-center text-zinc-605 hover:text-indigo-700 font-medium transition-colors bg-transparent border-none py-1 px-1.5 cursor-pointer outline-none rounded-md hover:bg-zinc-50">
+          <mat-icon class="!text-[18px] !w-[18px] !h-[18px] mr-1.5 text-indigo-500 inline-flex items-center justify-center">vpn_key</mat-icon>
+          <span>{{ hasUserApiKey() ? 'Đang dùng API Key cá nhân' : 'Nhập API Key' }}</span>
+        </button>
+
         <div class="flex items-center flex-wrap justify-center gap-x-2 gap-y-1">
-          <span class="font-medium text-zinc-600">v1.0.64</span>
+          <span class="font-medium text-zinc-600">v1.0.65</span>
           <span class="text-zinc-300">•</span>
           <a href="https://github.com/kiencang/silaBook" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition-colors">GitHub</a>
           <span class="text-zinc-300">•</span>
@@ -134,6 +141,10 @@ import {ToastComponent} from './shared/components/toast.component';
          <app-edit-project-modal (closeModal)="showEditProjectModal.set(false)" />
       }
 
+      @if (showApiKeyModal()) {
+         <app-api-key-modal (closeModal)="showApiKeyModal.set(false)" />
+      }
+
       <app-toast />
     </div>
   `
@@ -142,8 +153,16 @@ export class App {
   store = inject(BookStore);
   showProjectModal = signal<boolean>(false);
   showEditProjectModal = signal<boolean>(false);
+  showApiKeyModal = signal<boolean>(false);
+  hasUserApiKey = signal<boolean>(false);
 
   constructor() {
+    this.checkUserApiKey();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('api-key-changed', () => {
+        this.checkUserApiKey();
+      });
+    }
     effect(() => {
       if (typeof window !== 'undefined') {
         if (this.store.isTranslatingAny()) {
@@ -157,6 +176,13 @@ export class App {
         }
       }
     });
+  }
+
+  checkUserApiKey() {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('user_gemini_api_key');
+      this.hasUserApiKey.set(!!(saved && saved.trim() !== ''));
+    }
   }
 
   goToPhase(phase: number) {
