@@ -5,6 +5,10 @@ Tất cả những thay đổi đáng chú ý của dự án kiencang/Book-silaT
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.0.66]- 2026-05-28
+### Fixed
+- Điều chỉnh việc tối ưu critical CSS, vì điều này có thể gây lỗi hiển thị mất CSS khi build ứng dụng trên Cloudlfare Pages.
+
 ## [v1.0.65]- 2026-05-26
 ### Fixed
 - Thêm tùy chọn nhập API Key cá nhân.
