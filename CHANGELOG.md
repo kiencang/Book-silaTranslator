@@ -5,6 +5,11 @@ Tất cả những thay đổi đáng chú ý của dự án kiencang/Book-silaT
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.0.68]- 2026-05-29
+### Fixed
+- Điều chỉnh cách bóc tách dữ liệu JSON trả về từ AI (phase Đại từ & Từ khó), giảm rủi ro bóc tách lỗi.
+- Thông báo lỗi chuẩn hơn nếu không thể bóc tách được.
+
 ## [v1.0.67]- 2026-05-29
 ### Fixed
 - Chỉnh sửa SI/Prompt của phần tóm tắt bối cảnh để nó chuẩn hơn.

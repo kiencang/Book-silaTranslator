@@ -376,21 +376,22 @@ export class GeminiClient {
     });
 
     let result = response.text || '';
-    if (result.startsWith('```json')) {
-      result = result.replace(/^```json\n/, '').replace(/\n```$/, '');
-    } else if (result.startsWith('```')) {
-      result = result.replace(/^```\n/, '').replace(/\n```$/, '');
+    const match = result.match(/\[[\s\S]*\]/);
+    if (!match) {
+      throw new Error('Không thể đọc dữ liệu từ AI. Vui lòng thử lại sau vài giây.');
     }
+    result = match[0];
 
     try {
       const arr = JSON.parse(result);
       if (Array.isArray(arr)) {
         return arr;
       }
+      throw new Error('Dữ liệu không phải là mảng');
     } catch (e) {
-      console.warn('Failed to parse generatePronounsRaw JSON', e);
+      console.warn('Failed to parse generatePronounsRaw JSON', e, result);
+      throw new Error('Không thể đọc dữ liệu từ AI. Vui lòng thử lại sau vài giây.');
     }
-    return [];
   }
 
   async generatePronouns(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
@@ -432,21 +433,22 @@ export class GeminiClient {
     });
 
     let result = response.text || '';
-    if (result.startsWith('```json')) {
-      result = result.replace(/^```json\n/, '').replace(/\n```$/, '');
-    } else if (result.startsWith('```')) {
-      result = result.replace(/^```\n/, '').replace(/\n```$/, '');
+    const match = result.match(/\[[\s\S]*\]/);
+    if (!match) {
+      throw new Error('Không thể đọc dữ liệu từ AI. Vui lòng thử lại sau vài giây.');
     }
+    result = match[0];
 
     try {
       const arr = JSON.parse(result);
       if (Array.isArray(arr)) {
         return arr;
       }
+      throw new Error('Dữ liệu không phải là mảng');
     } catch (e) {
-      console.warn('Failed to parse generateGlossaryRaw JSON', e);
+      console.warn('Failed to parse generateGlossaryRaw JSON', e, result);
+      throw new Error('Không thể đọc dữ liệu từ AI. Vui lòng thử lại sau vài giây.');
     }
-    return [];
   }
 
   async generateGlossary(text: string, model: string, bookTitle = '', author = ''): Promise<string> {
