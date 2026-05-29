@@ -148,7 +148,7 @@ export class ProjectModal implements OnInit {
   private projectWorker = new Worker(new URL('./project.worker', import.meta.url), { type: 'module' });
   private workerId = 0;
 
-  private runProjectWorkerTask(type: string, payload: any): Promise<any> {
+  private runProjectWorkerTask(type: string, payload: unknown): Promise<{ jsonStr?: string; project?: Project; error?: string; [key: string]: unknown }> {
     return new Promise((resolve, reject) => {
       const id = ++this.workerId;
       const handler = (event: MessageEvent) => {
@@ -228,9 +228,9 @@ export class ProjectModal implements OnInit {
     let dataStr: string;
     try {
       const result = await this.runProjectWorkerTask('EXPORT_PROJECT', fullProject);
-      dataStr = result.jsonStr;
-    } catch (e: any) {
-      this.toast.error('Lỗi khi xuất dữ liệu: ' + e.message);
+      dataStr = result.jsonStr || '';
+    } catch (e: unknown) {
+      this.toast.error('Lỗi khi xuất dữ liệu: ' + (e instanceof Error ? e.message : 'Unknown error'));
       return;
     }
 

@@ -206,7 +206,7 @@ export class MarkdownTableEditorComponent {
     this.isUpdatingInternally = false;
   }
 
-  private syncTimeout: any;
+  private syncTimeout: ReturnType<typeof setTimeout> | undefined;
 
   updateCell(rowIndex: number, colIndex: number, event: Event) {
     const val = (event.target as HTMLInputElement | HTMLTextAreaElement).value;

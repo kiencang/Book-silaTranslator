@@ -197,7 +197,7 @@ export class GeminiClient {
         return { text: '', usedCount: 0, totalCount: fullGlossary.length };
       }
       
-      const matchedSet = new Set(matchedItems.map((item: any) => `${item.english}_${item.pos}`.toLowerCase()));
+      const matchedSet = new Set(matchedItems.map((item: { english: string; pos: string }) => `${item.english}_${item.pos}`.toLowerCase()));
       const filteredGlossary = fullGlossary.filter(item => matchedSet.has(`${item.english}_${item.pos}`.toLowerCase()));
       
       if (filteredGlossary.length === 0) return { text: '', usedCount: 0, totalCount: fullGlossary.length };
@@ -350,7 +350,7 @@ export class GeminiClient {
     return { text: result, customGlossary: activeGlossary || undefined, glossaryStatus, glossaryRatio };
   }
 
-  async generatePronounsRaw(text: string, model: string, bookTitle = '', author = ''): Promise<any[]> {
+  async generatePronounsRaw(text: string, model: string, bookTitle = '', author = ''): Promise<{ originalName?: string; gender?: string; ageGroup?: string; role?: string; translatedTitles?: string; narratorPronoun?: string; dialoguePronouns?: string; reasoning?: string; notes?: string; }[]> {
     const psi = await this.loadPromptText('/prompts/pronouns_system_instructions.md');
     const pp = await this.loadPromptText('/prompts/pronouns_prompt.md');
 
@@ -405,7 +405,7 @@ export class GeminiClient {
     return '';
   }
 
-  async generateGlossaryRaw(text: string, model: string, bookTitle = '', author = ''): Promise<any[]> {
+  async generateGlossaryRaw(text: string, model: string, bookTitle = '', author = ''): Promise<{ english?: string; pos?: string; vietnamese?: string; contextNotes?: string; }[]> {
     const gsi = await this.loadPromptText('/prompts/glossary_system_instructions.md');
     const gp = await this.loadPromptText('/prompts/glossary_prompt.md');
 

@@ -14,7 +14,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
   imports: [CommonModule, MatIconModule, FormsModule, MarkdownTableEditorComponent],
   template: `
     <div class="py-8">
-      <div class="max-w-7xl mx-auto lg:px-8 px-4 flex items-center justify-between mb-8">
+      <div class="max-w-5xl mx-auto lg:px-8 px-4 flex items-center justify-between mb-8">
         <div>
           <h2 class="text-2xl font-bold text-zinc-900">Thiết lập Bảng Đại từ Nhân xưng (Tùy chọn)</h2>
           <p class="text-zinc-500 mt-1">Sử dụng mô hình AI mạnh để phân tích nội dung truyện giúp xây dựng bảng đại từ nhân xưng hoàn chỉnh, nhằm đảm bảo nhất quán khi dịch & phù hợp hơn với văn hóa người Việt. Đặc biệt cần thiết cho thể loại tiểu thuyết, truyện ngắn. Các loại sách khác có thể không cần thiết (click vào "Bỏ qua phần này").</p>
@@ -23,7 +23,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
         </div>
       </div>
 
-      <div class="max-w-7xl mx-auto lg:px-8 px-4 space-y-6 mb-8">
+      <div class="max-w-5xl mx-auto lg:px-8 px-4 space-y-6 mb-8">
         <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-200">
           @if (pronounTask() && !isGeneratingPronouns()) {
             <div class="text-sm text-amber-700 bg-amber-50 rounded-lg p-4 border border-amber-200 mb-4">

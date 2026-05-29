@@ -221,7 +221,7 @@ export class Uploader {
   private pdfWorker = new Worker(new URL('./pdf.worker', import.meta.url), { type: 'module' });
   private workerId = 0;
 
-  private runWorkerTask(type: string, payload: any): Promise<any> {
+  private runWorkerTask(type: string, payload: unknown): Promise<{ count?: number, b64Data?: string, resultType?: string, chunks?: { index: number; pdfData: Uint8Array; }[] }> {
     return new Promise((resolve, reject) => {
       const id = ++this.workerId;
       const handler = (event: MessageEvent) => {
@@ -253,7 +253,7 @@ export class Uploader {
   isCountingTokens = signal<boolean>(false);
   tokenCountError = signal<string | null>(null);
   
-  countTokensTimeout: any;
+  countTokensTimeout: ReturnType<typeof setTimeout> | undefined;
 
   tokenPercentage() {
     return Math.min(100, (this.tokenCount() || 0) / 10000);
@@ -312,7 +312,7 @@ export class Uploader {
       }
 
       const result = await this.runWorkerTask('EXTRACT_TOKEN_PAGES', { arrayBuffer, start, end });
-      const count = await this.gemini.countTokens(result.b64Data, 'application/pdf', this.pdfModel());
+      const count = await this.gemini.countTokens(result.b64Data || '', 'application/pdf', this.pdfModel());
       this.tokenCount.set(count);
     } catch (e) {
       console.error('Lỗi khi đếm token:', e);
@@ -393,13 +393,13 @@ export class Uploader {
         this.store.updateTaskBatch('pdfTask', { ...currentTaskState, chunks: updatedChunks }, [i]);
         
         try {
-          if (!chunk.pdfData && !(chunk as any).base64Pdf) throw new Error("Missing PDF data");
+          if (!chunk.pdfData && !(chunk as { base64Pdf?: string }).base64Pdf) throw new Error("Missing PDF data");
           
           let b64Data: string;
           if (chunk.pdfData) {
             b64Data = await this.uint8ArrayToBase64(chunk.pdfData);
           } else {
-            b64Data = (chunk as any).base64Pdf;
+            b64Data = (chunk as { base64Pdf?: string }).base64Pdf ?? '';
             if (b64Data.includes(',')) b64Data = b64Data.split(',')[1];
           }
           
@@ -464,7 +464,7 @@ export class Uploader {
        
        this.isCountingTokens.set(true);
        file.arrayBuffer().then(buffer => this.runWorkerTask('COUNT_PAGES', { arrayBuffer: buffer })).then(result => {
-         const count = result.count;
+         const count = result.count || 0;
          this.pdfTotalPages.set(count);
          this.pdfStartPage.set(1);
          this.pdfEndPage.set(count);
@@ -528,7 +528,7 @@ export class Uploader {
       const result = await this.runWorkerTask('CHUNK_PDF', { arrayBuffer, start, end, chunkSize: 30 });
 
       if (result.resultType === 'single') {
-        const markdown = await this.gemini.convertPdfToMarkdown(result.b64Data, this.pdfModel());
+        const markdown = await this.gemini.convertPdfToMarkdown(result.b64Data || '', this.pdfModel());
         this.store.setMarkdown(markdown, file.name);
         this.toast.success(this.toast.Messages.FILE_PROCESS_SUCCESS);
       } else {
@@ -536,7 +536,7 @@ export class Uploader {
         
         this.store.setPdfTask({
            fileName: file.name,
-           chunks: result.chunks.map((c: any) => ({ ...c, status: 'pending' }))
+           chunks: (result.chunks || []).map((c: { index: number; pdfData?: Uint8Array; }) => ({ ...c, status: 'pending' }))
         });
         
         shouldResumePdf = true;

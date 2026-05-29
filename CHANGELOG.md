@@ -8,6 +8,8 @@ và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0
 ## [v1.0.66]- 2026-05-29
 ### Fixed
 - Chỉnh các lỗi khai báo biến `any`.
+- Chỉnh độ rộng của phase3, 4.
+- Tách footer ra một component riêng.
 
 ## [v1.0.65]- 2026-05-26
 ### Fixed

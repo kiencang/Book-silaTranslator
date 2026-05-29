@@ -14,7 +14,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
   imports: [CommonModule, MatIconModule, FormsModule, MarkdownTableEditorComponent],
   template: `
     <div class="py-8">
-      <div class="max-w-7xl mx-auto lg:px-8 px-4 flex items-center justify-between mb-8">
+      <div class="max-w-5xl mx-auto lg:px-8 px-4 flex items-center justify-between mb-8">
         <div>
           <h2 class="text-2xl font-bold text-zinc-900">Thiết lập Bảng Thuật Ngữ / Từ Khó (Tùy chọn)</h2>
           <p class="text-zinc-500 mt-1">Sử dụng mô hình AI mạnh để quét cuốn sách và trích xuất bảng thuật ngữ/từ khó dịch. Giúp bản dịch có chất lượng cao và thống nhất hơn. Đặc biệt cần thiết với sách khó dịch. Mặc dù đây là tùy chọn, không bắt buộc, nhưng khi tạo thường cho kết quả tốt hơn với bất kỳ thể loại sách nào.</p>
@@ -22,7 +22,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
         </div>
       </div>
 
-      <div class="max-w-7xl mx-auto lg:px-8 px-4 space-y-6 mb-8">
+      <div class="max-w-5xl mx-auto lg:px-8 px-4 space-y-6 mb-8">
         <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-200">
           @if (glossaryTask() && !isGenerating()) {
             <div class="text-sm text-amber-700 bg-amber-50 rounded-lg p-4 border border-amber-200 mb-4">
@@ -323,7 +323,7 @@ export class GlossarySetup {
         const allGlossaryItems = task.chunks.flatMap(c => Array.isArray(c.result) ? c.result : []);
         
         // Deduplicate by english + pos
-        const uniqueItems = new Map<string, any>();
+        const uniqueItems = new Map<string, { english?: string; pos?: string; vietnamese?: string; contextNotes?: string; }>();
         for (const item of allGlossaryItems) {
           if (!item.english) continue;
           const key = `${String(item.english).toLowerCase().trim()}_${String(item.pos || '').toLowerCase().trim()}`;

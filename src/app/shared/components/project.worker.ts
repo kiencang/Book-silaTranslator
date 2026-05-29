@@ -13,13 +13,13 @@ addEventListener('message', async ({ data }) => {
         // but we can use standard JS to base64 convert Uint8Array
         // Actually, FileReader Sync might not be available, we can use a helper function.
         
-        fullProject.pdfTask.chunks = fullProject.pdfTask.chunks.map((chunk: any) => {
+        fullProject.pdfTask.chunks = fullProject.pdfTask.chunks.map((chunk: { pdfData?: Uint8Array | Record<string, number>; base64Pdf?: string; [key: string]: unknown }) => {
           if (chunk.pdfData) {
             let base64 = "";
             let uint8Array: Uint8Array | null = null;
             
-            if (chunk.pdfData instanceof Uint8Array || (chunk.pdfData as any).buffer) {
-               uint8Array = chunk.pdfData;
+            if (chunk.pdfData instanceof Uint8Array || (chunk.pdfData as { buffer?: ArrayBuffer }).buffer) {
+               uint8Array = chunk.pdfData as Uint8Array;
             } else {
                uint8Array = new Uint8Array(Object.values(chunk.pdfData));
             }
@@ -51,8 +51,7 @@ addEventListener('message', async ({ data }) => {
       const proj = JSON.parse(text);
       
       if (proj && proj.pdfTask && proj.pdfTask.chunks) {
-         for (let i = 0; i < proj.pdfTask.chunks.length; i++) {
-           let chunk = proj.pdfTask.chunks[i];
+         for (const chunk of proj.pdfTask.chunks) {
            let base64 = null;
            
            if (chunk.base64Pdf) {

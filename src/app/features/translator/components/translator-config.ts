@@ -166,7 +166,7 @@ export class TranslatorConfigComponent {
   
   instructionText = signal(this.store.customInstructions() || '');
   displayedWordCount = signal(this.countWords(this.store.customInstructions() || ''));
-  private countTimeout: any;
+  private countTimeout: ReturnType<typeof setTimeout> | undefined;
 
   countWords(text: string): number {
     const clean = text.trim();

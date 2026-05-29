@@ -978,7 +978,7 @@ ${OFFLINE_READER_SCRIPT}
     }
   }
 
-  parseMarkdown(text: string | undefined, prefix: string = ''): SafeHtml | string {
+  parseMarkdown(text: string | undefined, prefix = ''): SafeHtml | string {
     if (!text) return '';
     let processedText = text;
     if (prefix) {
