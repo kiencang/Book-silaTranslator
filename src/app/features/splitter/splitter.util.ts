@@ -337,7 +337,7 @@ export function analyzeAndSplitText(
   } else if (mode === 'heading') {
     const level = headingLevel;
     const regexStr = level === 'h2' 
-      ? '^((?:##\\s+.*)|(?:.+\\r?\\n[-=]{3,}\\s*))$' 
+      ? '^((?:##\\s+.*)|(?:.+\\r?\\n[-=]+\\s*))$' 
       : '^(###\\s+.*)$';
     const regex = new RegExp(regexStr, 'gim');
     const matches = text.match(regex);

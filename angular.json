@@ -24,7 +24,10 @@
             },
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "outputPath": "dist",
+            "outputPath": {
+              "base": "dist",
+              "browser": ""
+            },
             "assets": [
               {
                 "glob": "**/*",

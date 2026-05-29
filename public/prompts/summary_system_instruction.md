@@ -5,9 +5,10 @@ Mục đích DUY NHẤT (The ONLY purpose) của kết quả đầu ra này là 
 
 **Hướng dẫn Trích xuất (Guidelines for Extraction):**
 1. **Nhận diện loại văn bản một cách ngầm định (Identify the Text Type implicitly):**
-    * *Nếu là Văn học/Truyện kể (Fiction/Narrative):* Nắm bắt xem ai đang có mặt, ai đang nói chuyện với ai, bối cảnh không gian hiện tại (immediate physical location), hành động/trạng thái hiện tại (current actions/states), và sắc thái cảm xúc (emotional tone).
-    * *Nếu là Phi hư cấu/Tài liệu hướng dẫn (Non-Fiction/Instructional):* Nắm bắt chủ đề cụ thể đang được trình bày, bước nào trong quy trình vừa được hoàn thành, hoặc luận điểm cốt lõi (core argument) vừa được thiết lập.
+    * *Nếu là Văn học/Truyện kể (Fiction/Narrative):* Nắm bắt xem ai đang có mặt, ai đang nói chuyện với ai, bối cảnh không gian hiện tại (immediate physical location), hành động/trạng thái hiện tại (current actions/states), sắc thái cảm xúc (emotional tone), và **giọng văn chung của đoạn (căng thẳng, hài hước, trang trọng, bi ai...)**.
+    * *Nếu là Phi hư cấu/Tài liệu hướng dẫn (Non-Fiction/Instructional):* Nắm bắt chủ đề cụ thể đang được trình bày, bước nào trong quy trình vừa được hoàn thành, học thuật, trang trọng hay gần gũi, hoặc luận điểm cốt lõi (core argument) vừa được thiết lập.
 2. **Tập trung vào "Điểm chuyển giao" (Focus on the "Hand-off"):** Ưu tiên các sự kiện, khái niệm, hoặc đoạn hội thoại xảy ra ở *phần cuối cùng* của khối văn bản này, vì chúng sẽ kết nối trực tiếp (directly connect) với phần đầu của khối văn bản tiếp theo.
-3. **Súc tích tối đa (Ruthless Conciseness):** Loại bỏ toàn bộ các ví dụ minh họa, các mô tả rườm rà (descriptive fluff), và các hành động đã ngã ngũ/kết thúc (resolved actions).
+3. **Mô tả Giọng điệu (Capture Tone):** Nêu rõ một từ hoặc một cụm từ ngắn gọn mô tả sắc thái cảm xúc hoặc không khí chung ở đoạn cuối của khối văn bản này (VD: "Không khí: Căng thẳng, nhân vật đang tức giận", hoặc "Giọng văn: Học thuật, phân tích khách quan"). Điều này đặc biệt ý nghĩa với truyện chữ.
+4. **Súc tích tối đa (Ruthless Conciseness):** Loại bỏ toàn bộ các ví dụ minh họa, các mô tả rườm rà (descriptive fluff), và các hành động đã ngã ngũ/kết thúc (resolved actions).
 4. **Định dạng (Format):** Kết quả đầu ra bằng tiếng Việt. Sử dụng các gạch đầu dòng ngắn gọn, cô đọng (short, dense bullet points) hoặc các câu đơn lập, gãy gọn (atomic sentences). Độ dài tối đa là 300 từ (càng ngắn càng tốt, miễn là vẫn giữ được tính liền mạch).
 5. **Không có văn bản thừa (No Extraneous Text):** CHỈ in ra các điểm ngữ cảnh (Output ONLY the contextual points). Không bao gồm các câu chữ mở đầu (introductory phrases) kiểu như "Dưới đây là tóm tắt...".

@@ -240,7 +240,7 @@ export class Uploader {
   }
   
   isDragging = false;
-  turndownService = new TurndownService().remove(['style', 'script', 'head', 'meta', 'title', 'noscript']);
+  turndownService = new TurndownService({ headingStyle: 'atx' }).remove(['style', 'script', 'head', 'meta', 'title', 'noscript']);
 
   pendingPdfFile = signal<File | null>(null);
   pdfModel = signal<string>('gemini-flash-lite-latest');

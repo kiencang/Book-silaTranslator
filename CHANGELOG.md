@@ -5,6 +5,11 @@ Tất cả những thay đổi đáng chú ý của dự án kiencang/Book-silaT
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.0.67]- 2026-05-29
+### Fixed
+- Chỉnh sửa SI/Prompt của phần tóm tắt bối cảnh để nó chuẩn hơn.
+- Yêu cầu khi chuyển từ html sang markdown sử dụng cấu trúc heading ATX thay vì kiểu mặc định Setext.
+
 ## [v1.0.66]- 2026-05-29
 ### Fixed
 - Chỉnh các lỗi khai báo biến `any`.

@@ -18,7 +18,7 @@ import { smartHardSplit } from '../splitter/splitter.util';
         <div>
           <h2 class="text-2xl font-bold text-zinc-900">Thiết lập Bảng Thuật Ngữ / Từ Khó (Tùy chọn)</h2>
           <p class="text-zinc-500 mt-1">Sử dụng mô hình AI mạnh để quét cuốn sách và trích xuất bảng thuật ngữ/từ khó dịch. Giúp bản dịch có chất lượng cao và thống nhất hơn. Đặc biệt cần thiết với sách khó dịch. Mặc dù đây là tùy chọn, không bắt buộc, nhưng khi tạo thường cho kết quả tốt hơn với bất kỳ thể loại sách nào.</p>
-          <p class="text-zinc-500 mt-2">Việc phân tích đầy đủ cả cuốn sách thường tốn thời gian từ 5 - 15 phút, tùy độ dài. Nó cũng đặc biệt tốn token, nên nếu bạn model Pro sẽ hết ngưỡng miễn phí sớm, bạn có thể dùng model Flash cho nhiệm vụ này. Đối với phân tích từ khó model Flash cho chất lượng rất tốt, không kém nhiều so với model Pro.</p>
+          <p class="text-zinc-500 mt-2">Việc phân tích đầy đủ cả cuốn sách thường tốn thời gian từ 3 - 10 phút, tùy độ dài, tùy model AI. Nó cũng đặc biệt tốn token, nên nếu bạn model Pro sẽ hết ngưỡng miễn phí sớm, bạn có thể dùng model Flash cho nhiệm vụ này. Đối với phân tích từ khó model Flash cho chất lượng rất tốt, không kém nhiều so với model Pro.</p>
         </div>
       </div>
 

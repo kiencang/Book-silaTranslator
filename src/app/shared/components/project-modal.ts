@@ -313,15 +313,21 @@ export class ProjectModal implements OnInit {
   }
 
   getProgress(p: Project) {
-    if (!p.chapters || p.chapters.length === 0 || p.phase < 3) return null;
-    let total = 0;
-    let translated = 0;
-    for (const c of p.chapters) {
-      total += c.wordCount || 0;
-      if (c.status === 'done') {
-        translated += c.wordCount || 0;
+    if (p.phase < 3) return null;
+    let total = p.totalWords || 0;
+    let translated = p.translatedWords || 0;
+
+    if (p.chapters && p.chapters.length > 0) {
+      total = 0;
+      translated = 0;
+      for (const c of p.chapters) {
+        total += c.wordCount || 0;
+        if (c.status === 'done') {
+          translated += c.wordCount || 0;
+        }
       }
     }
+
     if (total === 0) return null;
     const percentage = Math.round((translated / total) * 100);
     

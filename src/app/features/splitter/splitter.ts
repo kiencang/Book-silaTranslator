@@ -21,14 +21,14 @@ import { SplitPreviewComponent } from './components/split-preview.component';
   ],
   template: `
     <div class="max-w-4xl mx-auto py-8">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h2 class="text-2xl font-bold text-zinc-900">Chia theo chương dịch (hoặc khối dịch)</h2>
-          <p class="text-zinc-500 mt-1">Đang phân tích "{{ store.fileName() }}" để tìm ra cách phân chia tốt nhất.</p>
+      <div class="flex items-center justify-between gap-4 mb-8">
+        <div class="min-w-0">
+          <h2 class="text-2xl font-bold text-zinc-900 truncate">Chia theo chương dịch (hoặc khối dịch)</h2>
+          <p class="text-zinc-500 mt-1 truncate" title='Đang phân tích "{{ store.fileName() }}" để tìm ra cách phân chia tốt nhất.'>Đang phân tích "{{ store.fileName() }}" để tìm ra cách phân chia tốt nhất.</p>
         </div>
         <button 
           (click)="downloadMarkdown()"
-          class="flex items-center space-x-2 bg-white border border-zinc-300 hover:bg-zinc-50 text-zinc-700 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
+          class="shrink-0 whitespace-nowrap flex items-center space-x-2 bg-white border border-zinc-300 hover:bg-zinc-50 text-zinc-700 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
           title="Tải về file markdown đã được trích xuất"
         >
           <mat-icon class="!w-5 !h-5 !text-xl !flex !items-center !justify-center text-zinc-500">download</mat-icon>
