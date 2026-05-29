@@ -1,7 +1,7 @@
 # silaBook
 Công cụ dịch sách từ tiếng Anh sang tiếng Việt bằng Gemini. **Dự án đang trong giai đoạn phát triển và thử nghiệm**.
 
-Chương trình sử dụng SI & Prompt từ dự án này: https://github.com/kiencang/SI-Prompt-Book-EV-Translate (**v1.0.27**).
+Chương trình sử dụng SI & Prompt từ dự án này: https://github.com/kiencang/SI-Prompt-Book-EV-Translate (**v1.0.28**).
 
 Remix trên AI Studio và chỉnh sửa thêm nếu muốn: https://aistudio.google.com/apps/d25924ff-35f1-42f7-9543-f142ecfe037a?showPreview=true&showAssistant=true
 
