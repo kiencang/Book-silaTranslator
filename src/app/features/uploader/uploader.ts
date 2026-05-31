@@ -5,7 +5,9 @@ import { BookStore } from '../../core/book.store';
 import { ToastService } from '../../core/toast.service';
 import { GeminiClient, parseGeminiError, isQuotaError } from '../../core/gemini';
 import { MatIconModule } from '@angular/material/icon';
-import TurndownService from 'turndown';
+import { PdfService } from './pdf.service';
+import { processEpubContent } from './epub.util';
+import { processHtmlContent, getTurndownService } from './html.util';
 
 @Component({
   selector: 'app-uploader',
@@ -172,7 +174,7 @@ import TurndownService from 'turndown';
             type="file" 
             #fileInput 
             class="hidden" 
-            accept=".txt,.html,.htm,.pdf,.md" 
+            accept=".txt,.html,.htm,.pdf,.md,.epub" 
             (change)="onFileSelected($event)" 
           />
           
@@ -191,6 +193,7 @@ import TurndownService from 'turndown';
                 <h3 class="text-lg font-medium text-zinc-900">Tải lên cuốn sách cần dịch</h3>
                 <p class="text-sm text-zinc-500 mt-1">Click chọn hoặc kéo thả vào đây.</p>
                 <div class="flex flex-wrap gap-2 justify-center mt-4">
+                  <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">EPUB (30MB)</span>
                   <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">HTML (10MB)</span>
                   <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">PDF (50MB)</span>
                   <span class="px-2 py-1 bg-zinc-100 group-hover:bg-zinc-200 text-zinc-600 group-hover:text-zinc-900 text-xs rounded-md font-mono transition-colors">TXT (5MB)</span>
@@ -201,7 +204,7 @@ import TurndownService from 'turndown';
                     <mat-icon class="!w-[14px] !h-[14px] !text-[14px]">info</mat-icon>
                     Giới hạn xử lý tối đa: <span class="font-medium text-zinc-500">1M Tokens</span>
                   </p>
-                  <p class="text-xs text-emerald-600 font-medium tracking-tight">Nên ưu tiên định dạng HTML nếu có thể.</p>
+                  <p class="text-xs text-emerald-600 font-medium tracking-tight">Nên ưu tiên định dạng EPUB hoặc HTML nếu có thể.</p>
                 </div>
               </div>
             </div>
@@ -216,31 +219,10 @@ export class Uploader {
   store = inject(BookStore);
   gemini = inject(GeminiClient);
   toast = inject(ToastService);
+  pdfService = inject(PdfService);
   fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
 
-  private pdfWorker = new Worker(new URL('./pdf.worker', import.meta.url), { type: 'module' });
-  private workerId = 0;
-
-  private runWorkerTask(type: string, payload: unknown): Promise<{ count?: number, b64Data?: string, resultType?: string, chunks?: { index: number; pdfData: Uint8Array; }[] }> {
-    return new Promise((resolve, reject) => {
-      const id = ++this.workerId;
-      const handler = (event: MessageEvent) => {
-        if (event.data.id === id) {
-          this.pdfWorker.removeEventListener('message', handler);
-          if (event.data.type === 'SUCCESS') {
-            resolve(event.data.payload);
-          } else {
-            reject(new Error(event.data.payload.error));
-          }
-        }
-      };
-      this.pdfWorker.addEventListener('message', handler);
-      this.pdfWorker.postMessage({ type, payload, id });
-    });
-  }
-  
   isDragging = false;
-  turndownService = new TurndownService({ headingStyle: 'atx' }).remove(['style', 'script', 'head', 'meta', 'title', 'noscript']);
 
   pendingPdfFile = signal<File | null>(null);
   pdfModel = signal<string>('gemini-flash-lite-latest');
@@ -311,7 +293,7 @@ export class Uploader {
         return;
       }
 
-      const result = await this.runWorkerTask('EXTRACT_TOKEN_PAGES', { arrayBuffer, start, end });
+      const result = await this.pdfService.runWorkerTask('EXTRACT_TOKEN_PAGES', { arrayBuffer, start, end });
       const count = await this.gemini.countTokens(result.b64Data || '', 'application/pdf', this.pdfModel());
       this.tokenCount.set(count);
     } catch (e) {
@@ -397,7 +379,7 @@ export class Uploader {
           
           let b64Data: string;
           if (chunk.pdfData) {
-            b64Data = await this.uint8ArrayToBase64(chunk.pdfData);
+            b64Data = await this.pdfService.uint8ArrayToBase64(chunk.pdfData);
           } else {
             b64Data = (chunk as { base64Pdf?: string }).base64Pdf ?? '';
             if (b64Data.includes(',')) b64Data = b64Data.split(',')[1];
@@ -442,6 +424,7 @@ export class Uploader {
        'md': 5 * 1024 * 1024,
        'html': 10 * 1024 * 1024,
        'htm': 10 * 1024 * 1024,
+       'epub': 30 * 1024 * 1024,
        'pdf': 50 * 1024 * 1024,
     };
 
@@ -463,7 +446,7 @@ export class Uploader {
        }
        
        this.isCountingTokens.set(true);
-       file.arrayBuffer().then(buffer => this.runWorkerTask('COUNT_PAGES', { arrayBuffer: buffer })).then(result => {
+       file.arrayBuffer().then(buffer => this.pdfService.runWorkerTask('COUNT_PAGES', { arrayBuffer: buffer })).then(result => {
          const count = result.count || 0;
          this.pdfTotalPages.set(count);
          this.pdfStartPage.set(1);
@@ -489,14 +472,15 @@ export class Uploader {
         const text = await file.text();
         this.store.setMarkdown(text, file.name);
       } else if (file.name.toLowerCase().endsWith('.html') || file.name.toLowerCase().endsWith('.htm')) {
-        const text = await file.text();
-        const markdown = this.turndownService.turndown(text);
+        const markdown = await processHtmlContent(file);
         this.store.setMarkdown(markdown, file.name);
+      } else if (file.name.toLowerCase().endsWith('.epub')) {
+        const result = await processEpubContent(file, getTurndownService());
+        this.store.setMarkdown(result.markdown, file.name, result.images);
       } else {
         this.toast.error(this.toast.Messages.FILE_INVALID_FORMAT);
       }
     } catch (e: unknown) {
-      console.error(e);
       const msg = parseGeminiError(e);
       this.toast.error(this.toast.Messages.FILE_PROCESS_ERROR(msg));
     } finally {
@@ -525,7 +509,7 @@ export class Uploader {
       const start = Math.max(1, this.pdfStartPage());
       const end = Math.min(this.pdfTotalPages(), this.pdfEndPage());
       
-      const result = await this.runWorkerTask('CHUNK_PDF', { arrayBuffer, start, end, chunkSize: 30 });
+      const result = await this.pdfService.runWorkerTask('CHUNK_PDF', { arrayBuffer, start, end, chunkSize: 30 });
 
       if (result.resultType === 'single') {
         const markdown = await this.gemini.convertPdfToMarkdown(result.b64Data || '', this.pdfModel());
@@ -554,27 +538,5 @@ export class Uploader {
          this.resumePdfTask();
       }
     }
-  }
-
-  private fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
-  }
-
-  private uint8ArrayToBase64(uint8Array: Uint8Array): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const blob = new Blob([uint8Array as unknown as BlobPart], { type: 'application/pdf' });
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result as string;
-        resolve(dataUrl.split(',')[1]);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
   }
 }

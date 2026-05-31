@@ -91,6 +91,7 @@ export interface Project {
   pdfTask?: PdfConversionTask;
   pronounTask?: PronounGenerationTask;
   glossaryTask?: GlossaryGenerationTask;
+  images?: Record<string, string>;
   customInstructions?: string;
   totalWords?: number;
   translatedWords?: number;
@@ -98,8 +99,8 @@ export interface Project {
   pdfTaskMeta?: { fileName: string; chunkCount: number };
 }
 
-export type ProjectMeta = Omit<Project, 'chapters' | 'rawMarkdown' | 'pronounTable' | 'glossaryTable' | 'pdfTask' | 'pronounTask' | 'glossaryTask' | 'pronounVersions' | 'glossaryVersions'>;
-export type ProjectAsset = Pick<Project, 'rawMarkdown' | 'pronounTable' | 'glossaryTable' | 'pdfTask' | 'pronounTask' | 'glossaryTask' | 'pronounVersions' | 'glossaryVersions'>;
+export type ProjectMeta = Omit<Project, 'chapters' | 'rawMarkdown' | 'pronounTable' | 'glossaryTable' | 'pdfTask' | 'pronounTask' | 'glossaryTask' | 'pronounVersions' | 'glossaryVersions' | 'images'>;
+export type ProjectAsset = Pick<Project, 'rawMarkdown' | 'pronounTable' | 'glossaryTable' | 'pdfTask' | 'pronounTask' | 'glossaryTask' | 'pronounVersions' | 'glossaryVersions' | 'images'>;
 
 interface AppDB extends DBSchema {
   settings: {
@@ -206,7 +207,7 @@ export class DbService {
       const assetStore = tx.objectStore('project_assets');
       const chunkIndex = tx.objectStore('project_task_chunks').index('taskId');
       const [
-        rawMdReq, pronounsReq, glossaryReq, pVersReq, gVersReq, pdfReq, pTaskReq, gTaskReq
+        rawMdReq, pronounsReq, glossaryReq, pVersReq, gVersReq, pdfReq, pTaskReq, gTaskReq, imagesReq
       ] = await Promise.all([
         assetStore.get(`${id}_rawMarkdown`),
         assetStore.get(`${id}_pronounTable`),
@@ -215,7 +216,8 @@ export class DbService {
         assetStore.get(`${id}_glossaryVersions`),
         assetStore.get(`${id}_pdfTask`),
         assetStore.get(`${id}_pronounTask`),
-        assetStore.get(`${id}_glossaryTask`)
+        assetStore.get(`${id}_glossaryTask`),
+        assetStore.get(`${id}_images`)
       ]);
       
       const chapReq = await tx.objectStore('project_chapters').index('projectId').getAll(id);
@@ -234,6 +236,7 @@ export class DbService {
       if (glossaryReq) asset.glossaryTable = glossaryReq.data as typeof asset.glossaryTable;
       if (pVersReq) asset.pronounVersions = pVersReq.data as typeof asset.pronounVersions;
       if (gVersReq) asset.glossaryVersions = gVersReq.data as typeof asset.glossaryVersions;
+      if (imagesReq) asset.images = imagesReq.data as typeof asset.images;
       
       if (pdfReq) {
         asset.pdfTask = pdfReq.data as typeof asset.pdfTask;
@@ -267,6 +270,7 @@ export class DbService {
         glossaryTable: asset.glossaryTable || '',
         pronounVersions: asset.pronounVersions || [],
         glossaryVersions: asset.glossaryVersions || [],
+        images: asset.images || undefined,
         chapters
       } as Project;
     } catch {
@@ -443,6 +447,9 @@ export class DbService {
       await assetStore.put({ id: `${project.id}_glossaryTable`, data: project.glossaryTable } as { id: string; data: unknown });
       await assetStore.put({ id: `${project.id}_pronounVersions`, data: project.pronounVersions } as { id: string; data: unknown });
       await assetStore.put({ id: `${project.id}_glossaryVersions`, data: project.glossaryVersions } as { id: string; data: unknown });
+      if (project.images) {
+         await assetStore.put({ id: `${project.id}_images`, data: project.images } as { id: string; data: unknown });
+      }
       
       await this._saveTask(tx, project.id, 'pdfTask', project.pdfTask);
       await this._saveTask(tx, project.id, 'pronounTask', project.pronounTask);
@@ -478,6 +485,7 @@ export class DbService {
       await assetStore.delete(`${id}_glossaryTable`);
       await assetStore.delete(`${id}_pronounVersions`);
       await assetStore.delete(`${id}_glossaryVersions`);
+      await assetStore.delete(`${id}_images`);
       
       await this._saveTask(tx, id, 'pdfTask', null);
       await this._saveTask(tx, id, 'pronounTask', null);

@@ -25,6 +25,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "express": "^5.1.0",
     "idb": "^8.0.3",
+    "jszip": "^3.10.1",
     "marked": "^18.0.3",
     "marked-footnote": "^1.4.0",
     "motion": "^12.23.24",

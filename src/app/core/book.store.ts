@@ -111,6 +111,7 @@ export class BookStore {
   readonly phase = signal<0 | 1 | 2 | 3 | 4 | 5>(0);
   readonly fileName = signal<string | null>(null);
   readonly rawMarkdown = signal<string | null>(null);
+  readonly images = signal<Record<string, string> | undefined>(undefined);
   readonly pdfTask = signal<import('./db').PdfConversionTask | undefined>(undefined);
   readonly pronounTask = signal<import('./db').PronounGenerationTask | undefined>(undefined);
   readonly glossaryTask = signal<import('./db').GlossaryGenerationTask | undefined>(undefined);
@@ -173,9 +174,16 @@ export class BookStore {
       if (!projectId) return;
 
       const rawMarkdown = this.rawMarkdown();
+      const images = this.images();
       untracked(() => {
         if (isPlatformBrowser(this.platformId)) {
+          window.__SILA_IMAGES__ = images;
           this.db.saveProjectAsset(projectId, 'rawMarkdown', rawMarkdown);
+          if (images) {
+             this.db.saveProjectAsset(projectId, 'images', images);
+          } else {
+             this.db.saveProjectAsset(projectId, 'images', undefined);
+          }
         }
       });
     });
@@ -266,6 +274,7 @@ export class BookStore {
       
       this.fileName.set(proj.fileName);
       this.rawMarkdown.set(proj.rawMarkdown);
+      this.images.set(proj.images);
       this.pdfTask.set(proj.pdfTask);
       this.pronounTask.set(proj.pronounTask);
       this.glossaryTask.set(proj.glossaryTask);
@@ -303,6 +312,7 @@ export class BookStore {
     this.customInstructions.set(undefined);
     this.phase.set(0);
     if (isPlatformBrowser(this.platformId)) {
+      window.__SILA_IMAGES__ = undefined;
       localStorage.removeItem('md-translator-last-id');
     }
   }
@@ -362,8 +372,9 @@ export class BookStore {
     }
   }
 
-  setMarkdown(md: string, name: string) {
+  setMarkdown(md: string, name: string, images?: Record<string, string>) {
     this.rawMarkdown.set(md);
+    this.images.set(images);
     this.fileName.set(name);
     this.phase.set(2);
     this.isConverting.set(false);
@@ -476,6 +487,7 @@ export class BookStore {
     this.phase.set(1);
     this.fileName.set(null);
     this.rawMarkdown.set(null);
+    this.images.set(undefined);
     this.pdfTask.set(undefined);
     this.chapters.set([]);
   }

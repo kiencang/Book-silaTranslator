@@ -39,7 +39,7 @@ export function parseGeminiError(e: unknown): string {
     // ignore parse error
   }
 
-  return `Lỗi không xác định trong quá trình xử lý, vui lòng thử lại.`;
+  return msg ? msg : `Lỗi không xác định trong quá trình xử lý, vui lòng thử lại.`;
 }
 
 @Injectable({ providedIn: 'root' })
